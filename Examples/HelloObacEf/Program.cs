@@ -81,9 +81,10 @@ namespace HelloObac
             await EnsureDocument(3, "doc3");
             await obacManager.SetTreeNodeAcl(docTypeId, 3, new AclInfo
             {
+                InheritParentPermissions = false,
                 AclItems = new[]
                 {
-                    new AclItemInfo { UserId = 2, PermissionId = readPermission },
+                    new AclItemInfo { UserId = 2, PermissionId = readPermission, Kind = PermissionKindEnum.Allow},
                 }
             });
             
