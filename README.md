@@ -107,4 +107,4 @@ Initially Created by
 - Yury Skaletskiy (yury@redberries.pro)
 - Dmitry Koval (dkoval@redberries.pro)
 
-Redberries.pro
+(c) 2021-... Redberries.pro
