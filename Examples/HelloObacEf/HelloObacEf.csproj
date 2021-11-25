@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <RootNamespace>HelloObac</RootNamespace>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Redb.OBAC.Client\Redb.OBAC.Client.csproj" />
+      <ProjectReference Include="..\..\Redb.OBAC.PgSql\Redb.OBAC.PgSql.csproj" />
+    </ItemGroup>
+
+</Project>

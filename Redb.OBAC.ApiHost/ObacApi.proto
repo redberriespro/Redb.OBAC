@@ -1,0 +1,232 @@
+syntax = "proto3";
+
+package Redberries.OBAC.Api;
+
+// OBAC remote api
+service ObacApiHost
+{
+    rpc GetTreeById (GetTreeParams) returns (TreeInfoResults) {}
+    rpc EnsureTree (EnsureTreeParams) returns (TreeInfoResults) {}
+    rpc DeleteTree (DeleteTreeParams) returns (NoResults) {}
+
+    rpc EnsureTreeNodes (EnsureTreeNodeParams) returns (EnsureTreeNodeResults) {}
+    
+    rpc GetPermissionById (GetPermissionParams) returns (PermissionInfoResults) {}
+    rpc EnsurePermission (EnsurePermissionParams) returns (PermissionInfoResults) {}
+    rpc DeletePermission (DeletePermissionParams) returns (NoResults) {}
+
+    rpc GetRoleById (GetRoleParams) returns (RoleInfoResults) {}
+    rpc EnsureRole (EnsureRoleParams) returns (RoleInfoResults) {}
+    rpc DeleteRole (DeleteRoleParams) returns (NoResults) {}
+
+    rpc GetUserById (GetUserParams) returns (UserInfoResults) {}
+    rpc EnsureUser (EnsureUserParams) returns (UserInfoResults) {}
+    rpc DeleteUser (DeleteUserParams) returns (NoResults) {}
+
+    rpc GetUserGroupById (GetUserGroupParams) returns (UserGroupInfoResults) {}
+    rpc GetUserGroupUsers (GetUserGroupParams) returns (UserGroupUsersInfoResults) {}
+
+    rpc EnsureUserGroup (EnsureUserGroupParams) returns (UserGroupInfoResults) {}
+    rpc DeleteUserGroup (DeleteUserGroupParams) returns (NoResults) {}
+    rpc AddUserToGroupById (AddUserToGroupParams) returns (NoResults) {}
+    rpc RemoveUserFromGroupById (RemoveUserFromGroupParams) returns (NoResults) {}
+    
+    rpc SetAcl(SetAclParams) returns (NoResults) {}
+    rpc GetEffectivePermissions(GetEffectivePermissionsParams) returns (EffectivePermissionsResults) {}
+
+}
+
+// common messages
+
+message UUID {
+    bytes value = 1;
+}
+
+message NoResults {
+    
+}
+
+// tree manipulation
+
+message TreeNodeItemInfo {
+    UUID TreeId = 1;
+    int32 Id=2;
+    int32 ParentId=3; // 0 for root node
+    int32 OwnerUserId = 4;
+}
+
+message TreeInfoResults {
+    UUID TreeId = 1;
+    string Description = 2;
+    repeated TreeNodeItemInfo Nodes=3;
+}
+
+
+message GetTreeParams {
+    UUID TreeId = 1;
+    bool IncludeNodes = 2;
+    int32 StartingNodeId = 3;
+}
+
+message DeleteTreeParams {
+    UUID TreeId = 1;
+    bool ForceDeleteIfNotEmpty = 2;
+}
+
+message EnsureTreeParams {
+    UUID TreeId = 1;
+    string Description = 2;
+    string ExternalStrId = 3;
+    int32 ExternalIntId = 4;
+}
+
+message TreeNodeInfo {
+    UUID TreeId = 1;
+    int32 Id = 2;
+    repeated TreeNodeItemInfo Nodes = 3;
+}
+
+message EnsureTreeNodeParams {
+    UUID TreeId = 1;
+    repeated TreeNodeItemInfo Nodes = 2;
+}
+
+message EnsureTreeNodeResults {
+    UUID TreeId = 1;
+    repeated NodeResults Results = 2;
+
+    message NodeResults {
+        int32 Id=1;
+    }
+}
+
+// permissions
+
+message PermissionInfoResults {
+    UUID PermissionId = 1;
+    string Description = 2;
+}
+
+
+message GetPermissionParams {
+    UUID PermissionId = 1;
+}
+
+message DeletePermissionParams {
+    UUID PermissionId = 1;
+    bool ForceDelete = 2;
+}
+
+message EnsurePermissionParams {
+    UUID PermissionId = 1;
+    string Description = 2;
+}
+
+message SetAclParams {
+    UUID ObjectType = 1;
+    int32 ObjectId = 2;
+    bool InheritParentPermissions = 3;
+    repeated AclItemParams Acl = 4;
+}
+
+message AclItemParams {
+    int32 UserId = 1;
+    int32 UserGroupId = 2;
+    UUID Permission = 3;
+    bool DenyPermission = 4;
+}
+
+message GetEffectivePermissionsParams {
+    int32 UserId = 1;
+    UUID ObjectType = 2;
+    int32 ObjectId = 3; 
+}
+
+message EffectivePermissionsResults {
+    int32 UserId = 1;
+    UUID ObjectType = 2;
+    int32 ObjectId = 3;
+    repeated UUID EffectivePermissions = 4;
+}
+
+// roles
+
+message RoleInfoResults {
+    UUID RoleId = 1;
+    string Description = 2;
+    repeated UUID PermissionId = 3;
+}
+
+message GetRoleParams {
+    UUID RoleId = 1;
+}
+
+message DeleteRoleParams {
+    UUID RoleId = 1;
+}
+
+message EnsureRoleParams {
+    UUID RoleId = 1;
+    string Description = 2;
+    repeated UUID PermissionId = 3;
+}
+
+// subjects: users and user groups 
+
+
+message UserInfoResults {
+    int32 UserId = 1;
+    string Description = 2;
+}
+
+message GetUserParams {
+    int32 UserId = 1;
+}
+
+message DeleteUserParams {
+    int32 UserId = 1;
+    bool ForceDelete = 2;
+}
+
+message EnsureUserParams {
+    int32 UserId = 1;
+    string Description = 2;
+    string ExternalStrId = 3;
+    int32 ExternalIntId = 4;
+}
+
+message UserGroupInfoResults {
+    int32 UserGroupId = 1;
+    string Description = 2;
+}
+
+message UserGroupUsersInfoResults {
+    int32 UserGroupId = 1;
+    repeated int32 MemberUserId = 2;
+}
+
+message GetUserGroupParams {
+    int32 UserGroupId = 1;
+}
+
+message DeleteUserGroupParams {
+    int32 UserGroupId = 1;
+    bool ForceDelete = 2;
+}
+
+message EnsureUserGroupParams {
+    int32 UserGroupId = 1;
+    string Description = 2;
+    string ExternalStrId = 3;
+    int32 ExternalIntId = 4;
+}
+
+message AddUserToGroupParams {
+    int32 UserGroupId = 1;
+    repeated int32 UserId = 2;
+}
+
+message RemoveUserFromGroupParams {
+    int32 UserGroupId = 1;
+    repeated int32 UserId = 2;
+}
