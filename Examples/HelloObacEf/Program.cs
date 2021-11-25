@@ -16,9 +16,14 @@ namespace HelloObac
         private static HelloDbContext ctx;
         private static Guid docTypeId;
 
+        
+        // two postgres databases will be created for the example:
+        
+        // internal OBAC database
         public const string OBAC_CONNECTION =
             "Host=localhost;Port=5432;Database=obac;Username=postgres;Password=12345678";
         
+        // 'user-level' database containing domain entities and effective permission cache
         public const string TEST_CONNECTION =
             "Host=localhost;Port=5432;Database=obac_hello_ef;Username=postgres;Password=12345678";
 
