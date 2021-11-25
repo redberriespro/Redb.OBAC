@@ -4,6 +4,8 @@
 The library proposes an alternative approach to declarative ABAC libraries.
 Instead of writing complex rules for declaring permissions and access rights to resources, Redb.OBAC allows us to apply ACL lists to nodes of a hierchical structure.
 
+Discussions: [Telegram Chat](https://t.me/+InGrdq8qXeYyOTNi)
+
 ## Current State
 It's ALPHA version of the second generation code. "Alpha" means core APIs are more or less stable but *MIGHT* be changed before it becomes beta.
 
