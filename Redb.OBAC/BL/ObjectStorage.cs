@@ -663,7 +663,7 @@ namespace Redb.OBAC.BL
                 .ToListAsync();        
         }
 
-        public async Task<IEnumerable<ObacTreeNodePermissionEntity>> GetTreeNotePermissionList(Guid treeId, int[] treeNodeIds, Guid[] permissionIds)
+        public async Task<IEnumerable<ObacTreeNodePermissionEntity>> GetTreeNodePermissionList(Guid treeId, int[] treeNodeIds, Guid[] permissionIds)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             return await ctx

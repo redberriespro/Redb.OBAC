@@ -254,7 +254,7 @@ namespace Redb.OBAC.ObjectTypes
 
                 GetTreeNodePermissionList = async (treeObjectId, nodeIds, permIds) =>
                 {
-                    var npe = await _storage.GetTreeNotePermissionList(treeObjectId,
+                    var npe = await _storage.GetTreeNodePermissionList(treeObjectId,
                         nodeIds.ToArray(), permIds.ToArray());
                     return npe.Select(TreeObjectMapper.EntityToPermissionInfo).ToArray();
                 },
