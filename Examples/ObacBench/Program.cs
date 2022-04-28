@@ -25,4 +25,4 @@ var obacConfiguration = ObacManager.CreateConfiguration(pgStorage, epHouseReceiv
 
 var obacManager = obacConfiguration.GetObjectManager();
 
-// todo 0.1 8
+// todo 0.1 9
