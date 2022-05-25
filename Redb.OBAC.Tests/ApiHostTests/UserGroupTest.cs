@@ -5,13 +5,14 @@ using Redberries.OBAC.Api;
 
 namespace Redb.OBAC.Tests.ApiHostTests
 {
-    [TestFixture]
     public class UserGroupTest: TestBase
     {
+        public UserGroupTest(string dbName) : base(dbName) { }
+
         [Test]
         public async Task Users()
         {
-            var api = GetApiHost(TestBase.CONFIG_POSTGRES);
+            var api = GetApiHost();
             var res = await api.EnsureUser(new EnsureUserParams
             {
                 UserId = 10, Description = "user10", ExternalIntId = 1010, ExternalStrId = "1010"
@@ -33,7 +34,7 @@ namespace Redb.OBAC.Tests.ApiHostTests
         [Test]
         public async Task Groups()
         {
-            var api = GetApiHost(TestBase.CONFIG_POSTGRES);
+            var api = GetApiHost();
             var res = await api.EnsureUserGroup(new EnsureUserGroupParams
             {
                 UserGroupId = 10, Description = "group10", ExternalIntId = 1010, ExternalStrId = "1010"

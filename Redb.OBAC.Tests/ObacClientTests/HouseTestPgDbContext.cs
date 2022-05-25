@@ -1,14 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using Redb.OBAC.Client;
-using Redb.OBAC.Tests.ObacClientTests.Entities;
 
 namespace Redb.OBAC.Tests.ObacClientTests
 {
-    public class HouseTestPgDbContext: ObacEpContextBase
+    public class HouseTestPgDbContext: HouseTestDbContext
     {
-        protected readonly string ConnectionString;
-
-        public HouseTestPgDbContext(DbContextOptions<HouseTestPgDbContext> options) : base(options)
+        public HouseTestPgDbContext(DbContextOptions<HouseTestPgDbContext> options) 
+            : base(options)
         {
         }
 
@@ -16,12 +13,9 @@ namespace Redb.OBAC.Tests.ObacClientTests
         {
         }
 
-        public HouseTestPgDbContext(string connectionString)
+        public HouseTestPgDbContext(string connectionString) : base(connectionString)
         {
-            ConnectionString = connectionString;
         }
-        
-        public DbSet<HouseTestEntity> Houses { get; set; }
         
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

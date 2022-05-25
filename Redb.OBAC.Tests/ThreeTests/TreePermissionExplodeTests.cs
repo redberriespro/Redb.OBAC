@@ -13,7 +13,6 @@ using Redb.OBAC.Tree;
 
 namespace Redb.OBAC.Tests.ThreeTests
 {
-    [TestFixture]
     public class TreePermissionExplodeTests : TestBase
     {
         private Guid FakeTreeId = new Guid("7C74B8CF-FDFE-404E-972E-000000000001");
@@ -21,6 +20,8 @@ namespace Redb.OBAC.Tests.ThreeTests
         private Guid Perm_Read = new Guid("7C74B8CF-FDFE-404E-972E-78C3E5145101");
         private Guid Perm_Change = new Guid("7C74B8CF-FDFE-404E-972E-78C3E5145102");
         private Guid Perm_Delete = new Guid("7C74B8CF-FDFE-404E-972E-78C3E5145103");
+
+        public TreePermissionExplodeTests(string dbName) : base(dbName) { }
 
         [Test]
         public async Task RepairTest1TreeOrigState()

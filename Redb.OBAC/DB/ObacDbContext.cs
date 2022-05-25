@@ -11,11 +11,11 @@ namespace Redb.OBAC.DB
         {
         }
 
-        public ObacDbContext()
+        public ObacDbContext(): base()
         {
         }
 
-        public ObacDbContext(string connectionString)
+        public ObacDbContext(string connectionString): this()
         {
             ConnectionString = connectionString;
         }

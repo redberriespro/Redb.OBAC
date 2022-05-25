@@ -7,7 +7,6 @@ using Redb.OBAC.Tests.Utils;
 
 namespace Redb.OBAC.Tests.ThreeTests
 {
-    [TestFixture]
     public class HierTestUserGroups: TestBase
     {
         private int User1 = 744001;
@@ -26,6 +25,8 @@ namespace Redb.OBAC.Tests.ThreeTests
         private Guid DeletePermId = new Guid("02DB5F72-8D70-41E5-A70A-922899A07601");
         private Guid UpdatePermId = new Guid("02C2BACE-52C8-4DD4-97C0-41A0837C8602");
         private Guid ViewPermId = new Guid("02869541-AE42-42D8-B482-CAACC1556F03");
+
+        public HierTestUserGroups(string dbName) : base(dbName) { }
 
         private async Task EnsureObjects(IObacObjectManager om)
         {
@@ -54,12 +55,10 @@ namespace Redb.OBAC.Tests.ThreeTests
 
         [Test]
         public async Task GroupTest1()
-        {
-            var configName = CONFIG_POSTGRES;
-            
+        {          
             var treeId = Guid.NewGuid();
                 
-            var conf = GetConfiguration(configName);
+            var conf = GetConfiguration();
             var om = conf.GetObjectManager();
             
             await EnsureObjects(om);
@@ -125,10 +124,10 @@ namespace Redb.OBAC.Tests.ThreeTests
                 }
             });
 
-            var permCheckerUser1 = GetConfiguration(configName).GetPermissionChecker(User1);
-            var permCheckerUser2 = GetConfiguration(configName).GetPermissionChecker(User2);
-            var permCheckerUser3 = GetConfiguration(configName).GetPermissionChecker(User3);
-            var permCheckerUser4 = GetConfiguration(configName).GetPermissionChecker(User4);
+            var permCheckerUser1 = GetConfiguration().GetPermissionChecker(User1);
+            var permCheckerUser2 = GetConfiguration().GetPermissionChecker(User2);
+            var permCheckerUser3 = GetConfiguration().GetPermissionChecker(User3);
+            var permCheckerUser4 = GetConfiguration().GetPermissionChecker(User4);
 
             
             await om.AddUserToUserGroup(UserGroup1, User2);

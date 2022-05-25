@@ -738,7 +738,7 @@ namespace Redb.OBAC.BL
                 from obac_tree_nodes o
             join nodes n on n.id = o.parent_id and o.tree_id={1}
                 )
-            select {1} as tree_id, *
+            select *, {1} as tree_id
                 from nodes
                 order by id desc";
                 
@@ -757,7 +757,7 @@ namespace Redb.OBAC.BL
                 from obac_tree_nodes o
             join nodes n on n.id = o.parent_id and o.tree_id={0}
                 )
-            select {0} as tree_id, *
+            select *, {0} as tree_id
                 from nodes
                 order by id desc";
                 res =   ctx.ObacTreeNodes.FromSqlRaw(qry, treeId);
