@@ -14,9 +14,10 @@ namespace Redb.OBAC.Tests.ApiHostTests
     /// - получаем снапшот атомарных полномочий через Repair нового состояния
     /// - сравниваем - repair-версия полномочий и инкрементальная версия должны быть эквивалентны
     /// </summary>
-    [TestFixture]
     public class TreePermissionApiTests: TestBase
     {
+        public TreePermissionApiTests(string dbName) : base(dbName) { }
+
         [Test]
         public async Task SimpleOps()
         {

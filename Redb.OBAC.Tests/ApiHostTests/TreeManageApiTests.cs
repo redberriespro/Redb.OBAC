@@ -9,7 +9,6 @@ using Redberries.OBAC.Api;
 
 namespace Redb.OBAC.Tests.ApiHostTests
 {
-    [TestFixture]
     public class TreeManageApiTests: TestBase
     {
         private Guid Tree1Id = new Guid("333356ea-8d6c-11ea-bc55-0242ac110001");
@@ -36,7 +35,8 @@ namespace Redb.OBAC.Tests.ApiHostTests
         private Guid Perm1Id = new Guid("7C74B8CF-FDFE-404E-972E-78C3E51451D6");
         private Guid Perm2Id = new Guid("7C74B8CF-FDFE-404E-972E-78C3E51451D7");
         private Guid Role1Id = new Guid("7C74B8CF-FDFE-404E-972E-78C3E51451D8");
-        
+
+        public TreeManageApiTests(string dbName) : base(dbName) { }
         
         /*
          Node1
@@ -99,13 +99,13 @@ namespace Redb.OBAC.Tests.ApiHostTests
             var u = Tree1Id.ToGrpcUuid();
             var u2 = u.ToGuid();
             Assert.AreEqual(Tree1Id,u2);
-            var apiS =             GetApiHost(TestBase.CONFIG_POSTGRES);
+            var apiS =             GetApiHost();
         }
 
         [Test]
         public async Task TreeManipulation()
         {
-            var api = GetApiHost(TestBase.CONFIG_POSTGRES);
+            var api = GetApiHost();
             
             await api.EnsureTree(new EnsureTreeParams
             {
@@ -140,7 +140,7 @@ namespace Redb.OBAC.Tests.ApiHostTests
         [Test]
         public async Task TreePermissions1()
         {
-            var api = GetApiHost(TestBase.CONFIG_POSTGRES);
+            var api = GetApiHost();
 
             await api.EnsureTree(new EnsureTreeParams
             {
@@ -267,7 +267,7 @@ namespace Redb.OBAC.Tests.ApiHostTests
         [Test]
         public async Task TreeSimple()
         {
-            var api = GetApiHost(TestBase.CONFIG_POSTGRES);
+            var api = GetApiHost();
             try
             {
                 var ti = await api.GetTreeById(new GetTreeParams
@@ -316,7 +316,7 @@ namespace Redb.OBAC.Tests.ApiHostTests
         [Test]
         public async Task PermRoleSimple()
         {
-            var api = GetApiHost(TestBase.CONFIG_POSTGRES);
+            var api = GetApiHost();
             try
             {
                 var ti = await api.GetPermissionById(new GetPermissionParams()
@@ -396,8 +396,8 @@ namespace Redb.OBAC.Tests.ApiHostTests
         [Test]
         public async Task LazyTreeRestructureTest()
         {
-            var api = GetApiHost(TestBase.CONFIG_POSTGRES);
-            var lzProvider = GetObjectStorage(TestBase.CONFIG_POSTGRES) as ILazyTreeDataProvider;
+            var api = GetApiHost();
+            var lzProvider = GetObjectStorage() as ILazyTreeDataProvider;
             
             await api.EnsureTree(new EnsureTreeParams
             {
@@ -509,7 +509,7 @@ namespace Redb.OBAC.Tests.ApiHostTests
          [Test]
         public async Task LazyTreeRestructureTest2()
         {
-            var api = GetApiHost(TestBase.CONFIG_POSTGRES);
+            var api = GetApiHost();
             
             await api.EnsureTree(new EnsureTreeParams
             {
@@ -523,7 +523,7 @@ namespace Redb.OBAC.Tests.ApiHostTests
             
             await MakeSimpleTree(api, Tree5Id);
             
-            var lzProvider = GetObjectStorage(TestBase.CONFIG_POSTGRES) as ILazyTreeDataProvider;
+            var lzProvider = GetObjectStorage() as ILazyTreeDataProvider;
             var lzTree = new LazyTree(Tree5Id, lzProvider);
             await lzTree.GetRootNode();
             await AssertTreeValid(lzTree);
@@ -574,7 +574,7 @@ namespace Redb.OBAC.Tests.ApiHostTests
         {
             // todo check for cache hit count as well
             
-            var api = GetApiHost(TestBase.CONFIG_POSTGRES);
+            var api = GetApiHost();
             
             await api.EnsureTree(new EnsureTreeParams
             {
@@ -588,7 +588,7 @@ namespace Redb.OBAC.Tests.ApiHostTests
             
             await MakeSimpleTree(api, Tree4Id);
 
-            var lzProvider = GetObjectStorage(TestBase.CONFIG_POSTGRES) as ILazyTreeDataProvider;
+            var lzProvider = GetObjectStorage() as ILazyTreeDataProvider;
             var lzTree = new LazyTree(Tree4Id, lzProvider);
             await lzTree.GetNode(211);
             Assert.AreEqual(1, lzTree.Count);

@@ -13,7 +13,6 @@ using Redberries.OBAC.Api;
 
 namespace Redb.OBAC.Tests.ThreeTests
 {
-    [TestFixture]
     public class HierTest: TestBase
     { 
         private Guid OrgUnitTreeId = new Guid("01FAEDB2-F149-4781-B32E-7F81993AD39F");
@@ -34,6 +33,8 @@ namespace Redb.OBAC.Tests.ThreeTests
         private int Node120 = 120;
         private int Node130 = 130;
         private int Node200 = 200;
+
+        public HierTest(string dbName) : base(dbName) { }
 
         private async Task EnsureObjects(IObacObjectManager om)
         {
@@ -71,7 +72,7 @@ namespace Redb.OBAC.Tests.ThreeTests
         [Test]
         public async Task Hier1()
         {
-            var conf = GetConfiguration(CONFIG_POSTGRES);
+            var conf = GetConfiguration();
             var om = conf.GetObjectManager();
             
             await EnsureObjects(om);
@@ -195,7 +196,7 @@ namespace Redb.OBAC.Tests.ThreeTests
         [Test]
         public async Task Hier2()
         {
-            var conf = GetConfiguration(CONFIG_POSTGRES);
+            var conf = GetConfiguration();
             var om = conf.GetObjectManager();
 
             var treeId = Guid.NewGuid();
@@ -237,7 +238,7 @@ namespace Redb.OBAC.Tests.ThreeTests
                 }
             });
 
-            var storage = GetObjectStorage(CONFIG_POSTGRES);
+            var storage = GetObjectStorage();
 
             var nodeEp = await storage.GetEffectivePermissionsForAllUsers(treeId, Node130);
             Assert.AreEqual(2, nodeEp.Count);
@@ -246,7 +247,7 @@ namespace Redb.OBAC.Tests.ThreeTests
         [Test]
         public async Task HierSequentialAdd()
         {
-            var conf = GetConfiguration(CONFIG_POSTGRES);
+            var conf = GetConfiguration();
             var om = conf.GetObjectManager();
             
             await EnsureObjects(om);
@@ -340,7 +341,7 @@ namespace Redb.OBAC.Tests.ThreeTests
           [Test]
         public async Task HierSequentialAdd2()
         {
-            var conf = GetConfiguration(CONFIG_POSTGRES);
+            var conf = GetConfiguration();
             var om = conf.GetObjectManager();
             
             await EnsureObjects(om);
@@ -370,7 +371,7 @@ namespace Redb.OBAC.Tests.ThreeTests
             await om.EnsureTreeNode(treeId, Node110, Node100, User3);
             await om.EnsureTreeNode(treeId, 111, Node110, User2);
             
-            var storage = GetObjectStorage(CONFIG_POSTGRES);
+            var storage = GetObjectStorage();
 
             var nodeEp = await storage.GetEffectivePermissionsForAllUsers(treeId, Node100);
             Assert.AreEqual(1, nodeEp.Count);
@@ -389,7 +390,7 @@ namespace Redb.OBAC.Tests.ThreeTests
           [Test]
         public async Task HierUpdateAcls()
         {
-            var conf = GetConfiguration(CONFIG_POSTGRES);
+            var conf = GetConfiguration();
             var om = conf.GetObjectManager();
             var u1checker = conf.GetPermissionChecker(User1);
             var u2checker = conf.GetPermissionChecker(User2);
@@ -498,7 +499,7 @@ namespace Redb.OBAC.Tests.ThreeTests
         [Test]
         public async Task HierNodeReassign()
         {
-            var conf = GetConfiguration(CONFIG_POSTGRES);
+            var conf = GetConfiguration();
             var om = conf.GetObjectManager();
             
             await EnsureObjects(om);
@@ -603,8 +604,7 @@ namespace Redb.OBAC.Tests.ThreeTests
 
         private async Task AssertTreeRights(Guid treeId, bool extraChecks = false)
         {
-            var configName = CONFIG_POSTGRES;
-            var storage = GetObjectStorage(configName);
+            var storage = GetObjectStorage();
 
             var nodeEp = await storage.GetEffectivePermissionsForAllUsers(treeId, Node100);
             Assert.AreEqual(1, nodeEp.Count);
@@ -625,8 +625,8 @@ namespace Redb.OBAC.Tests.ThreeTests
             AssertContainEffectivePermission(nodeEp, treeId, User2, ViewPermId, Node130);
 
             if (!extraChecks) return;
-            var permCheckerUser1 = GetConfiguration(configName).GetPermissionChecker(User1);
-            var permCheckerUser2 = GetConfiguration(configName).GetPermissionChecker(User2);
+            var permCheckerUser1 = GetConfiguration().GetPermissionChecker(User1);
+            var permCheckerUser2 = GetConfiguration().GetPermissionChecker(User2);
             
             Assert.IsTrue(await permCheckerUser1.CheckObjectPermissions(treeId, Node100,  ViewPermId));
             Assert.IsFalse(await permCheckerUser1.CheckObjectPermissions(treeId, Node100,  UpdatePermId));

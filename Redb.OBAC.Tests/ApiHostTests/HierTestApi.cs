@@ -7,7 +7,6 @@ using Redberries.OBAC.Api;
 
 namespace Redb.OBAC.Tests.ApiHostTests
 {
-    [TestFixture]
     public class HierTestApi:TestBase
     {
         private Guid OrgUnitTreeId = new Guid("A5FAEDB2-F149-4781-B32E-7F81993AD39F");
@@ -17,10 +16,12 @@ namespace Redb.OBAC.Tests.ApiHostTests
 
         private Guid ManageRoleId = new Guid("1DD6D727-F1C1-45D7-94CC-5D6D72012733");
         private Guid ViewRoleId = new Guid("F7F0E312-9BA9-43A3-9A62-84D6B2101D05");
+
+        public HierTestApi(string dbName) : base(dbName) { }
         
         private async Task EnsureObjects()
         {
-            var api = GetApiHost(TestBase.CONFIG_POSTGRES);
+            var api = GetApiHost();
             
             await api.EnsureTree(new EnsureTreeParams
             {

@@ -11,9 +11,14 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.11">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Redb.OBAC.MySql\Redb.OBAC.MySql.csproj" />
       <ProjectReference Include="..\Redb.OBAC\Redb.OBAC.csproj" />
     </ItemGroup>
 
