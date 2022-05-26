@@ -108,7 +108,7 @@ Initially Created by
 - Dmitry Koval (dkoval@redberries.pro)
 
 Great thanks to out contributors, including
-- @PapaCarloSap (MySql backend)
+- [PapaCarloSap](https://github.com/PapaCarloSap) (MySql backend)
 
 
 (c) 2021-... Redberries.pro
