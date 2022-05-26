@@ -7,7 +7,7 @@ namespace Redb.OBAC.MySql
     public class MySqlObacDbContext : ObacDbContext
     {
         // uncomment base(...) when doing migrations  
-        public MySqlObacDbContext(): base("Host=192.168.2.12;Port=3306;Database=obac_test_user;Username=root;Password=12345678")
+        public MySqlObacDbContext()//: base("Host=192.168.2.12;Port=3306;Database=obac_test_user;Username=root;Password=12345678")
         { }
         
         public MySqlObacDbContext(string connectionString) : base(connectionString) { }
