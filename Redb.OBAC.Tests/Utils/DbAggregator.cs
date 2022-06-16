@@ -90,7 +90,7 @@ namespace Redb.OBAC.Tests.Utils
         internal abstract IEffectivePermissionsAware CreateHouseDbContext();
     }
 
-    internal sealed class MysqlDbAggregator : DbAggregator
+    internal sealed class MySqlDbAggregator : DbAggregator
     {
         public const string NAME = "mysql";
         private readonly TestMySqlConfig settings;
@@ -98,14 +98,14 @@ namespace Redb.OBAC.Tests.Utils
         private readonly ObjectStorage dbStorage;
         private readonly HouseTestMySqlDbContext houseDbContext;
 
-        private static readonly MysqlDbAggregator instance = new();
+        private static readonly MySqlDbAggregator instance = new();
 
-        public static MysqlDbAggregator GetInstance()
+        public static MySqlDbAggregator GetInstance()
         {
             return instance;
         }
 
-        private MysqlDbAggregator()
+        private MySqlDbAggregator()
         {
             settings = Setting.Mysql;
 
