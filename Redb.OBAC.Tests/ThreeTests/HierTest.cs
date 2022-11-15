@@ -6,7 +6,7 @@ using NUnit.Framework;
 using Redb.OBAC.ApiHost;
 using Redb.OBAC.Core;
 using Redb.OBAC.Core.Models;
-using Redb.OBAC.DB.Entities;
+using Redb.OBAC.EF.DB.Entities;
 using Redb.OBAC.Exceptions;
 using Redb.OBAC.Tests.Utils;
 using Redberries.OBAC.Api;

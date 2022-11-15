@@ -13,6 +13,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Redb.OBAC.ApiHost\Redb.OBAC.ApiHost.csproj" />
       <ProjectReference Include="..\Redb.OBAC.Client\Redb.OBAC.Client.csproj" />
+      <ProjectReference Include="..\Redb.OBAC.MsSql\Redb.OBAC.MsSql.csproj" />
       <ProjectReference Include="..\Redb.OBAC.MySql\Redb.OBAC.MySql.csproj" />
       <ProjectReference Include="..\Redb.OBAC.PgSql\Redb.OBAC.PgSql.csproj" />
       <ProjectReference Include="..\Redb.OBAC\Redb.OBAC.csproj" />

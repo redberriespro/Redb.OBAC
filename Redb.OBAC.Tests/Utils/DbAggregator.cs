@@ -1,11 +1,13 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Npgsql;
 using Redb.OBAC.ApiHost;
-using Redb.OBAC.BL;
+using Redb.OBAC.EF.BL;
 using Redb.OBAC.Client;
 using Redb.OBAC.Client.EffectivePermissionsReceiver;
-using Redb.OBAC.DB;
+using Redb.OBAC.EF.DB;
+using Redb.OBAC.MsSql;
 using Redb.OBAC.MySql;
 using Redb.OBAC.PgSql;
 using Redb.OBAC.Tests.ObacClientTests;
@@ -88,6 +90,91 @@ namespace Redb.OBAC.Tests.Utils
         internal abstract Task EnsureDatabaseExists();
         internal abstract Task EnsureCreatedAsync();
         internal abstract IEffectivePermissionsAware CreateHouseDbContext();
+    }
+
+    internal sealed class MsSqlDbAggregator : DbAggregator
+    {
+        public const string NAME = "mssql";
+        private readonly TestMsSqlConfig settings;
+        private readonly MsSqlObacStorageProvider dbProvider;
+        private readonly ObjectStorage dbStorage;
+        private readonly HouseTestMsSqlDbContext houseDbContext;
+
+        private static readonly MsSqlDbAggregator instance = new();
+
+        public static MsSqlDbAggregator GetInstance()
+        {
+            return instance;
+        }
+
+        private MsSqlDbAggregator()
+        {
+            settings = Setting.Mssql;
+
+            // create config for db
+            dbProvider = new MsSqlObacStorageProvider(settings.Config.Connection);
+            dbStorage = new ObjectStorage(dbProvider);
+            houseDbContext = new HouseTestMsSqlDbContext(settings.ConnectionTest);
+        }
+
+        public override string Name => NAME;
+
+        public override IObacStorageProvider DbProvider => dbProvider;
+        public override ObjectStorage DbStorage => dbStorage;
+        public override HouseTestDbContext HouseDbContext => houseDbContext;
+
+        private static void CleanDb(string connectionString)
+        {
+            SqlConnection connection;
+            var databaseName=string.Empty;
+            try
+            {
+                connection = new SqlConnection(connectionString);
+                databaseName = connection.Database;
+                connection.Open();
+            }
+            catch (SqlException ex)
+            {
+                if (ex.ErrorCode== -2146232060)
+                    return; // no need to drop anything :)
+                throw;
+            }
+            connection.ChangeDatabase("master");
+            var command = connection.CreateCommand();
+            command.CommandText = $"DROP DATABASE IF EXISTS {databaseName};";
+            command.ExecuteNonQuery();
+
+            command.CommandText = $"CREATE DATABASE {databaseName};";
+            command.ExecuteNonQuery();
+            command.Dispose();
+            connection.Close();
+            connection.Dispose();
+        }
+
+        internal override void TestCoreDbCleaner()
+        {
+            CleanDb(settings.Config.Connection);
+        }
+
+        internal override void TestUserDbCleaner()
+        {
+            CleanDb(settings.ConnectionTest);
+        }
+
+        internal override Task EnsureDatabaseExists()
+        {
+            return dbProvider.EnsureDatabaseExists();
+        }
+
+        internal override Task EnsureCreatedAsync()
+        {
+            return Task.Run(() => houseDbContext.Database.EnsureCreated());
+        }
+
+        internal override IEffectivePermissionsAware CreateHouseDbContext()
+        {
+            return new HouseTestMsSqlDbContext(settings.ConnectionTest);
+        }
     }
 
     internal sealed class MySqlDbAggregator : DbAggregator
@@ -211,7 +298,7 @@ namespace Redb.OBAC.Tests.Utils
             }
             catch (PostgresException ex)
             {
-                if (ex.MessageText.ToLower().Contains("does not exist"))
+                if (ex.Code=="3D000")
                     return; // no need to drop anything :)
                 throw;
             }

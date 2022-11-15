@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Redb.OBAC.DB;
+using Redb.OBAC.EF.DB;
 using System;
 
 namespace Redb.OBAC.MySql

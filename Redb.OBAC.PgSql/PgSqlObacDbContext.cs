@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Redb.OBAC.DB;
+using Redb.OBAC.EF.DB;
 
 namespace Redb.OBAC.PgSql
 {

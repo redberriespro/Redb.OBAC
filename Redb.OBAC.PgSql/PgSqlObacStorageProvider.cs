@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Redb.OBAC.DB;
+using Redb.OBAC.EF.DB;
 using Redb.OBAC.Permissions;
 
 namespace Redb.OBAC.PgSql

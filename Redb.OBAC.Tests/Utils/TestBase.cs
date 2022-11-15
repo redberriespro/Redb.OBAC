@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Redb.OBAC.ApiHost;
-using Redb.OBAC.BL;
+using Redb.OBAC.EF.BL;
 using Redb.OBAC.Tests.ObacClientTests;
 
 namespace Redb.OBAC.Tests.Utils
@@ -27,6 +27,9 @@ namespace Redb.OBAC.Tests.Utils
                 case MySqlDbAggregator.NAME:
                     dbAggregator = MySqlDbAggregator.GetInstance();
                     break;
+                case MsSqlDbAggregator.NAME:
+                    dbAggregator = MsSqlDbAggregator.GetInstance();
+                    break;
 
                 default:
                     break;
@@ -37,6 +40,7 @@ namespace Redb.OBAC.Tests.Utils
         {
             yield return PgDbAggregator.NAME;
             yield return MySqlDbAggregator.NAME;
+            yield return MsSqlDbAggregator.NAME;
         }
 
         protected IObacConfiguration GetConfiguration() => dbAggregator.Configuration;
