@@ -107,8 +107,8 @@ Initially Created by
 - Yury Skaletskiy (yury@redberries.pro)
 - Dmitry Koval (dkoval@redberries.pro)
 
-Great thanks to out contributors, including
+Great thanks to our dearest contributors, including
 - [PapaCarloSap](https://github.com/PapaCarloSap) (MySql backend)
-
+- [kaiser113-ru](https://github.com/kaiser113-ru) (MongoDB and MSSQL backends)
 
 (c) 2021-... Redberries.pro
