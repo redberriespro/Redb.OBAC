@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Redb.OBAC\Redb.OBAC.csproj" />
+    <ProjectReference Include="..\Redb.OBAC.EF\Redb.OBAC.EF.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,6 +2,7 @@
 using HelloObac;
 using Redb.OBAC;
 using Redb.OBAC.Client.EffectivePermissionsReceiver;
+using Redb.OBAC.EF;
 using Redb.OBAC.PgSql;
 
 Console.WriteLine("Bench Test");

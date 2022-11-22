@@ -1,4 +1,4 @@
-﻿using Redb.OBAC.DB;
+﻿using Redb.OBAC.EF.DB;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -25,6 +25,7 @@ namespace Redb.OBAC.MySql
         }
 
         public ObacDbContext CreateObacContext() => new MySqlObacDbContext(_config.Connection);
+
 
         public async Task EnsureDatabaseExists()
         {

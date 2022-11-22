@@ -6,7 +6,7 @@ namespace Redb.OBAC.Tests.ObacClientTests.Entities
     [Table("test_houses")]
     public class HouseTestEntity
     {
-        [Key]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
         public string Name { get; set; }
     }

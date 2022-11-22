@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Redb.OBAC.DB;
+using Redb.OBAC.Core.Models;
+using Redb.OBAC.EF.DB;
 
 namespace Redb.OBAC.PgSql
 {
@@ -54,6 +58,38 @@ namespace Redb.OBAC.PgSql
                 
                 optionsBuilder.UseLoggerFactory(lp);
             }
+        }
+
+        public override string GetTreeSubnodesDeepQueryRoot()
+        {
+            return @"with recursive nodes(id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id) as (
+            select id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id
+            from obac_tree_nodes
+            where parent_id = {0} and tree_id={1}
+            union all
+            select o.id, o.parent_id, o.external_id_int, o.external_id_str, o.inherit_parent_perms, o.owner_user_id
+                from obac_tree_nodes o
+            join nodes n on n.id = o.parent_id and o.tree_id={1}
+                )
+            select *, {1} as tree_id
+                from nodes
+                order by id desc";
+        }
+
+        public override string GetTreeSubnodesDeepQueryGivenNode()
+        {
+            return @"with recursive nodes(id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id) as (
+            select id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id
+            from obac_tree_nodes
+            where parent_id is null and tree_id={0}
+            union all
+            select o.id, o.parent_id, o.external_id_int, o.external_id_str, o.inherit_parent_perms, o.owner_user_id
+                from obac_tree_nodes o
+            join nodes n on n.id = o.parent_id and o.tree_id={0}
+                )
+            select *, {0} as tree_id
+                from nodes
+                order by id desc";
         }
     }
 }

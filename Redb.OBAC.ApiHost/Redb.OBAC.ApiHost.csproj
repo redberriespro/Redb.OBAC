@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Redb.OBAC.MsSql\Redb.OBAC.MsSql.csproj" />
       <ProjectReference Include="..\Redb.OBAC.MySql\Redb.OBAC.MySql.csproj" />
       <ProjectReference Include="..\Redb.OBAC\Redb.OBAC.csproj" />
     </ItemGroup>
