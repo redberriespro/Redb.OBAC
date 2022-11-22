@@ -16,7 +16,7 @@ using MongoDB.Driver;
 
 namespace Redb.OBAC.MongoDriver.BL
 {
-    public class ObjectStorage : ILazyTreeDataProvider, IEffectivePermissionFeed
+    public class ObjectStorage : IObjectStorage
     {
         private readonly IObacStorageProvider _storageProvider;
 
@@ -28,28 +28,19 @@ namespace Redb.OBAC.MongoDriver.BL
         public async Task RemoveAllObjectTypes(bool force)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-
-            var ots = ctx.ObacObjectTypes.DeleteMany(x => true);
-
-            //await ctx.SaveChangesAsync();
+            ctx.ObacObjectTypes.DeleteMany(x => true);
         }
 
         public async Task RemoveAllPermissions(bool force)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-
-            //var ots = await ctx.ObacPermissions.ToListAsync();
             ctx.ObacPermissions.DeleteMany(x => true);
-            //await ctx.SaveChangesAsync();
         }
 
         public async Task RemoveAllUserSubjects(bool force)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-
-            //var ots = await ctx.ObacUserSubjects.ToListAsync();
             ctx.ObacUserSubjects.DeleteMany(x => true);
-            //await ctx.SaveChangesAsync();
         }
 
         public async Task<PermissionInfo> GetPermissionById(Guid permissionId)
@@ -69,27 +60,18 @@ namespace Redb.OBAC.MongoDriver.BL
                 Id = permissionId,
                 Description = description
             });
-            //await ctx.SaveChangesAsync();
         }
 
         public async Task UpdatePermission(Guid permissionId, string description)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-
-            var p = await ctx.ObacPermissions.UpdateOneAsync(a => a.Id == permissionId, Builders<ObacPermissionEntity>.Update.Set(x => x.Description, description));
-            //if (p == null) return;
-            //p.Description = description;
-            //await ctx.SaveChangesAsync();
+            await ctx.ObacPermissions.UpdateOneAsync(a => a.Id == permissionId, Builders<ObacPermissionEntity>.Update.Set(x => x.Description, description));
         }
 
         public async Task DeletePermission(Guid permissionId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-
-            var p = await ctx.ObacPermissions.DeleteOneAsync(a => a.Id == permissionId);
-            //if (p == null) return;
-            //ctx.ObacPermissions.Remove(p);
-            //await ctx.SaveChangesAsync();
+            await ctx.ObacPermissions.DeleteOneAsync(a => a.Id == permissionId);
         }
 
         public async Task<RoleInfo> GetRoleById(Guid roleId)
@@ -120,7 +102,6 @@ namespace Redb.OBAC.MongoDriver.BL
                     PermissionId = pid
                 }).ToList()
             });
-            //await ctx.SaveChangesAsync();
         }
 
         public async Task AddPermissionToRole(Guid roleId, Guid permissionId)
@@ -137,7 +118,7 @@ namespace Redb.OBAC.MongoDriver.BL
                 RoleId = roleId
             });
 
-            await ctx.ObacRoles.UpdateOneAsync(a => a.Id == roleId, Builders<ObacRoleEntity>.Update.Set(x => x.Permissions, p.Permissions));
+            await ctx.ObacRoles.ReplaceOneAsync(a => a.Id == roleId, p);
         }
 
         public async Task UpdateRole(Guid roleId, string description, Guid[] permissionIds)
@@ -165,11 +146,7 @@ namespace Redb.OBAC.MongoDriver.BL
         public async Task DeleteRole(Guid roleId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-
-            var p = await ctx.ObacRoles.DeleteOneAsync(a => a.Id == roleId);
-            //if (p == null) return;
-            //ctx.ObacRoles.Remove(p);
-            //await ctx.SaveChangesAsync();
+            await ctx.ObacRoles.DeleteOneAsync(a => a.Id == roleId);
         }
 
         public async Task<IEnumerable<RoleInfo>> GetAllRoles()
@@ -177,7 +154,7 @@ namespace Redb.OBAC.MongoDriver.BL
             await using var ctx = _storageProvider.CreateObacContext();
 
             return (await ctx.ObacRoles
-                .Find(x=>true).ToListAsync()).Select(p => new RoleInfo()
+                .Find(x => true).ToListAsync()).Select(p => new RoleInfo()
                 {
                     RoleId = p.Id,
                     Description = p.Description,
@@ -198,12 +175,10 @@ namespace Redb.OBAC.MongoDriver.BL
             });
         }
 
-
-
         public async Task<SubjectInfo> GetUserSubjectById(int subjectId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-            var p = await ctx.ObacUserSubjects.Find(a => a.Id == subjectId).SingleOrDefaultAsync();
+            var p = await ctx.ObacUserSubjects.Find(a => a.Id == subjectId).FirstOrDefaultAsync();
             return p == null
                 ? null
                 : new SubjectInfo
@@ -220,7 +195,7 @@ namespace Redb.OBAC.MongoDriver.BL
         {
             await using var ctx = _storageProvider.CreateObacContext();
             var cursor = await ctx.ObacUserSubjects.FindAsync(a => a.ExternalIdInt == extenalIntId);
-            var p = await cursor.SingleOrDefaultAsync();
+            var p = await cursor.FirstOrDefaultAsync();
             return p == null ? null : new SubjectInfo
             {
                 SubjectId = p.Id,
@@ -235,7 +210,7 @@ namespace Redb.OBAC.MongoDriver.BL
         {
             await using var ctx = _storageProvider.CreateObacContext();
             var cursor = await ctx.ObacUserSubjects.FindAsync(a => a.ExternalIdString == stringId);
-            var p = await cursor.SingleOrDefaultAsync();
+            var p = await cursor.FirstOrDefaultAsync();
             return p == null
                 ? null
                 : new SubjectInfo
@@ -251,8 +226,6 @@ namespace Redb.OBAC.MongoDriver.BL
         public async Task AddUserSubject(int subjectId, string description, int? intId, string stringId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-            //await using var transaction = await ctx.Database.BeginTransactionAsync();
-
             await EnsureNoUserExternalIds(ctx, intId, stringId);
 
             await ctx.ObacUserSubjects.InsertOneAsync(new ObacUserSubjectEntity()
@@ -262,13 +235,11 @@ namespace Redb.OBAC.MongoDriver.BL
                 ExternalIdInt = intId,
                 ExternalIdString = stringId
             });
-            //await ctx.SaveChangesAsync();
-            //await transaction.CommitAsync();
         }
+
         public async Task<int> AddUserSubject(string description, int? intId, string stringId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-            //await using var transaction = await ctx.Database.BeginTransactionAsync();
 
             await EnsureNoUserExternalIds(ctx, intId, stringId);
 
@@ -279,13 +250,11 @@ namespace Redb.OBAC.MongoDriver.BL
                 ExternalIdString = stringId
             };
             await ctx.ObacUserSubjects.InsertOneAsync(userSubjectEntity);
-            //await ctx.SaveChangesAsync();
-            //await transaction.CommitAsync();
 
             return userSubjectEntity.Id;
         }
 
-        private async Task EnsureNoUserExternalIds(ObacMongoDbContext ctx, int? intId, string stringId)
+        private async Task EnsureNoUserExternalIds(ObacMongoDriverContext ctx, int? intId, string stringId)
         {
             if (intId.HasValue)
             {
@@ -307,27 +276,19 @@ namespace Redb.OBAC.MongoDriver.BL
 
             await ctx.ObacUserSubjects.
                 UpdateOneAsync(a => a.Id == subjectId, Builders<ObacUserSubjectEntity>.Update.Set(x => x.Description, description));
-            //if (p == null) return;
-            //p.Description = description;
-            //await ctx.SaveChangesAsync();
         }
 
         public async Task DeleteUserSubject(int subjectId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             await ctx.ObacUserSubjects.DeleteOneAsync(a => a.Id == subjectId);
-            //if (p == null) return;
-            //ctx.ObacUserSubjects.Remove(p);
-            //await ctx.SaveChangesAsync();
         }
-
-
 
         public async Task<SubjectInfo> GetGroupSubjectById(int subjectId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             var cursor = await ctx.ObacGroupSubjects.FindAsync(a => a.Id == subjectId);
-            var p = await cursor.SingleOrDefaultAsync();
+            var p = await cursor.FirstOrDefaultAsync();
             return p == null
                 ? null
                 : new SubjectInfo
@@ -351,12 +312,21 @@ namespace Redb.OBAC.MongoDriver.BL
         public async Task AddUserToGroup(int userGroupId, int userId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-            await ctx.ObacUsersInGroups.InsertOneAsync(new ObacUserInGroupEntity
+            try
             {
-                GroupId = userGroupId,
-                UserId = userId
-            });
-            //await ctx.SaveChangesAsync();
+                await ctx.ObacUsersInGroups.ReplaceOneAsync(x => x.GroupId == userGroupId && x.UserId == userId, new ObacUserInGroupEntity
+                {
+                    GroupId = userGroupId,
+                    UserId = userId
+                }, new ReplaceOptions { IsUpsert = true });
+                //await ctx.ObacUsersInGroups.InsertOneAsync(new ObacUserInGroupEntity
+                //{
+                //    GroupId = userGroupId,
+                //    UserId = userId
+                //});
+            }
+            catch (MongoWriteException) { }
+
         }
 
         public async Task DeleteUserFromGroup(int userGroupId, int userId)
@@ -364,13 +334,10 @@ namespace Redb.OBAC.MongoDriver.BL
             await using var ctx = _storageProvider.CreateObacContext();
             var ug = await ctx.ObacUsersInGroups
                 .DeleteOneAsync(a => a.UserId == userId && a.GroupId == userGroupId);
-            //if (ug == null) return;
-            //ctx.ObacUsersInGroups.Remove(ug);
-            //await ctx.SaveChangesAsync();
         }
 
 
-        private async Task EnsureNoGroupExternalIds(ObacMongoDbContext ctx, int? intId, string stringId)
+        private async Task EnsureNoGroupExternalIds(ObacMongoDriverContext ctx, int? intId, string stringId)
         {
             if (intId.HasValue)
             {
@@ -388,8 +355,6 @@ namespace Redb.OBAC.MongoDriver.BL
         public async Task AddGroupSubject(int subjectId, string description, int? intId, string stringId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-            //await using var transaction = await ctx.Database.BeginTransactionAsync();
-
             await EnsureNoGroupExternalIds(ctx, intId, stringId);
 
             var groupSubjectEntity = new ObacGroupSubjectEntity
@@ -400,34 +365,25 @@ namespace Redb.OBAC.MongoDriver.BL
                 ExternalIdString = stringId
             };
             await ctx.ObacGroupSubjects.InsertOneAsync(groupSubjectEntity);
-            //await ctx.SaveChangesAsync();
-            //await transaction.CommitAsync();
         }
 
         public async Task UpdateGroupSubject(int subjectId, string description)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-
-            var p = await ctx.ObacGroupSubjects.
+            await ctx.ObacGroupSubjects.
                 UpdateOneAsync(a => a.Id == subjectId, Builders<ObacGroupSubjectEntity>.Update.Set(x => x.Description, description));
-            //if (p == null) return;
-            //p.Description = description;
-            //await ctx.SaveChangesAsync();
         }
 
         public async Task DeleteUserGroupSubject(int subjectId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-            var p = await ctx.ObacGroupSubjects.DeleteOneAsync(a => a.Id == subjectId);
-            //if (p == null) return;
-            //ctx.ObacGroupSubjects.Remove(p);
-            //await ctx.SaveChangesAsync();
+            await ctx.ObacGroupSubjects.DeleteOneAsync(a => a.Id == subjectId);
         }
 
         public async Task DeleteObjectType(Guid objectTypeId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-            var p = await ctx.ObacObjectTypes.DeleteOneAsync(a => a.Id == objectTypeId);
+            await ctx.ObacObjectTypes.DeleteOneAsync(a => a.Id == objectTypeId);
         }
 
         public async Task<ObjectTypeInfo> GetObjectTypeById(Guid objectTypeId)
@@ -448,16 +404,13 @@ namespace Redb.OBAC.MongoDriver.BL
                 Description = description,
                 Type = objType
             });
-            //await ctx.SaveChangesAsync();
         }
 
         public async Task UpdateObjectType(Guid objectTypeId, string description)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-            var p = await ctx.ObacObjectTypes.UpdateOneAsync(a => a.Id == objectTypeId, Builders<ObacObjectTypeEntity>.Update.Set(x => x.Description, description));
-            //if (p == null) return;
-            //p.Description = description;
-            //await ctx.SaveChangesAsync();
+            await ctx.ObacObjectTypes.
+                UpdateOneAsync(a => a.Id == objectTypeId, Builders<ObacObjectTypeEntity>.Update.Set(x => x.Description, description));
         }
 
         public async Task<IEnumerable<ObjectTypeInfo>> GetAllObjectTypes()
@@ -478,7 +431,7 @@ namespace Redb.OBAC.MongoDriver.BL
             var cursor = await ctx.ObacUserPermissions.FindAsync(p =>
                 p.UserId == subjectId && p.PermissionId == permissionId && p.ObjectTypeId == objectTypeId &&
                 p.ObjectId == objectId);
-            var obj = await cursor.SingleOrDefaultAsync();
+            var obj = await cursor.FirstOrDefaultAsync();
 
             return obj?.Id;
         }
@@ -486,15 +439,12 @@ namespace Redb.OBAC.MongoDriver.BL
         public async Task AddUserEffectivePermission(int subjectId, Guid[] permissionIds, Guid objectTypeId, int? objectId, bool deleteExisting)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-            //await using var transaction = await ctx.Database.BeginTransactionAsync();
 
             if (deleteExisting)
             {
-                /*var oldUserPermissions =*/
-                ctx.ObacUserPermissions.DeleteMany(p =>
-p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectId
-);
-                //ctx.ObacUserPermissions.RemoveRange(oldUserPermissions);
+                ctx.ObacUserPermissions.DeleteMany(p => p.UserId == subjectId
+                                                    && p.ObjectTypeId == objectTypeId
+                                                    && p.ObjectId == objectId);
             }
 
             foreach (var permissionId in permissionIds)
@@ -508,9 +458,6 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
                     ObjectId = objectId
                 });
             }
-
-            //await ctx.SaveChangesAsync();
-            //await transaction.CommitAsync();
         }
 
         public async Task DeleteUserEffectivePermission(int subjectId, Guid permissionId, Guid objectTypeId, int? objectId)
@@ -520,10 +467,6 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
             var obj = await ctx.ObacUserPermissions.DeleteOneAsync(p =>
                 p.UserId == subjectId && p.PermissionId == permissionId && p.ObjectTypeId == objectTypeId &&
                 p.ObjectId == objectId);
-
-            //if (obj == null) return;
-            //ctx.ObacUserPermissions.Remove(obj);
-            //await ctx.SaveChangesAsync();
         }
 
         public async Task<Guid[]> GetEffectivePermissionsForUser(int userId, Guid objectTypeId, int? objectId)
@@ -534,12 +477,20 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
                 .ToListAsync()).Select(a => a.PermissionId).ToArray();
         }
 
-        public async Task<List<ObacUserPermissionsEntity>> GetEffectivePermissionsForAllUsers(Guid objectTypeId, int? objectId)
+        public async Task<List<TreeNodePermissionInfo>> GetEffectivePermissionsForAllUsers(Guid objectTypeId, int? objectId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             return (await ctx.ObacUserPermissions
                 .Find(p => p.ObjectTypeId == objectTypeId && p.ObjectId == objectId)
-                .ToListAsync());
+                .ToListAsync()).Where(e => e.ObjectId.HasValue).Select(x =>
+                new TreeNodePermissionInfo
+                {
+                    NodeId = x.ObjectId.Value,
+                    DenyPermission = false,
+                    PermissionId = x.PermissionId,
+                    UserId = x.UserId,
+                    UserGroupId = null
+                }).ToList();
         }
 
         public async Task<IEnumerable<UserPermissionInfo>> GetDirectPermissionsOnObject(Guid objectType, int objectId)
@@ -554,7 +505,7 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
 
         // tree manipulations
 
-        private async Task TreeEnsureNoExternalIds(ObacMongoDbContext ctx, int? intId, string stringId)
+        private async Task TreeEnsureNoExternalIds(ObacMongoDriverContext ctx, int? intId, string stringId)
         {
             if (intId.HasValue)
             {
@@ -583,15 +534,13 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
                 ExternalIdString = stringId
             };
             await ctx.ObacTree.InsertOneAsync(entity);
-
-            //await ctx.SaveChangesAsync();
         }
 
         public async Task UpdateObjectTree(Guid treeId, string description, int? intId, string stringId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
 
-            var entity = await ctx.ObacTree.Find(a => a.Id == treeId).SingleAsync();
+            var entity = await ctx.ObacTree.Find(a => a.Id == treeId).FirstAsync();
 
             entity.Description = description;
 
@@ -615,7 +564,6 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
             }
             entity.ExternalIdString = stringId;
             await ctx.ObacTree.ReplaceOneAsync(a => a.Id == treeId, entity);
-            //await ctx.SaveChangesAsync();
         }
 
         public async Task<TreeObjectTypeInfo> GetObjectTreeById(Guid treeId)
@@ -636,7 +584,7 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
         public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, int nodeId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-            var nd = await ctx.ObacTreeNodes.Find(tn => tn.TreeId == treeId && tn.Id == nodeId).SingleOrDefaultAsync();
+            var nd = await ctx.ObacTreeNodes.Find(tn => tn.TreeId == treeId && tn.NodeId == nodeId).FirstOrDefaultAsync();
             return nd switch
             {
                 null => null,
@@ -649,7 +597,7 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
             return new TreeNodeInfo
             {
                 TreeObjectTypeId = treeId,
-                NodeId = nd.Id,
+                NodeId = nd.NodeId,
                 ParentNodeId = nd.ParentId,
                 InheritParentPermissions = nd.InheritParentPermissions,
                 OwnerUserid = nd.OwnerUserId
@@ -659,30 +607,34 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
         public async Task CreateTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-            await ctx.ObacTreeNodes.InsertOneAsync(new ObacTreeNodeEntity
+            var newNode = new ObacTreeNodeEntity
             {
                 TreeId = treeId,
-                Id = nodeId,
+                NodeId = nodeId,
                 ParentId = parentId,
                 OwnerUserId = ownerUserId,
                 InheritParentPermissions = true
-            });
-            //await ctx.SaveChangesAsync();
+            };
+            try
+            {
+                await ctx.ObacTreeNodes.ReplaceOneAsync(x => x.NodeId == newNode.NodeId && x.TreeId == newNode.TreeId, newNode, new ReplaceOptions { IsUpsert = true });
+                //await ctx.ObacTreeNodes.InsertOneAsync(newNode);
+            }
+            catch (MongoWriteException) { }
+
         }
 
         public async Task<int?> ReplaceTreeNode(Guid treeId, int nodeId, int? newParentNodeId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-            var nd = await ctx.ObacTreeNodes.Find(n => n.TreeId == treeId && n.Id == nodeId).SingleAsync();
+            var nd = await ctx.ObacTreeNodes.Find(n => n.TreeId == treeId && n.NodeId == nodeId).FirstAsync();
             var oldParentId = nd.ParentId;
 
             if (nd.ParentId == newParentNodeId)
                 return oldParentId;
 
             nd.ParentId = newParentNodeId;
-            await ctx.ObacTreeNodes.ReplaceOneAsync(n => n.TreeId == treeId && n.Id == nodeId, nd);
-            //ctx.Entry(nd).Property(a => a.ParentId).IsModified = true;
-            //await ctx.SaveChangesAsync();
+            await ctx.ObacTreeNodes.ReplaceOneAsync(n => n.TreeId == treeId && n.NodeId == nodeId, nd);
             return oldParentId;
         }
 
@@ -723,11 +675,10 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
             TreeNodePermissionInfo[] ptodel)
         {
             await using var ctx = _storageProvider.CreateObacContext();
+           
 
             var nd = await ctx.ObacTreeNodes.
-                UpdateOneAsync(n => n.TreeId == treeId && n.Id == treeNodeId, Builders<ObacTreeNodeEntity>.Update.Set(x => x.InheritParentPermissions, inheritParentPermissions));
-            //nd.InheritParentPermissions = inheritParentPermissions;
-            //ctx.Entry(nd).Property(a => a.InheritParentPermissions).IsModified = true;
+                UpdateOneAsync(n => n.TreeId == treeId && n.NodeId == treeNodeId, Builders<ObacTreeNodeEntity>.Update.Set(x => x.InheritParentPermissions, inheritParentPermissions));
 
             foreach (var delItem in ptodel)
             {
@@ -738,11 +689,13 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
                     && p.UserId == delItem.UserId
                     && p.UserGroupId == delItem.UserGroupId
                     && p.Deny == delItem.DenyPermission);
-                //ctx.ObacTreeNodePermissions.Remove(p);
             }
 
-            foreach (var addItem in ptoadd)
+             foreach (var addItem in ptoadd)
             {
+                if (ctx.ObacUserSubjects.Find(x => x.Id == addItem.UserId).FirstOrDefault() == null && 
+                    ctx.ObacGroupSubjects.Find(x => x.Id == addItem.UserGroupId).FirstOrDefault() == null)
+                    throw new ObacException("Error when ACL set");
                 await ctx.ObacTreeNodePermissions.InsertOneAsync(new ObacTreeNodePermissionEntity
                 {
                     Id = Guid.NewGuid(),
@@ -755,7 +708,6 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
                 });
             }
 
-            //await ctx.SaveChangesAsync();
         }
 
 
@@ -764,85 +716,62 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
         {
             await using var ctx = _storageProvider.CreateObacContext();
 
-            IQueryable<ObacTreeNodeEntity> res=null;
+            List<ObacTreeNodeEntity> root = null;
 
-            //if (startingNodeId.HasValue)
-            //{
-            //    // start from root
-            //    var qry = $"with {(ctx.DbType != DbType.MsSql ? "recursive" : "")} nodes(id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id) as (" +
-            //@"select id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id
-            //from obac_tree_nodes
-            //where parent_id = {0} and tree_id={1}
-            //union all
-            //select o.id, o.parent_id, o.external_id_int, o.external_id_str, o.inherit_parent_perms, o.owner_user_id
-            //    from obac_tree_nodes o
-            //join nodes n on n.id = o.parent_id and o.tree_id={1}
-            //    )
-            //select *, {1} as tree_id
-            //    from nodes
-            //    order by id desc";
+            if (startingNodeId.HasValue)
+            {
+                root = ctx.ObacTreeNodes.Find(x => x.NodeId == startingNodeId && x.TreeId == treeId).ToList();
 
-            //    res = ctx.ObacTreeNodes.FromSqlRaw(qry, startingNodeId, treeId);
+            }
+            else
+            {
+                root = ctx.ObacTreeNodes.Find(x => x.ParentId == null && x.TreeId == treeId).ToList();
+            }
 
-            //}
-            //else
-            //{
-            //    // start from given node
-            //    var qry = $"with {(ctx.DbType != DbType.MsSql ? "recursive" : "")}  nodes(id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id) as (" +
-            //@"select id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id
-            //from obac_tree_nodes
-            //where parent_id is null and tree_id={0}
-            //union all
-            //select o.id, o.parent_id, o.external_id_int, o.external_id_str, o.inherit_parent_perms, o.owner_user_id
-            //    from obac_tree_nodes o
-            //join nodes n on n.id = o.parent_id and o.tree_id={0}
-            //    )
-            //select *, {0} as tree_id
-            //    from nodes
-            //    order by id desc";
-            //    res = ctx.ObacTreeNodes.FromSqlRaw(qry, treeId);
+            if (root != null)
+            {
+                var result = new List<ObacTreeNodeEntity>();
+                foreach (var item in root)
+                {
+                    if (root.Count > 1)
+                        result.Add(item);
+                    var childs = GetTreeSubnodesImpl(ctx, item);
+                    if (childs != null)
+                        result.AddRange(childs);
+                }
 
-            //}
+                return result.Select(nd => MakeTreeNodeInfo(treeId, nd));
+            }
+            return null;
+        }
 
-            return (await res.ToListAsync()).Select(nd => MakeTreeNodeInfo(treeId, nd));
+        public List<ObacTreeNodeEntity> GetTreeSubnodesImpl(ObacMongoDriverContext ctx, ObacTreeNodeEntity parent)
+        {
+            var childs = ctx.ObacTreeNodes.Find(x => x.ParentId == parent.NodeId&&x.TreeId==parent.TreeId).ToList();
+            if (childs.Count != 0)
+            {
+                var result = new List<ObacTreeNodeEntity>();
+                result.AddRange(childs);
+                foreach (var child in childs)
+                {
+                    var tempResult = GetTreeSubnodesImpl(ctx, child);
+                    if (tempResult != null)
+                        result.AddRange(tempResult);
+                }
+                return result;
+            }
+            return null;
         }
 
         public async Task<IEnumerable<TreeNodeInfo>> GetTreeSubnodesShallow(Guid treeId, int? startingNodeId = null)
         {
             await using var ctx = _storageProvider.CreateObacContext();
 
-            IQueryable<ObacTreeNodeEntity> res=null;
-
             return startingNodeId.HasValue
-                    ?(await ctx.ObacTreeNodes.Find(x => x.ParentId == startingNodeId && x.TreeId == treeId).ToListAsync()).
-                        OrderByDescending(x => x.Id).Select(x => MakeTreeNodeInfo(treeId, x))
-                    :(await ctx.ObacTreeNodes.Find(x => x.ParentId == null && x.TreeId == treeId).ToListAsync()).
-                        OrderByDescending(x => x.Id).Select(x => MakeTreeNodeInfo(treeId, x));
-            //if (startingNodeId.HasValue)
-            //{
-
-            //    //start from given node
-            //    var qry = @"select id,  tree_id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id
-            //from obac_tree_nodes
-            //where parent_id = {0} and tree_id={1} order by id desc";
-
-            //    res = ctx.ObacTreeNodes.FromSqlRaw(qry, startingNodeId, treeId);
-
-            //}
-            //else
-            //{
-
-            //    //start from root
-            //   var qry = @"select id, tree_id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id
-            //from obac_tree_nodes
-            //where parent_id is null and tree_id={0} order by id desc";
-
-
-            //    res = ctx.ObacTreeNodes.FromSqlRaw(qry, treeId);
-
-            //}
-
-            //return (await res.ToListAsync()).Select(nd => MakeTreeNodeInfo(treeId, nd));
+                    ? (await ctx.ObacTreeNodes.Find(x => x.ParentId == startingNodeId && x.TreeId == treeId).ToListAsync()).
+                        OrderByDescending(x => x.NodeId).Select(x => MakeTreeNodeInfo(treeId, x))
+                    : (await ctx.ObacTreeNodes.Find(x => x.ParentId == null && x.TreeId == treeId).ToListAsync()).
+                        OrderByDescending(x => x.NodeId).Select(x => MakeTreeNodeInfo(treeId, x));
         }
 
 
@@ -854,18 +783,14 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
 
         public async Task DeleteObjectTree(Guid treeId)
         {
-            /*await using*/
-            var ctx = _storageProvider.CreateObacContext();
+            await using var ctx = _storageProvider.CreateObacContext();
 
             var tid = "{" + treeId + "}";
 
-            // await ctx.Database.ExecuteSqlCommandAsync( 
-            //     $"DELETE FROM obac_tree_nodes WHERE tree_id = {tid}"); 
-            await ctx.Database.GetCollection<ObacTreeNodeEntity>("obac_tree_nodes").
+            await ctx.ObacTreeNodes.
                 DeleteManyAsync(x => x.TreeId == treeId);
 
-            //ctx.ObacTreeNodes.RemoveRange(ctx.ObacTreeNodes.Where(n => n.TreeId == treeId));
-            ctx.ObacTree.DeleteMany(n => n.Id == treeId);
+            await ctx.ObacTree.DeleteManyAsync(n => n.Id == treeId);
 
         }
 
@@ -873,9 +798,8 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
 
         public async Task FeedWithActionList(IEnumerable<PermissionActionInfo> actions)
         {
-            /*await using*/
-            var ctx = _storageProvider.CreateObacContext();
-            // todo improve
+            await using var ctx = _storageProvider.CreateObacContext();
+
             int n = EP_BATCH_SZ;
 
             foreach (var a in actions)
@@ -884,7 +808,7 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
                 {
                     case PermissionActionEnum.RemoveAllObjectsDirectPermission:
                         {
-                            await ctx.Database.GetCollection<ObacUserPermissionsEntity>("obac_userpermissions").
+                            await ctx.ObacUserPermissions.
                                 DeleteManyAsync(x => x.ObjectTypeId == a.ObjectTypeId && x.ObjectId == a.ObjectId);
 
                         }
@@ -899,10 +823,6 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
                                         && p.ObjectId == a.ObjectId
                                         && p.PermissionId == a.PermissionId
                                         && p.UserId == a.UserId);
-                            //if (p != null)
-                            //{
-                            //    ctx.ObacUserPermissions.Remove(p);
-                            //}
                         }
                         break;
                     case PermissionActionEnum.AddDirectPermission:
@@ -925,13 +845,7 @@ p.UserId == subjectId && p.ObjectTypeId == objectTypeId && p.ObjectId == objectI
                 if (n > 0) continue;
 
                 n = EP_BATCH_SZ;
-                //await ctx.SaveChangesAsync();
             }
-
-            //if (n != EP_BATCH_SZ)
-            //    await ctx.SaveChangesAsync();
         }
-
-
     }
 }

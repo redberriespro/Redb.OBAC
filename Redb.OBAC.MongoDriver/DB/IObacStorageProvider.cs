@@ -8,7 +8,7 @@ namespace Redb.OBAC.MongoDriver.DB
         /// factory method
         /// </summary>
         /// <returns></returns>
-        ObacMongoDbContext CreateObacContext();
+        ObacMongoDriverContext CreateObacContext();
         
         /// <summary>
         /// default e.p. storage - usually in the same database as main data is stored

@@ -656,11 +656,10 @@ namespace Redb.OBAC.Tests.ThreeTests
                     $"ACL item not found: user {userId} group {userGroupId} perm {permId} kind {kind}");
         }
         
-        private void AssertContainEffectivePermission(List<ObacUserPermissionsEntity> eps, Guid objectTypeId, int userId, Guid permId, int objectId)
+        private void AssertContainEffectivePermission(List<TreeNodePermissionInfo> eps, Guid objectTypeId, int userId, Guid permId, int objectId)
         {
             var ep = eps.SingleOrDefault(
-                e => e.ObjectTypeId==objectTypeId
-                && e.ObjectId == objectId
+                e =>  e.NodeId == objectId
                 && e.PermissionId == permId
                 && e.UserId == userId
             );

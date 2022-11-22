@@ -8,7 +8,7 @@ using Redb.OBAC.MongoDriver.DB.Entities;
 
 namespace Redb.OBAC.MongoDriver.DB
 {
-    public abstract class ObacMongoDbContext : IAsyncDisposable
+    public abstract class ObacMongoDriverContext : IAsyncDisposable
     {
         private MongoClient _client;
         private string _dbName;
@@ -27,19 +27,21 @@ namespace Redb.OBAC.MongoDriver.DB
         public IMongoCollection<ObacUserPermissionsEntity> ObacUserPermissions { get; set; }
         public IMongoDatabase Database { get; private set; }
 
-        public ObacMongoDbContext()
+        public MongoClient Client => _client;
+
+        public ObacMongoDriverContext()
         {
             _client = new MongoClient();
         }
 
-        public ObacMongoDbContext(string connectionString)
+        public ObacMongoDriverContext(string connectionString)
         {
             _client = new MongoClient(connectionString);
-            _dbName = "obac";
+            _dbName = new MongoUrl(connectionString).DatabaseName;
             Initialize();
         }
 
-        public ObacMongoDbContext(string connectionString,string dbName)
+        public ObacMongoDriverContext(string connectionString,string dbName)
         {
             _client = new MongoClient(connectionString);
             _dbName = dbName;
@@ -59,10 +61,6 @@ namespace Redb.OBAC.MongoDriver.DB
             ObacTreeNodes = Database.GetCollection<ObacTreeNodeEntity>("obac_tree_nodes");
             ObacTreeNodePermissions = Database.GetCollection<ObacTreeNodePermissionEntity>("obac_tree_node_permissions");
             ObacUserPermissions = Database.GetCollection<ObacUserPermissionsEntity>("obac_userpermissions");
-
-
-
-
         }
 
         public async ValueTask DisposeAsync()

@@ -9,12 +9,12 @@ namespace Redb.OBAC.Client.EffectivePermissionsReceiver
 {
     public class EffectivePermissionsEfReceiver: IEffectivePermissionFeed
     {
-        private readonly IEffectivePermissionsAware _epContext;
+        private readonly ObacEpContextBase _epContext;
         private const int EP_BATCH_SZ = 100;
         
         public EffectivePermissionsEfReceiver(IEffectivePermissionsAware epContext)
         {
-            _epContext = epContext;
+            _epContext = epContext as ObacEpContextBase;
         }
         public async Task FeedWithActionList(IEnumerable<PermissionActionInfo> actions)
         {

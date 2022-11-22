@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Redb.OBAC.MongoDriver.DB.Entities
 {
     // [Table("obac_users_in_groups")]
-
+    [BsonIgnoreExtraElements]
     public class ObacUserInGroupEntity
     {
         [BsonElement("user_id")]

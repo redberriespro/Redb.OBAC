@@ -26,6 +26,7 @@ namespace Redb.OBAC.MySql
 
         public ObacDbContext CreateObacContext() => new MySqlObacDbContext(_config.Connection);
 
+
         public async Task EnsureDatabaseExists()
         {
             var ctx = CreateObacContext();

@@ -4,7 +4,9 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Redb.OBAC.ApiHost;
 using Redb.OBAC.EF.BL;
+using Redb.OBAC.EF.DB;
 using Redb.OBAC.Tests.ObacClientTests;
+using Redb.OBAC.Tree;
 
 namespace Redb.OBAC.Tests.Utils
 {
@@ -13,7 +15,7 @@ namespace Redb.OBAC.Tests.Utils
     {
         private static Dictionary<string, HouseTestDbContext> TestDbContexts = new();
         private static Dictionary<string, IObacConfiguration> _configurations = new();
-        private static readonly Dictionary<string, ObjectStorage> _storageProviders = new();
+        private static readonly Dictionary<string, IObjectStorage> _storageProviders = new();
         private static readonly Dictionary<string, ApiHostImpl> _apiHosts = new();
         private readonly DbAggregator dbAggregator;
 
@@ -30,6 +32,9 @@ namespace Redb.OBAC.Tests.Utils
                 case MsSqlDbAggregator.NAME:
                     dbAggregator = MsSqlDbAggregator.GetInstance();
                     break;
+                case MongoDbAggregator.NAME:
+                    dbAggregator= MongoDbAggregator.GetInstance();
+                    break;
 
                 default:
                     break;
@@ -41,15 +46,16 @@ namespace Redb.OBAC.Tests.Utils
             yield return PgDbAggregator.NAME;
             yield return MySqlDbAggregator.NAME;
             yield return MsSqlDbAggregator.NAME;
+            yield return MongoDbAggregator.NAME;
         }
 
         protected IObacConfiguration GetConfiguration() => dbAggregator.Configuration;
 
         protected ApiHostImpl GetApiHost() => dbAggregator.ApiHost;
 
-        protected ObjectStorage GetObjectStorage() => dbAggregator.DbStorage;
+        protected IObjectStorage GetObjectStorage() => dbAggregator.DbStorage;
 
-        protected HouseTestDbContext TestDbContext => dbAggregator.HouseDbContext;
+        protected IEffectivePermissionsAware TestDbContext => dbAggregator.HouseDbContext;
 
         //protected ApiServerImpl ApiServer() => Container.Resolve<ApiServerImpl>();
         [OneTimeSetUp]

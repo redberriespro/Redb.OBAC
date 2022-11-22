@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Redb.OBAC.Core.Models;
 using Redb.OBAC.EF.DB;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Redb.OBAC.MySql
 {
@@ -9,10 +12,44 @@ namespace Redb.OBAC.MySql
         // uncomment base(...) when doing migrations  
         public MySqlObacDbContext()//: base("Host=192.168.2.12;Port=3306;Database=obac_test_user;Username=root;Password=12345678")
         { }
-        
+
         public MySqlObacDbContext(string connectionString) : base(connectionString) { }
 
         public MySqlObacDbContext(DbContextOptions<ObacDbContext> options) : base(options) { }
+
+        public override string GetTreeSubnodesDeepQueryRoot()
+        {
+            return @"with recursive nodes(id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id) as (
+            select id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id
+            from obac_tree_nodes
+            where parent_id = {0} and tree_id={1}
+            union all
+            select o.id, o.parent_id, o.external_id_int, o.external_id_str, o.inherit_parent_perms, o.owner_user_id
+                from obac_tree_nodes o
+            join nodes n on n.id = o.parent_id and o.tree_id={1}
+                )
+            select *, {1} as tree_id
+                from nodes
+                order by id desc";
+        }
+
+        public override string GetTreeSubnodesDeepQueryGivenNode()
+        {
+            return @"with recursive nodes(id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id) as (
+            select id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id
+            from obac_tree_nodes
+            where parent_id is null and tree_id={0}
+            union all
+            select o.id, o.parent_id, o.external_id_int, o.external_id_str, o.inherit_parent_perms, o.owner_user_id
+                from obac_tree_nodes o
+            join nodes n on n.id = o.parent_id and o.tree_id={0}
+                )
+            select *, {0} as tree_id
+                from nodes
+                order by id desc";
+        }
+
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

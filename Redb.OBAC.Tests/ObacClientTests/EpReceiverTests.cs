@@ -1,11 +1,14 @@
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using NUnit.Framework;
 using Redb.OBAC.Core;
 using Redb.OBAC.Core.Models;
 using Redb.OBAC.Exceptions;
+using Redb.OBAC.Tests.Entities;
 using Redb.OBAC.Tests.ObacClientTests.Entities;
 using Redb.OBAC.Tests.Utils;
 
@@ -41,27 +44,30 @@ namespace Redb.OBAC.Tests.ObacClientTests
             
             await EnsureObjects(om);
 
-            var h1 = await TestDbContext.Houses.SingleOrDefaultAsync(a => a.Id == Node100);
-            if (h1 != null)
+            var ctx=TestDbContext as HouseTestDbContext;
+            if (ctx != null)
             {
-                TestDbContext.Houses.Remove(h1);
-                await TestDbContext.SaveChangesAsync();
-            }
-
-            h1 = new HouseTestEntity
-            {
-                Id = Node100,
-                Name = "house100"
-            };
-            await TestDbContext.Houses.AddAsync(h1);
-            await TestDbContext.SaveChangesAsync();
-            
-            // set ACL house 100 user 2 view
-            await om.SetTreeNodeAcl(HouseCaseTreeId, Node100, new AclInfo
-            {
-                InheritParentPermissions = true,
-                AclItems = new[]
+                var h1 = await ctx.Houses.SingleOrDefaultAsync(a => a.Id == Node100);
+                if (h1 != null)
                 {
+                    ctx.Houses.Remove(h1);
+                    await ctx.SaveChangesAsync();
+                }
+
+                h1 = new HouseTestEntity
+                {
+                    Id = Node100,
+                    Name = "house100"
+                };
+                await ctx.Houses.AddAsync(h1);
+                await ctx.SaveChangesAsync();
+
+                // set ACL house 100 user 2 view
+                await om.SetTreeNodeAcl(HouseCaseTreeId, Node100, new AclInfo
+                {
+                    InheritParentPermissions = true,
+                    AclItems = new[]
+                    {
                     new AclItemInfo
                     {
                         UserId = User2,
@@ -69,29 +75,81 @@ namespace Redb.OBAC.Tests.ObacClientTests
                         Kind = PermissionKindEnum.Allow
                     }
                 }
-            });
+                });
 
-            var c = TestDbContext;
-            var houses = from h in c.Houses
-                join p in c.EffectivePermissions
-                    on h.Id equals p.ObjectId
-                where
-                    p.ObjectTypeId == HouseCaseTreeId && p.UserId == User2
-                select h;
+                var c = ctx;
+                var houses = from h in c.Houses
+                             join p in c.EffectivePermissions
+                                 on h.Id equals p.ObjectId
+                             where
+                                 p.ObjectTypeId == HouseCaseTreeId && p.UserId == User2
+                             select h;
 
-            var h2 = await houses.ToListAsync();
-            Assert.AreEqual(1, h2.Count);
-            
-            houses = from h in c.Houses
-                join p in c.EffectivePermissions
-                    on h.Id equals p.ObjectId
-                where
-                    p.ObjectTypeId == HouseCaseTreeId && p.UserId == User1
-                select h;
+                var h2 = await houses.ToListAsync();
+                Assert.AreEqual(1, h2.Count);
 
-            h2 = await houses.ToListAsync();
-            Assert.AreEqual(0, h2.Count);
+                houses = from h in c.Houses
+                         join p in c.EffectivePermissions
+                             on h.Id equals p.ObjectId
+                         where
+                             p.ObjectTypeId == HouseCaseTreeId && p.UserId == User1
+                         select h;
 
+                h2 = await houses.ToListAsync();
+                Assert.AreEqual(0, h2.Count);
+            }
+            else
+            {
+                var mongoctx= TestDbContext as HouseTestMongoDbContext;
+                await mongoctx.Houses.DeleteOneAsync(a => a.Id == Node100);
+                
+
+                var h1 = new HouseTestEntityMongo
+                {
+                    Id = Node100,
+                    Name = "house100"
+                };
+                await mongoctx.Houses.InsertOneAsync(h1);
+
+                // set ACL house 100 user 2 view
+                await om.SetTreeNodeAcl(HouseCaseTreeId, Node100, new AclInfo
+                {
+                    InheritParentPermissions = true,
+                    AclItems = new[]
+                    {
+                    new AclItemInfo
+                    {
+                        UserId = User2,
+                        PermissionId = ViewPermId,
+                        Kind = PermissionKindEnum.Allow
+                    }
+                }
+                });
+
+                var c = mongoctx;
+                var housesTemp = c.Houses.Find(x => true).ToList();
+                var permTemp = c.EffectivePermissions.Find(x => true).ToList();
+
+                var houses = from h in housesTemp
+                             join p in permTemp
+                                 on h.Id equals p.ObjectId
+                             where
+                                 p.ObjectTypeId == HouseCaseTreeId && p.UserId == User2
+                             select h;
+
+                var h2 = houses.ToList();
+                Assert.AreEqual(1, h2.Count);
+
+                houses = from h in housesTemp
+                         join p in permTemp
+                             on h.Id equals p.ObjectId
+                         where
+                             p.ObjectTypeId == HouseCaseTreeId && p.UserId == User1
+                         select h;
+
+                h2 = houses.ToList();
+                Assert.AreEqual(0, h2.Count);
+            }
         }
 
     }

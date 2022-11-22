@@ -264,9 +264,7 @@ namespace Redb.OBAC.EF.ObjectTypes
                 GetNodeEffectivePermissions = async (treeObjectId, nodeId) =>
                 {
                     var effpe = await _storage.GetEffectivePermissionsForAllUsers(treeObjectId, nodeId);
-                    return effpe
-                        .Where(e => e.ObjectId.HasValue)
-                        .Select(ObacObjectMapper.EntityToEffectivePermissionInfo).ToArray();
+                    return effpe.ToArray();
                 }
             };
         }

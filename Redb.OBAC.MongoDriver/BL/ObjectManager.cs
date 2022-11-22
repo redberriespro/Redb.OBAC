@@ -281,7 +281,7 @@ namespace Redb.OBAC.MongoDriver.BL
             {
                 await _store.AddUserToGroup(userGroupId, memberUserId);
             }
-            catch (DbUpdateException _)
+            catch (DbUpdateException)
             {
                 // ignore any update exception (include duplicates etc)
             }        

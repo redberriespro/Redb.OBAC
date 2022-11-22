@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Redb.OBAC.MongoDb;
 using Redb.OBAC.MsSql;
 using Redb.OBAC.MySql;
 using Redb.OBAC.PgSql;
@@ -15,6 +16,9 @@ namespace Redb.OBAC.Tests.Utils
 
         [JsonProperty("mssql")]
         public TestMsSqlConfig Mssql { get; set; }
+
+        [JsonProperty("mongodb")]
+        public TestMongoDbConfig MongoDb { get; set; }
     }
 
     public class TestDbConfig
@@ -39,5 +43,11 @@ namespace Redb.OBAC.Tests.Utils
     {
         [JsonProperty("db.config")]
         public PgSqlObacConfig Config { get; set; }
+    }
+
+    public class TestMongoDbConfig : TestDbConfig
+    {
+        [JsonProperty("db.config")]
+        public MongoDbObacConfig Config { get; set; }
     }
 }

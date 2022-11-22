@@ -6,6 +6,7 @@ using Redb.OBAC;
 using Redb.OBAC.Client.EffectivePermissionsReceiver;
 using Redb.OBAC.Core;
 using Redb.OBAC.Core.Models;
+using Redb.OBAC.EF;
 using Redb.OBAC.PgSql;
 
 namespace HelloObac

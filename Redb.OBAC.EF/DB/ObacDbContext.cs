@@ -1,18 +1,15 @@
 using Microsoft.EntityFrameworkCore;
+using Redb.OBAC.Core.Models;
 using Redb.OBAC.EF.DB.Entities;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
 
 namespace Redb.OBAC.EF.DB
 {
-    public enum DbType
-    {
-        MsSql,
-        MySql,
-        PgSQL
-    }
     public abstract class ObacDbContext : DbContext
     {
-        protected readonly string ConnectionString;
-        public DbType DbType { get; protected set; } = DbType.PgSQL;
+        protected readonly string ConnectionString;        
         public ObacDbContext(DbContextOptions<ObacDbContext> options) : base(options)
         {
         }
@@ -38,6 +35,10 @@ namespace Redb.OBAC.EF.DB
         public DbSet<ObacTreeNodePermissionEntity> ObacTreeNodePermissions { get; set; }
 
         public DbSet<ObacUserPermissionsEntity> ObacUserPermissions { get; set; }
+
+        public abstract string GetTreeSubnodesDeepQueryRoot();
+
+        public abstract string GetTreeSubnodesDeepQueryGivenNode();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

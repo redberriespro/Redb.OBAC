@@ -4,13 +4,14 @@ using System;
 namespace Redb.OBAC.MongoDriver.DB.Entities
 {
     // [Table("obac_tree_nodes")]
+    [BsonIgnoreExtraElements]
     public class ObacTreeNodeEntity
     {
         [BsonElement("tree_id")] 
         public Guid TreeId { get; set; }
         
-        [BsonElement("id")] 
-        public int Id { get; set; }
+        [BsonElement("node_id")] 
+        public int NodeId { get; set; }
         
         public ObacTreeEntity Tree { get; set; }
         

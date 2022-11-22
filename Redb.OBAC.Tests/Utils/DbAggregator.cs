@@ -18,15 +18,22 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Redb.OBAC.EF;
+using Redb.OBAC.MongoDriver.DB;
+using Redb.OBAC.MongoDb;
+using MongoDB.Driver;
+using Redb.OBAC.Tree;
+using Redb.OBAC.Core;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace Redb.OBAC.Tests.Utils
 {
     internal abstract class DbAggregator
     {
-        private bool isInit = false;
+        protected bool isInit = false;
         protected static TestAppSettings Setting;
-        private EffectivePermissionsEfReceiver epHouseReceiver;
-        private IObacConfiguration config;
+        protected IEffectivePermissionFeed epHouseReceiver;
+        protected IObacConfiguration config;
         private ApiHostImpl apiHost;
 
 
@@ -41,9 +48,9 @@ namespace Redb.OBAC.Tests.Utils
 
         public abstract string Name { get; }
 
-        public abstract IObacStorageProvider DbProvider { get; }
-        public abstract ObjectStorage DbStorage { get; }
-        public abstract HouseTestDbContext HouseDbContext { get; }
+        //public abstract EF.DB.IObacStorageProvider DbProvider { get; }
+        public abstract IObjectStorage DbStorage { get; }
+        public abstract IEffectivePermissionsAware HouseDbContext { get; }
 
 
         protected static async Task<TestAppSettings> ReadSettings()
@@ -54,31 +61,7 @@ namespace Redb.OBAC.Tests.Utils
             return JsonConvert.DeserializeObject<TestAppSettings>(configText);
         }
 
-        public async Task InitTestFramework()
-        {
-            if (isInit) return;
-            isInit = true;
-
-            // drop DBs before running any tests
-            TestCoreDbCleaner();
-            await EnsureDatabaseExists();
-
-            TestUserDbCleaner();
-            await EnsureCreatedAsync();
-
-            epHouseReceiver = new EffectivePermissionsEfReceiver(CreateHouseDbContext()); 
-
-            // register OBAC configuration
-            CreateConfigurationObacManager();
-
-            // initialize in-process obac api based on db config
-            CreateApiHost();
-        }
-
-        internal void CreateConfigurationObacManager()
-        {
-            if (config == null) config = ObacManager.CreateConfiguration(DbProvider, epHouseReceiver);
-        }
+        public abstract Task InitTestFramework();
 
         internal void CreateApiHost()
         {
@@ -119,14 +102,35 @@ namespace Redb.OBAC.Tests.Utils
 
         public override string Name => NAME;
 
-        public override IObacStorageProvider DbProvider => dbProvider;
+        public EF.DB.IObacStorageProvider DbProvider => dbProvider;
         public override ObjectStorage DbStorage => dbStorage;
         public override HouseTestDbContext HouseDbContext => houseDbContext;
+
+        public override async Task InitTestFramework()
+        {
+            if (isInit) return;
+            isInit = true;
+
+            // drop DBs before running any tests
+            TestCoreDbCleaner();
+            await EnsureDatabaseExists();
+
+            TestUserDbCleaner();
+            await EnsureCreatedAsync();
+
+            epHouseReceiver = new EffectivePermissionsEfReceiver(CreateHouseDbContext());
+
+            // register OBAC configuration
+            if (config == null) config = Redb.OBAC.EF.ObacManager.CreateConfiguration(DbProvider, epHouseReceiver);
+
+            // initialize in-process obac api based on db config
+            CreateApiHost();
+        }
 
         private static void CleanDb(string connectionString)
         {
             SqlConnection connection;
-            var databaseName=string.Empty;
+            var databaseName = string.Empty;
             try
             {
                 connection = new SqlConnection(connectionString);
@@ -135,7 +139,7 @@ namespace Redb.OBAC.Tests.Utils
             }
             catch (SqlException ex)
             {
-                if (ex.ErrorCode== -2146232060)
+                if (ex.ErrorCode == -2146232060)
                     return; // no need to drop anything :)
                 throw;
             }
@@ -204,10 +208,30 @@ namespace Redb.OBAC.Tests.Utils
 
         public override string Name => NAME;
 
-        public override IObacStorageProvider DbProvider => dbProvider;
+        public EF.DB.IObacStorageProvider DbProvider => dbProvider;
         public override ObjectStorage DbStorage => dbStorage;
         public override HouseTestDbContext HouseDbContext => houseDbContext;
 
+        public override async Task InitTestFramework()
+        {
+            if (isInit) return;
+            isInit = true;
+
+            // drop DBs before running any tests
+            TestCoreDbCleaner();
+            await EnsureDatabaseExists();
+
+            TestUserDbCleaner();
+            await EnsureCreatedAsync();
+
+            epHouseReceiver = new EffectivePermissionsEfReceiver(CreateHouseDbContext());
+
+            // register OBAC configuration
+            if (config == null) config = Redb.OBAC.EF.ObacManager.CreateConfiguration(DbProvider, epHouseReceiver);
+
+            // initialize in-process obac api based on db config
+            CreateApiHost();
+        }
         private static void CleanDb(string connectionString)
         {
             MySqlConnection connection;
@@ -284,9 +308,30 @@ namespace Redb.OBAC.Tests.Utils
 
         public override string Name => NAME;
 
-        public override IObacStorageProvider DbProvider => dbProvider;
+        public EF.DB.IObacStorageProvider DbProvider => dbProvider;
         public override ObjectStorage DbStorage => dbStorage;
         public override HouseTestDbContext HouseDbContext => houseDbContext;
+
+        public override async Task InitTestFramework()
+        {
+            if (isInit) return;
+            isInit = true;
+
+            // drop DBs before running any tests
+            TestCoreDbCleaner();
+            await EnsureDatabaseExists();
+
+            TestUserDbCleaner();
+            await EnsureCreatedAsync();
+
+            epHouseReceiver = new EffectivePermissionsEfReceiver(CreateHouseDbContext());
+
+            // register OBAC configuration
+            if (config == null) config = Redb.OBAC.EF.ObacManager.CreateConfiguration(DbProvider, epHouseReceiver);
+
+            // initialize in-process obac api based on db config
+            CreateApiHost();
+        }
 
         private static void CleanDb(string connectionString)
         {
@@ -298,7 +343,7 @@ namespace Redb.OBAC.Tests.Utils
             }
             catch (PostgresException ex)
             {
-                if (ex.Code=="3D000")
+                if (ex.Code == "3D000")
                     return; // no need to drop anything :)
                 throw;
             }
@@ -334,6 +379,95 @@ namespace Redb.OBAC.Tests.Utils
         internal override IEffectivePermissionsAware CreateHouseDbContext()
         {
             return new HouseTestPgDbContext(settings.ConnectionTest);
+        }
+    }
+
+    internal sealed class MongoDbAggregator : DbAggregator
+    {
+        public const string NAME = "mongodb";
+        private readonly TestMongoDbConfig settings;
+        private readonly MongoDbObacStorageProvider dbProvider;
+        private readonly MongoDriver.BL.ObjectStorage dbStorage;
+        private readonly HouseTestMongoDbContext houseDbContext;
+
+        private static readonly MongoDbAggregator instance = new();
+
+        public static MongoDbAggregator GetInstance()
+        {
+            return instance;
+        }
+
+        private MongoDbAggregator()
+        {
+            settings = Setting.MongoDb;
+
+            // create config for db
+            dbProvider = new MongoDbObacStorageProvider(settings.Config.Connection);
+            dbStorage = new MongoDriver.BL.ObjectStorage(dbProvider);
+            houseDbContext = new HouseTestMongoDbContext(settings.ConnectionTest);
+        }
+
+        public override string Name => NAME;
+
+        public MongoDriver.DB.IObacStorageProvider DbProvider => dbProvider;
+        public override MongoDriver.BL.ObjectStorage DbStorage => dbStorage;
+        public override IEffectivePermissionsAware HouseDbContext => houseDbContext;
+
+        public override async Task InitTestFramework()
+        {
+            if (isInit) return;
+            isInit = true;
+
+            // drop DBs before running any tests
+            TestCoreDbCleaner();
+            await EnsureDatabaseExists();
+
+            TestUserDbCleaner();
+            await EnsureCreatedAsync();
+
+            epHouseReceiver = new MongoDbClient.EffectivePermissionsReceiver.EffectivePermissionsEfReceiver(CreateHouseDbContext());
+
+            // register OBAC configuration
+            if (config == null) config = Redb.OBAC.MongoDriver.ObacManager.CreateConfiguration(DbProvider, epHouseReceiver);
+
+            // initialize in-process obac api based on db config
+            CreateApiHost();
+        }
+
+        private static void CleanDb(string connectionString)
+        {
+            MongoClient connection;
+            var url = new MongoUrl(connectionString);
+            var databaseName = string.Empty;
+
+            connection = new MongoClient(connectionString);
+            connection.DropDatabase(url.DatabaseName);
+
+        }
+
+        internal override void TestCoreDbCleaner()
+        {
+            CleanDb(settings.Config.Connection);
+        }
+
+        internal override void TestUserDbCleaner()
+        {
+            CleanDb(settings.ConnectionTest);
+        }
+
+        internal override Task EnsureDatabaseExists()
+        {
+            return dbProvider.EnsureDatabaseExists();
+        }
+
+        internal override Task EnsureCreatedAsync()
+        {
+            return Task.Run(() => houseDbContext.EnsureCreated());
+        }
+
+        internal override IEffectivePermissionsAware CreateHouseDbContext()
+        {
+            return new HouseTestMongoDbContext(settings.ConnectionTest);
         }
     }
 

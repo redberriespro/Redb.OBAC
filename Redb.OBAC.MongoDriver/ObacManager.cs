@@ -10,13 +10,6 @@ namespace Redb.OBAC.MongoDriver
     /// </summary>
     public class ObacManager
     {
-        /// <summary>
-        /// configure with default in-memory storage and no caching
-        /// </summary>
-        public static IObacConfiguration CreateDemoConfiguration()
-        {
-            throw new NotImplementedException();
-        }
 
         /// <summary>
         /// configure with default storage and no caching

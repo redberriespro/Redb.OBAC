@@ -8,18 +8,48 @@ namespace Redb.OBAC.MsSql
     {
         public MsSqlObacDbContext():base()
         {
-            DbType = DbType.MsSql;
         }
 
         public MsSqlObacDbContext(string connectionString) : base(connectionString)
         {
-            DbType = DbType.MsSql;
         }
 
         public MsSqlObacDbContext(DbContextOptions<ObacDbContext> options) : base(options)
         {
-            DbType = DbType.MsSql;
         }
+
+        public override string GetTreeSubnodesDeepQueryRoot()
+        {
+            return @"with nodes(id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id) as (
+            select id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id
+            from obac_tree_nodes
+            where parent_id = {0} and tree_id={1}
+            union all
+            select o.id, o.parent_id, o.external_id_int, o.external_id_str, o.inherit_parent_perms, o.owner_user_id
+                from obac_tree_nodes o
+            join nodes n on n.id = o.parent_id and o.tree_id={1}
+                )
+            select *, {1} as tree_id
+                from nodes
+                order by id desc";
+        }
+
+        public override string GetTreeSubnodesDeepQueryGivenNode()
+        {
+            return @"with nodes(id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id) as (
+            select id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id
+            from obac_tree_nodes
+            where parent_id is null and tree_id={0}
+            union all
+            select o.id, o.parent_id, o.external_id_int, o.external_id_str, o.inherit_parent_perms, o.owner_user_id
+                from obac_tree_nodes o
+            join nodes n on n.id = o.parent_id and o.tree_id={0}
+                )
+            select *, {0} as tree_id
+                from nodes
+                order by id desc";
+            
+        }        
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

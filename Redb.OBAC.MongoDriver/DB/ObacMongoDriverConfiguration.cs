@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using Redb.OBAC.MongoDriver.DB.Entities;
 using System;
 using System.Collections.Generic;
@@ -18,119 +19,64 @@ namespace Redb.OBAC.MongoDriver.DB
             await database.GetCollection<ObacUserSubjectEntity>("obac_users").Indexes.
                CreateOneAsync(new CreateIndexModel<ObacUserSubjectEntity>(Builders<ObacUserSubjectEntity>.IndexKeys.Ascending(x => x.ExternalIdString)));
 
+            string cmdStr = "{ createIndexes: 'obac_userpermissions', indexes: [ { key: { userid: 1, permid:1,objtypeid:1,objid:1 }, name: 'obac_userpermissions_unique', unique: true } ] }";
+            BsonDocument cmd = BsonDocument.Parse(cmdStr);
+            await database.RunCommandAsync<BsonDocument>(cmd);
 
-            await database.GetCollection<ObacUserPermissionsEntity>("obac_userpermissions").Indexes.
-               CreateOneAsync(new CreateIndexModel<ObacUserPermissionsEntity>(Builders<ObacUserPermissionsEntity>.IndexKeys.Ascending(x => new { x.UserId, x.PermissionId, x.ObjectTypeId, x.ObjectId }))); //IsUnique
+            cmdStr = "{ createIndexes: 'obac_userpermissions', indexes: [ { key: { userid: 1, objtypeid:1,objid:1 }, name: 'obac_userpermissions_3', unique: false } ] }";
+            cmd = BsonDocument.Parse(cmdStr);
+            await database.RunCommandAsync<BsonDocument>(cmd);
 
-            await database.GetCollection<ObacUserPermissionsEntity>("obac_userpermissions").Indexes.
-              CreateOneAsync(new CreateIndexModel<ObacUserPermissionsEntity>(Builders<ObacUserPermissionsEntity>.IndexKeys.Ascending(x => new { x.UserId, x.ObjectTypeId, x.ObjectId })));
+            cmdStr = "{ createIndexes: 'obac_userpermissions', indexes: [ { key: { objtypeid:1,objid:1 }, name: 'obac_userpermissions_2', unique: false } ] }";
+            cmd = BsonDocument.Parse(cmdStr);
+            await database.RunCommandAsync<BsonDocument>(cmd);
 
-            await database.GetCollection<ObacUserPermissionsEntity>("obac_userpermissions").Indexes.
-             CreateOneAsync(new CreateIndexModel<ObacUserPermissionsEntity>(Builders<ObacUserPermissionsEntity>.IndexKeys.Ascending(x => new { x.ObjectTypeId, x.ObjectId })));
-
-
-
-            //await database.GetCollection<ObacPermissionRoleEntity>("obac_permissions_in_roles").Indexes.
-            // CreateOneAsync(new CreateIndexModel<ObacPermissionRoleEntity>(Builders<ObacPermissionRoleEntity>.IndexKeys.Ascending(x => new { x.PermissionId, x.RoleId}))); //keys
-
-
-            //builder.Entity<ObacPermissionRoleEntity>()
-            //    .HasKey(a => new { a.PermissionId, a.RoleId });
-
-            //builder.Entity<ObacPermissionRoleEntity>()
-            //    .HasOne(p => p.Role)
-            //    .WithMany(r => r.Permissions)
-            //    .HasForeignKey(p => p.RoleId);
-
+            cmdStr = "{ createIndexes: 'obac_permissions_in_roles', indexes: [ { key: { role_id:1,perm_id:1 }, name: 'obac_obac_permissions_in_roles_unique', unique: true } ] }";
+            cmd = BsonDocument.Parse(cmdStr);
+            await database.RunCommandAsync<BsonDocument>(cmd);
 
             // trees
+            cmdStr = "{ createIndexes: 'obac_tree_nodes', indexes: [ { key: { tree_id:1,id:1,parent_id:1 }, name: 'obac_tree_nodes_3', unique: false } ] }";
+            cmd = BsonDocument.Parse(cmdStr);
+            await database.RunCommandAsync<BsonDocument>(cmd);
+
+            cmdStr = "{ createIndexes: 'obac_tree_nodes', indexes: [ { key: { tree_id:1,node_id:1 }, name: 'obac_tree_nodes_unique', unique: true } ] }";
+            cmd = BsonDocument.Parse(cmdStr);
+            await database.RunCommandAsync<BsonDocument>(cmd);
+
 
             await database.GetCollection<ObacTreeNodeEntity>("obac_tree_nodes").Indexes.
-             CreateOneAsync(new CreateIndexModel<ObacTreeNodeEntity>(Builders<ObacTreeNodeEntity>.IndexKeys.Ascending(x => new { x.TreeId, x.Id, x.ParentId })));
+            CreateOneAsync(new CreateIndexModel<ObacTreeNodeEntity>(Builders<ObacTreeNodeEntity>.IndexKeys.Ascending(x =>  x.TreeId )));
 
-            //TODO: add key
+            cmdStr = "{ createIndexes: 'obac_tree_node_permissions', indexes: [ { key: { user_id:1,user_group_id:1,tree_id:1,tree_node_id:1,perm_id:1 }, name: 'obac_tree_node_permissions_5', unique: true } ] }";
+            cmd = BsonDocument.Parse(cmdStr);
+            await database.RunCommandAsync<BsonDocument>(cmd);
 
-            //builder.Entity<ObacTreeNodeEntity>()
-            //   .HasKey(p => new { p.TreeId, p.Id });
+            cmdStr = "{ createIndexes: 'obac_tree_node_permissions', indexes: [ { key: { tree_id:1,tree_node_id:1 }, name: 'obac_tree_node_permissions_2', unique: false } ] }";
+            cmd = BsonDocument.Parse(cmdStr);
+            await database.RunCommandAsync<BsonDocument>(cmd);
 
-            await database.GetCollection<ObacTreeNodeEntity>("obac_tree_nodes").Indexes.
-            CreateOneAsync(new CreateIndexModel<ObacTreeNodeEntity>(Builders<ObacTreeNodeEntity>.IndexKeys.Ascending(x => new { x.TreeId })));
+            cmdStr = "{ createIndexes: 'obac_tree_node_permissions', indexes: [ { key: { user_group_id:1 }, name: 'obac_tree_node_permissions_1', unique: false } ] }";
+            cmd = BsonDocument.Parse(cmdStr);
+            await database.RunCommandAsync<BsonDocument>(cmd);
 
-
-            //TODO: add FK
-            //builder.Entity<ObacTreeNodeEntity>()
-            //    .HasOne(p => p.Tree)
-            //    .WithMany()
-            //    .HasForeignKey(p => p.TreeId);
-
-            //builder.Entity<ObacTreeNodeEntity>()
-            //    .HasOne(p => p.Parent)
-            //    .WithMany()
-            //    .HasForeignKey(p => new { p.TreeId, p.ParentId });
-
-            //builder.Entity<ObacTreeNodeEntity>()
-            //    .HasOne(p => p.Owner)
-            //    .WithMany()
-            //    .HasForeignKey(p => p.OwnerUserId);
-
-            await database.GetCollection<ObacTreeNodePermissionEntity>("obac_tree_node_permissions").Indexes.
-           CreateOneAsync(new CreateIndexModel<ObacTreeNodePermissionEntity>(Builders<ObacTreeNodePermissionEntity>.IndexKeys.Ascending(x => new { x.UserId, x.UserGroupId, x.TreeId, x.NodeId, x.PermissionId }))); //IsUnique
-
-            await database.GetCollection<ObacTreeNodePermissionEntity>("obac_tree_node_permissions").Indexes.
-           CreateOneAsync(new CreateIndexModel<ObacTreeNodePermissionEntity>(Builders<ObacTreeNodePermissionEntity>.IndexKeys.Ascending(x => new { x.TreeId, x.NodeId })));
-
-            await database.GetCollection<ObacTreeNodePermissionEntity>("obac_tree_node_permissions").Indexes.
-          CreateOneAsync(new CreateIndexModel<ObacTreeNodePermissionEntity>(Builders<ObacTreeNodePermissionEntity>.IndexKeys.Ascending(x => new { x.UserGroupId })));
-
-            await database.GetCollection<ObacTreeNodePermissionEntity>("obac_tree_node_permissions").Indexes.
-           CreateOneAsync(new CreateIndexModel<ObacTreeNodePermissionEntity>(Builders<ObacTreeNodePermissionEntity>.IndexKeys.Ascending(x => new { x.TreeId, x.NodeId, x.PermissionId })));
-
-            //TODO:Add FK
-
-            //builder.Entity<ObacTreeNodePermissionEntity>()
-            //    .HasOne(p => p.User)
-            //    .WithMany()
-            //    .HasForeignKey(p => p.UserId)
-            //    .OnDelete(DeleteBehavior.Cascade);
-
-
-            //builder.Entity<ObacTreeNodePermissionEntity>()
-            //    .HasOne(p => p.UserGroup)
-            //    .WithMany()
-            //    .HasForeignKey(p => p.UserGroupId)
-            //    .OnDelete(DeleteBehavior.Cascade);
-
-
-            //builder.Entity<ObacTreeNodePermissionEntity>()
-            //    .HasOne(p => p.Node)
-            //    .WithMany()
-            //    .HasForeignKey(p => new { p.TreeId, p.NodeId })
-            //    .OnDelete(DeleteBehavior.Cascade);
-
+            cmdStr = "{ createIndexes: 'obac_tree_node_permissions', indexes: [ { key: { tree_id:1,tree_node_id:1,perm_id:1 }, name: 'obac_tree_node_permissions_3', unique: false } ] }";
+            cmd = BsonDocument.Parse(cmdStr);
+            await database.RunCommandAsync<BsonDocument>(cmd);
 
 
             // userGroups
             //builder.Entity<ObacUserInGroupEntity>().HasKey(x => new { x.UserId, x.GroupId });
 
-            await database.GetCollection<ObacUserInGroupEntity>("obac_users_in_groups").Indexes.
-          CreateOneAsync(new CreateIndexModel<ObacUserInGroupEntity>(Builders<ObacUserInGroupEntity>.IndexKeys.Ascending(x => new { x.UserId })));
+            cmdStr = "{ createIndexes: 'obac_users_in_groups', indexes: [ { key: { user_id: 1, group_id:1 }, name: 'obac_users_in_groups_key', unique: true } ] }";
+            cmd = BsonDocument.Parse(cmdStr);
+            await database.RunCommandAsync<BsonDocument>(cmd);
 
             await database.GetCollection<ObacUserInGroupEntity>("obac_users_in_groups").Indexes.
-          CreateOneAsync(new CreateIndexModel<ObacUserInGroupEntity>(Builders<ObacUserInGroupEntity>.IndexKeys.Ascending(x => new { x.GroupId })));
+          CreateOneAsync(new CreateIndexModel<ObacUserInGroupEntity>(Builders<ObacUserInGroupEntity>.IndexKeys.Ascending(x =>  x.UserId )));
 
-
-            //builder.Entity<ObacUserInGroupEntity>()
-            //    .HasOne(pt => pt.User)
-            //    .WithMany(p => p.Groups)
-            //    .HasForeignKey(pt => pt.UserId)
-            //    .OnDelete(DeleteBehavior.Cascade); ;
-
-            //builder.Entity<ObacUserInGroupEntity>()
-            //    .HasOne(pt => pt.Group)
-            //    .WithMany(p => p.Users)
-            //    .HasForeignKey(pt => pt.GroupId)
-            //    .OnDelete(DeleteBehavior.Cascade); ;
-
+            await database.GetCollection<ObacUserInGroupEntity>("obac_users_in_groups").Indexes.
+          CreateOneAsync(new CreateIndexModel<ObacUserInGroupEntity>(Builders<ObacUserInGroupEntity>.IndexKeys.Ascending(x => x.GroupId)));
 
         }
     }
