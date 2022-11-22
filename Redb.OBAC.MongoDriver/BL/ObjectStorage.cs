@@ -675,10 +675,15 @@ namespace Redb.OBAC.MongoDriver.BL
             TreeNodePermissionInfo[] ptodel)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-           
+            foreach (var addItem in ptoadd)
+            {
+                if (ctx.ObacUserSubjects.Find(x => x.Id == addItem.UserId).FirstOrDefault() == null &&
+                    ctx.ObacGroupSubjects.Find(x => x.Id == addItem.UserGroupId).FirstOrDefault() == null)
+                    throw new ObacException("Error when ACL set");
+            }
 
             var nd = await ctx.ObacTreeNodes.
-                UpdateOneAsync(n => n.TreeId == treeId && n.NodeId == treeNodeId, Builders<ObacTreeNodeEntity>.Update.Set(x => x.InheritParentPermissions, inheritParentPermissions));
+            UpdateOneAsync(n => n.TreeId == treeId && n.NodeId == treeNodeId, Builders<ObacTreeNodeEntity>.Update.Set(x => x.InheritParentPermissions, inheritParentPermissions));
 
             foreach (var delItem in ptodel)
             {
@@ -691,11 +696,8 @@ namespace Redb.OBAC.MongoDriver.BL
                     && p.Deny == delItem.DenyPermission);
             }
 
-             foreach (var addItem in ptoadd)
+            foreach (var addItem in ptoadd)
             {
-                if (ctx.ObacUserSubjects.Find(x => x.Id == addItem.UserId).FirstOrDefault() == null && 
-                    ctx.ObacGroupSubjects.Find(x => x.Id == addItem.UserGroupId).FirstOrDefault() == null)
-                    throw new ObacException("Error when ACL set");
                 await ctx.ObacTreeNodePermissions.InsertOneAsync(new ObacTreeNodePermissionEntity
                 {
                     Id = Guid.NewGuid(),
@@ -747,7 +749,7 @@ namespace Redb.OBAC.MongoDriver.BL
 
         public List<ObacTreeNodeEntity> GetTreeSubnodesImpl(ObacMongoDriverContext ctx, ObacTreeNodeEntity parent)
         {
-            var childs = ctx.ObacTreeNodes.Find(x => x.ParentId == parent.NodeId&&x.TreeId==parent.TreeId).ToList();
+            var childs = ctx.ObacTreeNodes.Find(x => x.ParentId == parent.NodeId && x.TreeId == parent.TreeId).ToList();
             if (childs.Count != 0)
             {
                 var result = new List<ObacTreeNodeEntity>();

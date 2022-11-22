@@ -158,33 +158,41 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
 
         public async Task SetTreeNodeAcl(Guid treeId, int treeNodeId, AclInfo acl)
         {
-            var oldAcl = await GetTreeNodeAcl(treeId, treeNodeId);
+            try
+            {
+                var oldAcl = await GetTreeNodeAcl(treeId, treeNodeId);
 
-            var diff = AclComparer.CompareAcls(oldAcl, acl);
+                var diff = AclComparer.CompareAcls(oldAcl, acl);
 
-            EnsureAclValid(acl);
+                EnsureAclValid(acl);
 
-            if (!diff.AclItemsToBeAdded.Any()
-                && !diff.AclItemsToBeRemoved.Any()
-                && diff.InheritParentPermissionsAction == NodeParentPermissionInheritanceActionEnum.KeepSame)
-                return;
+                if (!diff.AclItemsToBeAdded.Any()
+                    && !diff.AclItemsToBeRemoved.Any()
+                    && diff.InheritParentPermissionsAction == NodeParentPermissionInheritanceActionEnum.KeepSame)
+                    return;
 
-            var tc = new TreePermissionCalculator();
-            var tr = MakeTreeActionContext(treeId);
+                var tc = new TreePermissionCalculator();
+                var tr = MakeTreeActionContext(treeId);
 
-            var ptoadd = diff.AclItemsToBeAdded.Select(a => TreeObjectMapper.AclToPermissionInfo(treeNodeId, a))
-                .ToArray();
-            var ptodel = diff.AclItemsToBeRemoved.Select(a => TreeObjectMapper.AclToPermissionInfo(treeNodeId, a))
-                .ToArray();
+                var ptoadd = diff.AclItemsToBeAdded.Select(a => TreeObjectMapper.AclToPermissionInfo(treeNodeId, a))
+                    .ToArray();
+                var ptodel = diff.AclItemsToBeRemoved.Select(a => TreeObjectMapper.AclToPermissionInfo(treeNodeId, a))
+                    .ToArray();
 
-            await tc.ChangePermissions(
-                GetEffectivePermissionsFeed(),
-                tr, treeNodeId,
-                ptoadd,
-                ptodel,
-                diff.InheritParentPermissionsAction);
+                await tc.ChangePermissions(
+                    GetEffectivePermissionsFeed(),
+                    tr, treeNodeId,
+                    ptoadd,
+                    ptodel,
+                    diff.InheritParentPermissionsAction);
 
-            await _storage.SetTreeNodePermissions(treeId, treeNodeId, acl.InheritParentPermissions, ptoadd, ptodel);
+                await _storage.SetTreeNodePermissions(treeId, treeNodeId, acl.InheritParentPermissions, ptoadd, ptodel);
+            }
+            catch(Exception ex)
+            {
+                await RepairTreeNodeEffectivePermissions(treeId, treeNodeId);
+                throw new ObacException("Error when ACL set");
+            }
 
         }
 
