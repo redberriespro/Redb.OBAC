@@ -1,16 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+        <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Google.Protobuf" Version="3.21.11" />
-      <PackageReference Include="Grpc" Version="2.46.5" />
-      <PackageReference Include="Grpc.Tools" Version="2.51.0">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.11">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -18,12 +12,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Redb.OBAC.ApiClient\Redb.OBAC.ApiClient.csproj" />
+      <ProjectReference Include="..\Redb.OBAC\Redb.OBAC.ApiClient\Redb.OBAC.ApiClient.csproj" />
       <ProjectReference Include="..\Redb.OBAC\Redb.OBAC.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="ObacApi.proto" />
-      <Protobuf Include="ObacApi.proto" />
     </ItemGroup>
 
 </Project>

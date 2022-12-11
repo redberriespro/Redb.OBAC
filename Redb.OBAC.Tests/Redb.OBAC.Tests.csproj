@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+        <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Redb.OBAC.ApiClient\Redb.OBAC.ApiClient.csproj" />
       <ProjectReference Include="..\Redb.OBAC.ApiHost\Redb.OBAC.ApiHost.csproj" />
       <ProjectReference Include="..\Redb.OBAC.Client\Redb.OBAC.Client.csproj" />
       <ProjectReference Include="..\Redb.OBAC.MongoClient\Redb.OBAC.MongoClient.csproj" />

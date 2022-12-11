@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Redb.OBAC.MongoDb", "Redb.O
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Redb.OBAC.MongoClient", "Redb.OBAC.MongoClient\Redb.OBAC.MongoClient.csproj", "{91BB062A-333F-4837-B670-82D3457F1176}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Redb.OBAC.ApiClient", "Redb.OBAC.ApiClient\Redb.OBAC.ApiClient.csproj", "{559B161D-5BCE-429A-B227-64F7BAD730CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +99,10 @@ Global
 		{91BB062A-333F-4837-B670-82D3457F1176}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91BB062A-333F-4837-B670-82D3457F1176}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91BB062A-333F-4837-B670-82D3457F1176}.Release|Any CPU.Build.0 = Release|Any CPU
+		{559B161D-5BCE-429A-B227-64F7BAD730CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{559B161D-5BCE-429A-B227-64F7BAD730CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{559B161D-5BCE-429A-B227-64F7BAD730CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{559B161D-5BCE-429A-B227-64F7BAD730CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -116,6 +122,7 @@ Global
 		{9BFD65E8-F079-4262-8779-DDF0E9A00824} = {FCCDC60E-70D7-47B8-8AD4-6A2567C7E965}
 		{8E45BFF0-7DD8-4662-AA15-5CBFB24E6287} = {FCCDC60E-70D7-47B8-8AD4-6A2567C7E965}
 		{91BB062A-333F-4837-B670-82D3457F1176} = {FCCDC60E-70D7-47B8-8AD4-6A2567C7E965}
+		{559B161D-5BCE-429A-B227-64F7BAD730CF} = {FCCDC60E-70D7-47B8-8AD4-6A2567C7E965}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0F5046BC-9141-4AD3-A8C8-91FEC0B5D70E}
