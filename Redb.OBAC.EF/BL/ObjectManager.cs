@@ -89,6 +89,12 @@ namespace Redb.OBAC.EF.BL
         }
 
 
+        public async Task<IReadOnlyCollection<PermissionInfo>> GetPermissions()
+        {
+            return await _store.ListPermissions();
+        }
+
+        
         public async Task<PermissionInfo> GetPermission(Guid permissionId)
         {
             return await _store.GetPermissionById(permissionId);

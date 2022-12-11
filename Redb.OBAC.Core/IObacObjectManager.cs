@@ -50,6 +50,7 @@ namespace Redb.OBAC.Core
 
         #region permission objects
 
+        Task<IReadOnlyCollection<PermissionInfo>> GetPermissions();
         Task<PermissionInfo> GetPermission(Guid permissionId);
         Task EnsurePermission(Guid permissionId, string description, bool force = false);
         Task DeletePermission(Guid permissionId, bool force=false);

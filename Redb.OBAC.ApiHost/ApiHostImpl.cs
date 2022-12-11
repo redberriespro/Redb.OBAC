@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
+using Redb.OBAC.ApiClient;
 using Redb.OBAC.Core;
 using Redb.OBAC.Core.Models;
 using Redb.OBAC.Exceptions;
-using Redb.OBAC.Models;
 using Redberries.OBAC.Api;
 
 namespace Redb.OBAC.ApiHost
@@ -96,6 +95,20 @@ namespace Redb.OBAC.ApiHost
             return new NoResults();
         }
 
+        public override async Task<PermissionsInfoResults> GetPermissions(GetPermissionsParams request,
+            ServerCallContext context)
+        {
+            var perms = (await _objectManager.GetPermissions())
+                .Select(p => new PermissionInfoResults
+                {
+                    PermissionId = p.PermissionId.ToGrpcUuid(),
+                    Description = p.Description
+                });
+            var res = new PermissionsInfoResults();
+            res.Permissions.AddRange(perms);
+
+            return res;
+        }
 
         public override async Task<PermissionInfoResults> GetPermissionById(GetPermissionParams request,
             ServerCallContext context)

@@ -51,6 +51,15 @@ namespace Redb.OBAC.EF.BL
             await ctx.SaveChangesAsync();
         }
 
+        public async Task<IReadOnlyCollection<PermissionInfo>> ListPermissions()
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+
+            return  (await ctx.ObacPermissions.ToListAsync())
+                .Select(p => new PermissionInfo { PermissionId = p.Id, Description = p.Description })
+                .ToList();
+        }
+        
         public async Task<PermissionInfo> GetPermissionById(Guid permissionId)
         {
             await using var ctx = _storageProvider.CreateObacContext();

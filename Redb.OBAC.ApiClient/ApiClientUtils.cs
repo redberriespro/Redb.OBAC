@@ -1,10 +1,9 @@
-using System;
 using Google.Protobuf;
 using Redberries.OBAC.Api;
 
-namespace Redb.OBAC.ApiHost
+namespace Redb.OBAC.ApiClient
 {
-    public static class ApiServerUtils
+    public static class ApiClientUtils
     {
         public static Guid ToGuid(this UUID value) => new Guid(value.Value.ToByteArray());
         
