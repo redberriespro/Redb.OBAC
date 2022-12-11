@@ -109,7 +109,7 @@ namespace Redb.OBAC.ApiHost.Grpc
 
       
     }
-    public class ServerConfiguration
+    public class GrpcServerConfiguration
     {
         [JsonProperty("localhostPort")]
         public int LocalhostPort { get; set; } = 0;
@@ -144,13 +144,19 @@ namespace Redb.OBAC.ApiHost.Grpc
         private Server _grpcServer;
         CancellationTokenRegistration? _tokenRegistration;
         private readonly ILogger _logger;
-        private readonly ServerConfiguration _configuration;
+        private readonly GrpcServerConfiguration _configuration;
         private int _shutdownTimeoutSec = 30;
 
-        public GrpcServerExecutable(ILogger<GrpcServerExecutable>logger, ServerConfiguration configuration)
+        public GrpcServerExecutable(ILogger logger, 
+            GrpcServerConfiguration configuration, 
+            IEnumerable<ServerServiceDefinition> serviceDefinitions)
         {
             _logger = logger;
             _configuration = configuration;
+            
+            _serviceDefinitions = serviceDefinitions;
+            if (!_serviceDefinitions.Any())
+                throw new ArgumentException("Service list is empty!", nameof(serviceDefinitions));
         }
         
         public Task Worker
@@ -163,14 +169,7 @@ namespace Redb.OBAC.ApiHost.Grpc
                 return _grpcServer.ShutdownTask;
             }
         }
-
-        public GrpcServerExecutable(IEnumerable<ServerServiceDefinition> serviceDefinitions)
-        {
-            _serviceDefinitions = serviceDefinitions;
-            if (!_serviceDefinitions.Any())
-                throw new ArgumentException("Service list is empty!", nameof(serviceDefinitions));
-        }
-
+        
         public Task StartAsync(CancellationToken token)
         {
             if (_grpcServer != null)
