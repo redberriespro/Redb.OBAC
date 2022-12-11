@@ -13,7 +13,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Redb.OBAC.ApiClient\Redb.OBAC.ApiClient.csproj" />
-      <ProjectReference Include="..\Redb.OBAC\Redb.OBAC.ApiClient\Redb.OBAC.ApiClient.csproj" />
       <ProjectReference Include="..\Redb.OBAC\Redb.OBAC.csproj" />
     </ItemGroup>
 
