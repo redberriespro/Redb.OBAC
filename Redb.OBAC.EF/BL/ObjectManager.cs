@@ -192,6 +192,7 @@ namespace Redb.OBAC.EF.BL
 
         public async Task EnsureUser(int userId, string description = null, int? intId = null, string stringId = null)
         {
+            // todo auto-generate user id if zero. consider always do it, protecting user id from being changed
             var perm = await _store.GetUserSubjectById(userId);
             if (perm == null)
             {
