@@ -183,58 +183,68 @@ message EnsureRoleParams {
 
 
 message UserInfoResults {
-    int32 UserId = 1;
-    string Description = 2;
+    int32 IntId = 1;
+    string StringId = 2;
+    string Description = 3;
 }
 
 message GetUserParams {
-    int32 UserId = 1;
+    int32 IntId = 1;
+    string StringId = 2;
 }
 
 message DeleteUserParams {
-    int32 UserId = 1;
-    bool ForceDelete = 2;
+    int32 IntId = 1;
+    string StringId = 2;
+    bool ForceDelete = 3;
 }
 
 message EnsureUserParams {
-    int32 UserId = 1;
-    string Description = 2;
-    string ExternalStrId = 3;
-    int32 ExternalIntId = 4;
+    string StringId = 1;
+    int32 IntId = 2;
+    string Description = 3;
 }
 
 message UserGroupInfoResults {
-    int32 UserGroupId = 1;
-    string Description = 2;
+    int32 IntId = 1;
+    string StringId = 2;
+    string Description = 3;
 }
 
 message UserGroupUsersInfoResults {
-    int32 UserGroupId = 1;
-    repeated int32 MemberUserId = 2;
+    int32 UserGroupIntId = 1;
+    string UserGroupStringId = 2;
+    repeated int32 MemberUserIntId = 3;
+    repeated string MemberUserStringId = 4;
 }
 
 message GetUserGroupParams {
-    int32 UserGroupId = 1;
+    int32 IntId = 1;
+    string StringId = 2;
 }
 
 message DeleteUserGroupParams {
-    int32 UserGroupId = 1;
-    bool ForceDelete = 2;
+    int32 IntId = 1;
+    string StringId = 2;
+    bool ForceDelete = 3;
 }
 
 message EnsureUserGroupParams {
-    int32 UserGroupId = 1;
-    string Description = 2;
-    string ExternalStrId = 3;
-    int32 ExternalIntId = 4;
+    int32 IntId = 1;
+    string StringId = 2;
+    string Description = 3;
 }
 
 message AddUserToGroupParams {
-    int32 UserGroupId = 1;
-    repeated int32 UserId = 2;
+    int32 UserGroupIntId = 1;
+    string UserGroupStringId = 2;
+    repeated int32 MemberUserIntId = 3;
+    repeated string MemberUserStringId = 4;
 }
 
 message RemoveUserFromGroupParams {
-    int32 UserGroupId = 1;
-    repeated int32 UserId = 2;
+    int32 UserGroupIntId = 1;
+    string UserGroupStringId = 2;
+    repeated int32 MemberUserIntId = 3;
+    repeated string MemberUserStringId = 4;
 }
