@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
@@ -24,6 +26,7 @@ namespace Redb.OBAC.ApiHost
             _objectManager = configuration.GetObjectManager();
         }
 
+        #region GRPC
         public override async Task<TreeInfoResults> GetTreeById(GetTreeParams request, ServerCallContext context)
         {
             var treeInfo = await _objectManager.GetTree(request.TreeId.ToGuid());
@@ -321,6 +324,103 @@ namespace Redb.OBAC.ApiHost
             return res;
         }
 
+        public override async Task<ResolveExternalIdsResults> ResolveExternalIds(ResolveExternalIdsParams request, ServerCallContext context)
+        {
+            var requestGrouped = request.Items.GroupBy(i => i.Type);
+            var res = new ResolveExternalIdsResults();
+
+            foreach (var itemGroup in requestGrouped)
+            {
+                var groupResolved = itemGroup.Key switch
+                {
+                    ResolveExternalItemType.ItemUser => await ResolveExternalUsers(itemGroup.ToArray()),
+                    ResolveExternalItemType.ItemUserGroup => await ResolveExternalUserGroups(itemGroup.ToArray()),
+                    ResolveExternalItemType.ItemTree => await ResolveExternalTrees(itemGroup.ToArray()),
+                    ResolveExternalItemType.ItemTreeNode => await ResolveExternalTreeNodes(itemGroup.ToArray()),
+                    _ => new List<ResolveExternalIdsResults.Types.ResolveExternalItemResult>()
+                };
+                
+                if (groupResolved.Any())
+                    res.Items.AddRange(groupResolved);
+            }
+            
+            return res;
+        }
+
+        #endregion
+
+        private async Task<IReadOnlyCollection<ResolveExternalIdsResults.Types.ResolveExternalItemResult>> ResolveExternalUsers(ResolveExternalItem[] items)
+        {
+            var res = new List<ResolveExternalIdsResults.Types.ResolveExternalItemResult>();
+            foreach (var userItem in items)
+            {
+                var u = await _objectManager.GetUser(
+                    null, 
+                    userItem.ExternalIntId == 0? null:
+                        userItem.ExternalIntId, 
+                    userItem.ExternalStringId);
+                
+                if (u == null)
+                {
+                    res.Add(new ResolveExternalIdsResults.Types.ResolveExternalItemResult
+                    {
+                        ExternalItem = userItem, Success = false
+                    });
+                }
+                else
+                {
+                    res.Add(new ResolveExternalIdsResults.Types.ResolveExternalItemResult
+                    {
+                        ExternalItem = userItem, Success = true, ItemId = u.SubjectId
+                    });
+                }
+            }
+            
+            return res;
+        }
+        
+        private async Task<IReadOnlyCollection<ResolveExternalIdsResults.Types.ResolveExternalItemResult>> ResolveExternalUserGroups(ResolveExternalItem[] items)
+        {
+            var res = new List<ResolveExternalIdsResults.Types.ResolveExternalItemResult>();
+            foreach (var userItem in items)
+            {
+                var u = await _objectManager.GetUserGroup(
+                    null, 
+                    userItem.ExternalIntId == 0? null:
+                        userItem.ExternalIntId, 
+                    userItem.ExternalStringId);
+                
+                if (u == null)
+                {
+                    res.Add(new ResolveExternalIdsResults.Types.ResolveExternalItemResult
+                    {
+                        ExternalItem = userItem, Success = false
+                    });
+                }
+                else
+                {
+                    res.Add(new ResolveExternalIdsResults.Types.ResolveExternalItemResult
+                    {
+                        ExternalItem = userItem, Success = true, ItemId = u.SubjectId
+                    });
+                }
+            }
+            
+            return res;
+        }
+        
+        private async Task<IReadOnlyCollection<ResolveExternalIdsResults.Types.ResolveExternalItemResult>> ResolveExternalTrees(ResolveExternalItem[] items)
+        {
+            // todo add batch method
+            throw new NotImplementedException();
+        }
+        
+        private async Task<IReadOnlyCollection<ResolveExternalIdsResults.Types.ResolveExternalItemResult>> ResolveExternalTreeNodes(ResolveExternalItem[] items)
+        {
+            // todo add batch method
+            throw new NotImplementedException();
+        }
+        
         private IObacPermissionChecker GetPermissionChecker(int userId)
         {
             if (_permissionCheckers.TryGetValue(userId, out var pc))
@@ -377,9 +477,8 @@ namespace Redb.OBAC.ApiHost
                 if (aclItem.UserId == 0 && aclItem.UserGroupId == 0)
                     throw new ObacException("Either UserId or UserGroupId must be set");
             }
-            
-
         }
+        
     }
 }
         

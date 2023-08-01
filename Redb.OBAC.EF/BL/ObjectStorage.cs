@@ -347,6 +347,38 @@ namespace Redb.OBAC.EF.BL
                     ExternalStringId = p.ExternalIdString
                 };
         }
+        
+        public async Task<SubjectInfo> GetGroupSubjectByExternalIntId(int externalId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var p = await ctx.ObacGroupSubjects.SingleOrDefaultAsync(a => a.ExternalIdInt == externalId);
+            return p == null
+                ? null
+                : new SubjectInfo
+                {
+                    SubjectId = p.Id,
+                    SubjectType = SubjectTypeEnum.UserGroup,
+                    Description = p.Description,
+                    ExternalIntId = p.ExternalIdInt,
+                    ExternalStringId = p.ExternalIdString
+                };
+        }
+        
+        public async Task<SubjectInfo> GetGroupSubjectByExternalStringId(string stringId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var p = await ctx.ObacGroupSubjects.SingleOrDefaultAsync(a => a.ExternalIdString == stringId);
+            return p == null
+                ? null
+                : new SubjectInfo
+                {
+                    SubjectId = p.Id,
+                    SubjectType = SubjectTypeEnum.UserGroup,
+                    Description = p.Description,
+                    ExternalIntId = p.ExternalIdInt,
+                    ExternalStringId = p.ExternalIdString
+                };
+        }
 
         public async Task<int[]> GetGroupMembers(int userGroupId)
         {

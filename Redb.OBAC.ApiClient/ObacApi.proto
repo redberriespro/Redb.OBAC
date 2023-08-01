@@ -35,6 +35,8 @@ service ObacApiHost
     rpc SetAcl(SetAclParams) returns (NoResults) {}
     rpc GetEffectivePermissions(GetEffectivePermissionsParams) returns (EffectivePermissionsResults) {}
 
+    rpc ResolveExternalIds (ResolveExternalIdsParams) returns (ResolveExternalIdsResults) {}
+
 }
 
 // common messages
@@ -237,4 +239,30 @@ message AddUserToGroupParams {
 message RemoveUserFromGroupParams {
     int32 UserGroupId = 1;
     repeated int32 UserId = 2;
+}
+
+enum ResolveExternalItemType {
+    ITEM_USER = 0;
+    ITEM_USER_GROUP = 1;
+    ITEM_TREE = 2;
+    ITEM_TREE_NODE = 3;
+}
+
+message ResolveExternalItem {
+    ResolveExternalItemType Type = 1;
+    int32 ExternalIntId = 2;
+    string ExternalStringId = 3;
+}
+
+message ResolveExternalIdsParams {
+    repeated ResolveExternalItem Items = 1;
+}
+
+message ResolveExternalIdsResults {
+    message ResolveExternalItemResult {
+        ResolveExternalItem ExternalItem = 1;
+        int32 ItemId = 2;
+        bool Success = 3;
+    }
+    repeated ResolveExternalItemResult Items = 1;
 }

@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Redb.OBAC.EF.DB.Entities
 {
+    /// <summary>
+    /// effective user permissions
+    /// </summary>
     [Table("obac_userpermissions")]
     public class ObacUserPermissionsEntity
     {

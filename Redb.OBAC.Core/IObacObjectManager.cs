@@ -57,8 +57,7 @@ namespace Redb.OBAC.Core
 
     
         #endregion
-
-
+        
         #region role objects
 
         Task<RoleInfo> GetRole(Guid roleId);
@@ -73,7 +72,7 @@ namespace Redb.OBAC.Core
         Task EnsureUser(int userId, string description, int? intId = null, string stringId=null);
         Task DeleteUser(int userId, bool force=false);
 
-        Task<SubjectInfo> GetUser(int userId);
+        Task<SubjectInfo> GetUser(int? userId, int? intId = null, string stringId=null);
 
         
         #endregion
@@ -82,7 +81,7 @@ namespace Redb.OBAC.Core
         Task EnsureUserGroup(int userGroupId, string description, int? intId = null, string stringId=null);
         Task DeleteUserGroup(int userGroupId, bool force=false);
 
-        Task<SubjectInfo> GetUserGroup(int userGroupId);
+        Task<SubjectInfo> GetUserGroup(int? userGroupId, int? intId = null, string stringId = null);
 
         Task<int[]> GetUserGroupMembers(int userGroupId);
 

@@ -250,12 +250,27 @@ namespace Redb.OBAC.EF.BL
             _cacheBackend.InvalidateForUserGroup(userGroupId);
         }
 
-        public async Task<SubjectInfo> GetUser(int userId)
+        public async Task<SubjectInfo> GetUser(int? userId, int? intId = null, string stringId=null)
         {
-            var user = _cacheBackend.GetUserById(userId);
+            if (!userId.HasValue && !intId.HasValue && stringId == null)
+                throw new ObacException("GetUser: no ID provided");
+            
+            SubjectInfo user;
+                
+            if (stringId != null)
+                user = _cacheBackend.GetUserByExternalStringId(stringId);
+            else if (intId.HasValue)
+                user = _cacheBackend.GetUserByExternalIntId(intId.Value);
+            else user = _cacheBackend.GetGroupById(userId.Value);
+            
             if (user == null)
             {
-                user = await _store.GetUserSubjectById(userId);
+                if (stringId != null)
+                    user = await _store.GetUserSubjectByExternalStringId(stringId);
+                else if (intId.HasValue)
+                    user = await _store.GetUserSubjectByExternalIntId(intId.Value);
+                else user = await _store.GetUserSubjectById(userId.Value);
+                
                 if (user!=null)
                     _cacheBackend.SetUserId(user);
             }
@@ -263,15 +278,31 @@ namespace Redb.OBAC.EF.BL
             return user;
         }
         
-        public async Task<SubjectInfo> GetUserGroup(int subjectId)
+        public async Task<SubjectInfo> GetUserGroup(int? userGroupId, int? intId, string stringId = null)
         {
-            var grp = _cacheBackend.GetGroupById(subjectId);
+            if (!userGroupId.HasValue && !intId.HasValue && stringId == null)
+                throw new ObacException("GetUserGroup: no ID provided");
+            
+            SubjectInfo grp;
+                
+            if (stringId != null)
+                grp = _cacheBackend.GetGroupByExternalStringId(stringId);
+            else if (intId.HasValue)
+                grp = _cacheBackend.GetGroupByExternalIntId(intId.Value);
+            else grp = _cacheBackend.GetGroupById(userGroupId.Value);
+            
             if (grp == null)
             {
-                grp = await _store.GetGroupSubjectById(subjectId);
+                if (stringId != null)
+                    grp = await _store.GetGroupSubjectByExternalStringId(stringId);
+                else if (intId.HasValue)
+                    grp = await _store.GetGroupSubjectByExternalIntId(intId.Value);
+                else grp = await _store.GetGroupSubjectById(userGroupId.Value);
+                
                 if (grp!=null)
                     _cacheBackend.SetGroupId(grp);
             }
+    
             return grp;
         }
 
