@@ -139,16 +139,22 @@ message AclItemParams {
         PERMISSION = 0;
         ROLE = 1;
     }
+
+    enum SubjectTypeEnum {
+        USER = 0;
+        USER_GROUP = 1;
+    }
     
-    int32 UserId = 1;
-    int32 UserGroupId = 2;
-    PermissionTypeEnum PermissionType = 3;
-    UUID Permission = 4;
-    bool DenyPermission = 5;
-    int32 ExternalUserIntId = 6;
-    string ExternalUserStringId = 7;
-    int32 ExternalUserGroupIntId = 8;
-    string ExternalUserGroupStringId = 9;
+    SubjectTypeEnum SubjectType = 1;
+    int32 UserId = 2;
+    int32 UserGroupId = 3;
+    PermissionTypeEnum PermissionType = 4;
+    UUID Permission = 5;
+    bool DenyPermission = 6;
+    int32 ExternalUserIntId = 7;
+    string ExternalUserStringId = 8;
+    int32 ExternalUserGroupIntId = 9;
+    string ExternalUserGroupStringId = 10;
 }
 
 message GetAclParams {

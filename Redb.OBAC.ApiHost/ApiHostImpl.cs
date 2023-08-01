@@ -411,14 +411,62 @@ namespace Redb.OBAC.ApiHost
         
         private async Task<IReadOnlyCollection<ResolveExternalIdsResults.Types.ResolveExternalItemResult>> ResolveExternalTrees(ResolveExternalItem[] items)
         {
-            // todo add batch method
-            throw new NotImplementedException();
+            var res = new List<ResolveExternalIdsResults.Types.ResolveExternalItemResult>();
+            foreach (var userItem in items)
+            {
+                var u = await _objectManager.GetTree(
+                    null, 
+                    userItem.ExternalIntId == 0? null:
+                        userItem.ExternalIntId, 
+                    userItem.ExternalStringId);
+                
+                if (u == null)
+                {
+                    res.Add(new ResolveExternalIdsResults.Types.ResolveExternalItemResult
+                    {
+                        ExternalItem = userItem, Success = false
+                    });
+                }
+                else
+                {
+                    res.Add(new ResolveExternalIdsResults.Types.ResolveExternalItemResult
+                    {
+                        ExternalItem = userItem, Success = true, ItemId = u.SubjectId
+                    });
+                }
+            }
+            
+            return res;
         }
         
         private async Task<IReadOnlyCollection<ResolveExternalIdsResults.Types.ResolveExternalItemResult>> ResolveExternalTreeNodes(ResolveExternalItem[] items)
         {
-            // todo add batch method
-            throw new NotImplementedException();
+            var res = new List<ResolveExternalIdsResults.Types.ResolveExternalItemResult>();
+            foreach (var userItem in items)
+            {
+                var u = await _objectManager.GetTreeNode(
+                    null, 
+                    userItem.ExternalIntId == 0? null:
+                        userItem.ExternalIntId, 
+                    userItem.ExternalStringId);
+                
+                if (u == null)
+                {
+                    res.Add(new ResolveExternalIdsResults.Types.ResolveExternalItemResult
+                    {
+                        ExternalItem = userItem, Success = false
+                    });
+                }
+                else
+                {
+                    res.Add(new ResolveExternalIdsResults.Types.ResolveExternalItemResult
+                    {
+                        ExternalItem = userItem, Success = true, ItemId = u.SubjectId
+                    });
+                }
+            }
+            
+            return res;
         }
         
         private IObacPermissionChecker GetPermissionChecker(int userId)
@@ -443,27 +491,63 @@ namespace Redb.OBAC.ApiHost
         {
             CheckAcl(request);
 
-            var acl = GrpcRequestToAcl(request);
+            var acl = await GrpcRequestToAcl(request);
             
             await _objectManager.SetTreeNodeAcl(request.ObjectType.ToGuid(), request.ObjectId, acl);
             
             return new NoResults();
         }
 
-        private AclInfo GrpcRequestToAcl(SetAclParams request)
+        private async Task<AclInfo> GrpcRequestToAcl(SetAclParams request)
         {
             var res = new AclInfo
             {
                 InheritParentPermissions = request.InheritParentPermissions
             };
-
-            res.AclItems = request.Acl.Select(i => new AclItemInfo {
-                    UserId = i.UserId==0?null:i.UserId,
-                    UserGroupId = i.UserGroupId==0?null:i.UserGroupId,
-                    PermissionId = i.Permission.ToGuid(),
-                    Kind = i.DenyPermission? PermissionKindEnum.Deny: PermissionKindEnum.Allow
-                }).ToArray();
+            var items = new List<AclItemInfo>();
             
+            foreach (var aclItem in request.Acl)
+            {
+                AclItemInfo itemToAdd;
+                if (aclItem.SubjectType == AclItemParams.Types.SubjectTypeEnum.User)
+                {
+                    var userObj = await _objectManager.GetUser(aclItem.UserId, aclItem.ExternalUserIntId,
+                        aclItem.ExternalUserStringId);
+
+                    if (userObj == null)
+                        throw new ObacException(
+                            $"subject type User cannot be found for id triade ({aclItem.UserId}, {aclItem.ExternalUserIntId}, {aclItem.ExternalUserStringId}");
+                    
+                    itemToAdd = new AclItemInfo
+                    {
+                        UserId = userObj.SubjectId ,
+                        PermissionType = aclItem.PermissionType== AclItemParams.Types.PermissionTypeEnum.Permission? AclItemInfoPermissionType.Permission: AclItemInfoPermissionType.Role,
+                        PermissionId = aclItem.Permission.ToGuid(),
+                        Kind = aclItem.DenyPermission ? PermissionKindEnum.Deny : PermissionKindEnum.Allow
+                    };
+                }
+                else
+                {
+                    var userGroupObj = await _objectManager.GetUser(aclItem.UserId, aclItem.ExternalUserIntId,
+                        aclItem.ExternalUserStringId);
+
+                    if (userGroupObj == null)
+                        throw new ObacException(
+                            $"subject type UserGroup cannot be found for id triade ({aclItem.UserGroupId}, {aclItem.ExternalUserGroupIntId}, {aclItem.ExternalUserGroupStringId}");
+
+                    itemToAdd = new AclItemInfo
+                    {
+                        UserId = userGroupObj.SubjectId ,
+                        PermissionType = aclItem.PermissionType== AclItemParams.Types.PermissionTypeEnum.Permission? AclItemInfoPermissionType.Permission: AclItemInfoPermissionType.Role,
+                        PermissionId = aclItem.Permission.ToGuid(),
+                        Kind = aclItem.DenyPermission ? PermissionKindEnum.Deny : PermissionKindEnum.Allow
+                    };
+                }
+
+                items.Add(itemToAdd);
+            }
+
+            res.AclItems = items.ToArray();
             
             return res;
         }
@@ -506,14 +590,15 @@ namespace Redb.OBAC.ApiHost
             if (request.ObjectId == 0)
                 throw new ObacException("ObjectId must be set");
 
-            foreach (var aclItem in request.Acl)
-            {
-                if (aclItem.UserId != 0 && aclItem.UserGroupId != 0)
-                    throw new ObacException("Cannot set both UserId or UserGroupId");
-            
-                if (aclItem.UserId == 0 && aclItem.UserGroupId == 0)
-                    throw new ObacException("Either UserId or UserGroupId must be set");
-            }
+            // since we'd introduced External Int/Sting ids over here, this style of checking makes no sense
+            // foreach (var aclItem in request.Acl)
+            // {
+            //     if (aclItem.UserId != 0 && aclItem.UserGroupId != 0)
+            //         throw new ObacException("Cannot set both UserId or UserGroupId");
+            //
+            //     if (aclItem.UserId == 0 && aclItem.UserGroupId == 0)
+            //         throw new ObacException("Either UserId or UserGroupId must be set");
+            // }
         }
         
     }

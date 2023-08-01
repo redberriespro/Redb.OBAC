@@ -159,6 +159,7 @@ namespace Redb.OBAC.EF.ObjectTypes
 
         public async Task SetTreeNodeAcl(Guid treeId, int treeNodeId, AclInfo acl)
         {
+            throw new NotImplementedException("Role based permissions needs to be supported!");
             try
             {
                 var oldAcl = await GetTreeNodeAcl(treeId, treeNodeId);

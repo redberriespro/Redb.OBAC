@@ -2,11 +2,19 @@ using System;
 
 namespace Redb.OBAC.Core.Models
 {
+    public enum AclItemInfoPermissionType
+    {
+        Permission,
+        Role
+    };
+    
     public class AclItemInfo
     {
+        public AclItemInfoPermissionType PermissionType { get; set; }
         public Guid PermissionId { get; set; }
         public int? UserId { get; set; }
         public int? UserGroupId { get; set; }
+        
         public PermissionKindEnum Kind { get; set; } = PermissionKindEnum.Allow;
         
         public override string ToString()
