@@ -32,7 +32,9 @@ service ObacApiHost
     rpc AddUserToGroupById (AddUserToGroupParams) returns (NoResults) {}
     rpc RemoveUserFromGroupById (RemoveUserFromGroupParams) returns (NoResults) {}
     
+    rpc GetAcl(GetAclParams) returns (GetAclResults) {}
     rpc SetAcl(SetAclParams) returns (NoResults) {}
+
     rpc GetEffectivePermissions(GetEffectivePermissionsParams) returns (EffectivePermissionsResults) {}
 
     rpc ResolveExternalIds (ResolveExternalIdsParams) returns (ResolveExternalIdsResults) {}
@@ -132,18 +134,40 @@ message EnsurePermissionParams {
     string Description = 2;
 }
 
-message SetAclParams {
+message AclItemParams {
+    enum PermissionTypeEnum {
+        PERMISSION = 0;
+        ROLE = 1;
+    }
+    
+    int32 UserId = 1;
+    int32 UserGroupId = 2;
+    PermissionTypeEnum PermissionType = 3;
+    UUID Permission = 4;
+    bool DenyPermission = 5;
+    int32 ExternalUserIntId = 6;
+    string ExternalUserStringId = 7;
+    int32 ExternalUserGroupIntId = 8;
+    string ExternalUserGroupStringId = 9;
+}
+
+message GetAclParams {
+    UUID ObjectType = 1;
+    int32 ObjectId = 2;
+}
+
+message GetAclResults {
     UUID ObjectType = 1;
     int32 ObjectId = 2;
     bool InheritParentPermissions = 3;
     repeated AclItemParams Acl = 4;
 }
 
-message AclItemParams {
-    int32 UserId = 1;
-    int32 UserGroupId = 2;
-    UUID Permission = 3;
-    bool DenyPermission = 4;
+message SetAclParams {
+    UUID ObjectType = 1;
+    int32 ObjectId = 2;
+    bool InheritParentPermissions = 3;
+    repeated AclItemParams Acl = 4;
 }
 
 message GetEffectivePermissionsParams {
@@ -252,6 +276,7 @@ message ResolveExternalItem {
     ResolveExternalItemType Type = 1;
     int32 ExternalIntId = 2;
     string ExternalStringId = 3;
+    UUID NodeTypeId = 4;
 }
 
 message ResolveExternalIdsParams {

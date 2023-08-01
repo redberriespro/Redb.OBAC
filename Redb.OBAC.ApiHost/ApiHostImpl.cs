@@ -431,6 +431,13 @@ namespace Redb.OBAC.ApiHost
             return pc;
         }
 
+        public override async Task<GetAclResults> GetAcl(GetAclParams request, ServerCallContext context)
+        {
+            var acl = await _objectManager.GetTreeNodeAcl(request.ObjectType.ToGuid(), request.ObjectId);
+
+            return await AclToGrpcResponse(request, acl);
+        }
+        
         public override async Task<NoResults> SetAcl(SetAclParams request,
             ServerCallContext context)
         {
@@ -438,11 +445,8 @@ namespace Redb.OBAC.ApiHost
 
             var acl = GrpcRequestToAcl(request);
             
-            
-            
             await _objectManager.SetTreeNodeAcl(request.ObjectType.ToGuid(), request.ObjectId, acl);
             
-
             return new NoResults();
         }
 
@@ -461,6 +465,39 @@ namespace Redb.OBAC.ApiHost
                 }).ToArray();
             
             
+            return res;
+        }
+        
+        private async Task<GetAclResults> AclToGrpcResponse(GetAclParams request, AclInfo acl)
+        {
+            var res = new GetAclResults
+            {
+                ObjectType = request.ObjectType, 
+                ObjectId = request.ObjectId,
+                InheritParentPermissions = acl.InheritParentPermissions
+            };
+
+            foreach (var aclItem in acl.AclItems)
+            {
+                var aclUser =  aclItem.UserId.HasValue ? await _objectManager.GetUser(aclItem.UserId) : null;
+                var aclUserGroup = aclItem.UserGroupId.HasValue ? await _objectManager.GetUserGroup(aclItem.UserGroupId) : null;
+                
+                res.Acl.Add(new AclItemParams
+                {
+                    DenyPermission = aclItem.Kind == PermissionKindEnum.Deny,
+                    Permission = aclItem.PermissionId.ToGrpcUuid(),
+                    
+                    UserId = aclItem.UserId??0,
+                    ExternalUserIntId = aclUser?.ExternalIntId??0,
+                    ExternalUserStringId = aclUser?.ExternalStringId,
+                    
+                    UserGroupId = aclItem.UserGroupId??0,
+                    ExternalUserGroupIntId = aclUserGroup?.ExternalIntId??0,
+                    ExternalUserGroupStringId = aclUserGroup?.ExternalStringId,
+
+                });
+            }
+
             return res;
         }
 
