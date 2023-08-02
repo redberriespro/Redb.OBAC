@@ -300,6 +300,40 @@ namespace Redb.OBAC.MongoDriver.BL
                     ExternalStringId = p.ExternalIdString
                 };
         }
+        
+        public async Task<SubjectInfo> GetGroupSubjectByExternalIntId(int externalId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var cursor = await ctx.ObacGroupSubjects.FindAsync(a => a.ExternalIdInt == externalId);
+            var p = await cursor.FirstOrDefaultAsync();
+            return p == null
+                ? null
+                : new SubjectInfo
+                {
+                    SubjectId = p.Id,
+                    SubjectType = SubjectTypeEnum.UserGroup,
+                    Description = p.Description,
+                    ExternalIntId = p.ExternalIdInt,
+                    ExternalStringId = p.ExternalIdString
+                };
+        }
+        
+        public async Task<SubjectInfo> GetGroupSubjectByExternalStringId(string externalId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var cursor = await ctx.ObacGroupSubjects.FindAsync(a => a.ExternalIdString == externalId);
+            var p = await cursor.FirstOrDefaultAsync();
+            return p == null
+                ? null
+                : new SubjectInfo
+                {
+                    SubjectId = p.Id,
+                    SubjectType = SubjectTypeEnum.UserGroup,
+                    Description = p.Description,
+                    ExternalIntId = p.ExternalIdInt,
+                    ExternalStringId = p.ExternalIdString
+                };
+        }
 
         public async Task<int[]> GetGroupMembers(int userGroupId)
         {
@@ -580,11 +614,63 @@ namespace Redb.OBAC.MongoDriver.BL
                 }
             };
         }
+        
+        public async Task<TreeObjectTypeInfo> GetTreeObjectByExternalIntId(int externalId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var res = await ctx.ObacTree.Find(t => t.ExternalIdInt == externalId).FirstOrDefaultAsync();
+            return res switch
+            {
+                null => null,
+                _ => new TreeObjectTypeInfo
+                {
+                    TreeObjectTypeId = res.Id,
+                    Description = res.Description
+                }
+            };
+        }
+        
+        public async Task<TreeObjectTypeInfo> GetTreeObjectByExternalStringId(string externalId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var res = await ctx.ObacTree.Find(t => t.ExternalIdString == externalId).FirstOrDefaultAsync();
+            return res switch
+            {
+                null => null,
+                _ => new TreeObjectTypeInfo
+                {
+                    TreeObjectTypeId = res.Id,
+                    Description = res.Description
+                }
+            };
+        }
 
         public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, int nodeId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             var nd = await ctx.ObacTreeNodes.Find(tn => tn.TreeId == treeId && tn.NodeId == nodeId).FirstOrDefaultAsync();
+            return nd switch
+            {
+                null => null,
+                _ => MakeTreeNodeInfo(treeId, nd)
+            };
+        }
+        
+        public async Task<TreeNodeInfo> GetTreeNodeByExternalIntId(Guid treeId, int externalId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var nd = await ctx.ObacTreeNodes.Find(tn => tn.TreeId == treeId && tn.ExternalIdInt == externalId).FirstOrDefaultAsync();
+            return nd switch
+            {
+                null => null,
+                _ => MakeTreeNodeInfo(treeId, nd)
+            };
+        }
+        
+        public async Task<TreeNodeInfo> GetTreeNodeByExternalStringId(Guid treeId, string externalId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var nd = await ctx.ObacTreeNodes.Find(tn => tn.TreeId == treeId && tn.ExternalIdString == externalId).FirstOrDefaultAsync();
             return nd switch
             {
                 null => null,

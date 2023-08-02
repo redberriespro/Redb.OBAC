@@ -316,9 +316,7 @@ namespace Redb.OBAC.EF.BL
     
             return grp;
         }
-
-      
-
+        
         public async Task<int[]> GetUserGroupMembers(int userGroupId)
         {
             return await _store.GetGroupMembers(userGroupId);

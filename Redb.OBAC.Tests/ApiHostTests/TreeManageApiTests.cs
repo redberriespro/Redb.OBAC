@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Redb.OBAC.ApiClient;
 using Redb.OBAC.ApiHost;
 using Redb.OBAC.Tests.Utils;
 using Redb.OBAC.Tree;

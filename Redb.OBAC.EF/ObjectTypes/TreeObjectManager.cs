@@ -8,7 +8,6 @@ using Redb.OBAC.EF.BL;
 using Redb.OBAC.BL;
 using Redb.OBAC.Core;
 using Redb.OBAC.Core.Models;
-using Redb.OBAC.EF.DB;
 using Redb.OBAC.EF.DB.Entities;
 using Redb.OBAC.Exceptions;
 using Redb.OBAC.EF.ModelsPrivate;
@@ -182,7 +181,7 @@ namespace Redb.OBAC.EF.ObjectTypes
 
         public async Task SetTreeNodeAcl(Guid treeId, int treeNodeId, AclInfo acl)
         {
-            throw new NotImplementedException("Role based permissions needs to be supported!");
+            //throw new NotImplementedException("Role based permissions needs to be supported!");
             try
             {
                 var oldAcl = await GetTreeNodeAcl(treeId, treeNodeId);

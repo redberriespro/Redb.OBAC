@@ -37,6 +37,18 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
             var res = await _storage.GetObjectTreeById(treeObjectTypeId);
             return res;
         }
+        
+        public async Task<TreeObjectTypeInfo> GetTreeObjectByExternalIntId(int externalId)
+        {
+            var res = await _storage.GetTreeObjectByExternalIntId(externalId);
+            return res;
+        }
+        
+        public async Task<TreeObjectTypeInfo> GetTreeObjectByExternalStringId(string externalId)
+        {
+            var res = await _storage.GetTreeObjectByExternalStringId(externalId);
+            return res;
+        }
 
         public async Task DeleteTreeObjectType(Guid treeObjectTypeId, bool force)
         {
@@ -144,6 +156,16 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
         public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, int treeNodeId)
         {
             return await _storage.GetTreeNode(treeId, treeNodeId);
+        }
+        
+        public async Task<TreeNodeInfo> GetTreeNodeByExternalIntId(Guid treeId, int externalId)
+        {
+            return await _storage.GetTreeNodeByExternalIntId(treeId, externalId);
+        }
+        
+        public async Task<TreeNodeInfo> GetTreeNodeByExternalStringId(Guid treeId, string externalId)
+        {
+            return await _storage.GetTreeNodeByExternalStringId(treeId, externalId);
         }
 
         public async Task RepairTreeNodeEffectivePermissions(Guid treeId, int treeNodeId)

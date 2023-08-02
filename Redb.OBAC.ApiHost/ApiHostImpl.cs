@@ -512,8 +512,9 @@ namespace Redb.OBAC.ApiHost
                 AclItemInfo itemToAdd;
                 if (aclItem.SubjectType == AclItemParams.Types.SubjectTypeEnum.User)
                 {
-                    var userObj = await _objectManager.GetUser(aclItem.UserId, aclItem.ExternalUserIntId,
-                        aclItem.ExternalUserStringId);
+                    var userObj = await _objectManager.GetUser(aclItem.UserId,
+                        aclItem.ExternalUserIntId == 0?null:aclItem.ExternalUserIntId,
+                        String.IsNullOrEmpty(aclItem.ExternalUserStringId)?null:aclItem.ExternalUserStringId);
 
                     if (userObj == null)
                         throw new ObacException(
@@ -529,8 +530,9 @@ namespace Redb.OBAC.ApiHost
                 }
                 else
                 {
-                    var userGroupObj = await _objectManager.GetUser(aclItem.UserId, aclItem.ExternalUserIntId,
-                        aclItem.ExternalUserStringId);
+                    var userGroupObj = await _objectManager.GetUserGroup(aclItem.UserId,
+                        aclItem.ExternalUserGroupIntId == 0? null: aclItem.ExternalUserGroupIntId,
+                        String.IsNullOrEmpty(aclItem.ExternalUserGroupStringId)?null:aclItem.ExternalUserGroupStringId);
 
                     if (userGroupObj == null)
                         throw new ObacException(
