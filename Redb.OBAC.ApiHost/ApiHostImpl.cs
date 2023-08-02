@@ -156,19 +156,10 @@ namespace Redb.OBAC.ApiHost
             var info = await _objectManager.GetRole(request.RoleId.ToGuid());
             if (info == null) return new RoleInfoResults();
 
-            var res = new RoleInfoResults
-            {
-                RoleId = info.RoleId.ToGrpcUuid(),
-                Description = info.Description
-            };
-
-            foreach (var p in info.PermissionIds)
-            {
-                res.PermissionId.Add(p.ToGrpcUuid());
-            }
-
-            return res;
+            return RoleInfoToGrpc(info); ;
         }
+
+      
 
         public override async Task<RoleInfoResults> EnsureRole(EnsureRoleParams request,
             ServerCallContext context)
@@ -352,6 +343,18 @@ namespace Redb.OBAC.ApiHost
                     res.Items.AddRange(groupResolved);
             }
             
+            return res;
+        }
+
+        public override async Task<GetRolesResults> GetRoles(GetRolesParams request, ServerCallContext context)
+        {
+            var roles = await _objectManager.GetRoles();
+            var res = new GetRolesResults();
+            foreach (var r in roles)
+            {
+                res.Roles.Add(RoleInfoToGrpc(r));
+            }
+
             return res;
         }
 
@@ -598,7 +601,21 @@ namespace Redb.OBAC.ApiHost
 
             return res;
         }
+        private static RoleInfoResults RoleInfoToGrpc(RoleInfo info)
+        {
+            var res = new RoleInfoResults
+            {
+                RoleId = info.RoleId.ToGrpcUuid(),
+                Description = info.Description
+            };
 
+            foreach (var p in info.PermissionIds)
+            {
+                res.PermissionId.Add(p.ToGrpcUuid());
+            }
+
+            return res;
+        }
         private void CheckAcl(SetAclParams request)
         {
             if (request.ObjectId == 0)

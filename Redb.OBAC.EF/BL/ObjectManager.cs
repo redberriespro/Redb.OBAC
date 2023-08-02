@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Redb.OBAC.Backends;
@@ -172,6 +173,12 @@ namespace Redb.OBAC.EF.BL
         {
             return await _store.GetRoleById(roleId);
         }
+
+        public async Task<IReadOnlyCollection<RoleInfo>> GetRoles()
+        {
+            return (await _store.GetAllRoles()).ToArray();
+        }
+
 
         public async Task EnsureRole(Guid roleId, string description, Guid[] permissionIds, bool force = false)
         {

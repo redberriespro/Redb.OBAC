@@ -60,6 +60,7 @@ namespace Redb.OBAC.Core
         
         #region role objects
 
+        Task<IReadOnlyCollection<RoleInfo>> GetRoles();
         Task<RoleInfo> GetRole(Guid roleId);
         Task EnsureRole(Guid roleId, string description, Guid[] permissionIds, bool force = false);
         Task DeleteRole(Guid roleId);

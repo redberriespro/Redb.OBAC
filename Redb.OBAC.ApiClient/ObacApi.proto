@@ -16,6 +16,7 @@ service ObacApiHost
     rpc EnsurePermission (EnsurePermissionParams) returns (PermissionInfoResults) {}
     rpc DeletePermission (DeletePermissionParams) returns (NoResults) {}
 
+    rpc GetRoles (GetRolesParams) returns (GetRolesResults) {}
     rpc GetRoleById (GetRoleParams) returns (RoleInfoResults) {}
     rpc EnsureRole (EnsureRoleParams) returns (RoleInfoResults) {}
     rpc DeleteRole (DeleteRoleParams) returns (NoResults) {}
@@ -202,6 +203,14 @@ message RoleInfoResults {
 message GetRoleParams {
     UUID RoleId = 1;
 }
+
+message GetRolesParams {
+}
+
+message GetRolesResults {
+    repeated RoleInfoResults Roles = 1;
+}
+
 
 message DeleteRoleParams {
     UUID RoleId = 1;
