@@ -525,7 +525,7 @@ namespace Redb.OBAC.ApiHost
                             $"subject type User cannot be found for id triade ({aclItem.UserId}, {aclItem.ExternalUserIntId}, {aclItem.ExternalUserStringId}");
                     
                     itemToAdd = new AclItemInfo
-                    {
+                    { 
                         UserId = userObj.SubjectId ,
                         PermissionType = aclItem.PermissionType== AclItemParams.Types.PermissionTypeEnum.Permission? AclItemInfoPermissionType.Permission: AclItemInfoPermissionType.Role,
                         PermissionId = aclItem.Permission.ToGuid(),
@@ -544,7 +544,7 @@ namespace Redb.OBAC.ApiHost
 
                     itemToAdd = new AclItemInfo
                     {
-                        UserId = userGroupObj.SubjectId ,
+                        UserGroupId = userGroupObj.SubjectId ,
                         PermissionType = aclItem.PermissionType== AclItemParams.Types.PermissionTypeEnum.Permission? AclItemInfoPermissionType.Permission: AclItemInfoPermissionType.Role,
                         PermissionId = aclItem.Permission.ToGuid(),
                         Kind = aclItem.DenyPermission ? PermissionKindEnum.Deny : PermissionKindEnum.Allow
