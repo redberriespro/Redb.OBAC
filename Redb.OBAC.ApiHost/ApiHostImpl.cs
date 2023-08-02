@@ -73,6 +73,25 @@ namespace Redb.OBAC.ApiHost
             };
         }
         
+        public override async Task<GetTreeNodeResults> GetTreeNodeById(GetTreeNodeParams request, ServerCallContext context)
+        {
+            var treeId = request.TreeId.ToGuid();
+            var res = await _objectManager.GetTreeNode(treeId, request.Id);
+            if (res == null) throw new ObacException($"Tree Node {treeId}/{request.Id} does not exist");
+            return new GetTreeNodeResults
+            {
+                Node = new TreeNodeItemInfo
+                {
+                    Id = res.NodeId, 
+                    TreeId = res.TreeObjectTypeId.ToGrpcUuid(),
+                    ExternalIntId = res.ExternalIntId ?? 0,
+                    ExternalStrId = res.ExternalStringId,
+                    
+                    ParentId = res.ParentNodeId??0
+                }
+            };
+        }
+        
         public override async Task<EnsureTreeNodeResults> EnsureTreeNodes(EnsureTreeNodeParams request,
             ServerCallContext context)
         {
@@ -178,6 +197,8 @@ namespace Redb.OBAC.ApiHost
             return res;
         }
 
+       
+
         public override async Task<NoResults> DeleteRole(DeleteRoleParams request, ServerCallContext context)
         {
             await _objectManager.DeleteRole(request.RoleId.ToGuid());
@@ -193,7 +214,9 @@ namespace Redb.OBAC.ApiHost
             var res = new UserInfoResults
             {
                 UserId = info.SubjectId,
-                Description = info.Description
+                Description = info.Description,
+                ExternalIntId = info.ExternalIntId ?? 0,
+                ExternalStrId = info.ExternalStringId,
             };
 
             return res;
@@ -230,7 +253,9 @@ namespace Redb.OBAC.ApiHost
             var res = new UserGroupInfoResults
             {
                 UserGroupId = info.SubjectId,
-                Description = info.Description
+                Description = info.Description,
+                ExternalIntId = info.ExternalIntId ?? 0,
+                ExternalStrId = info.ExternalStringId,
             };
 
             return res;
@@ -581,6 +606,8 @@ namespace Redb.OBAC.ApiHost
                     DenyPermission = aclItem.Kind == PermissionKindEnum.Deny,
                     Permission = aclItem.PermissionId.ToGrpcUuid(),
                     PermissionType = aclItem.PermissionType== AclItemInfoPermissionType.Permission? AclItemParams.Types.PermissionTypeEnum.Permission: AclItemParams.Types.PermissionTypeEnum.Role,
+                    
+                    SubjectType = aclItem.UserId.HasValue? AclItemParams.Types.SubjectTypeEnum.User: AclItemParams.Types.SubjectTypeEnum.UserGroup, 
                     UserId = aclItem.UserId ?? 0,
                     ExternalUserIntId = aclUser?.ExternalIntId ?? 0,
 

@@ -751,6 +751,8 @@ namespace Redb.OBAC.EF.BL
                 TreeObjectTypeId = treeId,
                 NodeId = nd.Id,
                 ParentNodeId = nd.ParentId,
+                ExternalIntId = nd.ExternalIdInt,
+                ExternalStringId = nd.ExternalIdString,
                 InheritParentPermissions = nd.InheritParentPermissions,
                 Acl = nd.AclJSON,
                 OwnerUserid = nd.OwnerUserId

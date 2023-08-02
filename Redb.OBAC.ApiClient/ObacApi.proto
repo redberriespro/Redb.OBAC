@@ -9,6 +9,7 @@ service ObacApiHost
     rpc EnsureTree (EnsureTreeParams) returns (TreeInfoResults) {}
     rpc DeleteTree (DeleteTreeParams) returns (NoResults) {}
 
+    rpc GetTreeNodeById (GetTreeNodeParams) returns (GetTreeNodeResults) {}
     rpc EnsureTreeNodes (EnsureTreeNodeParams) returns (EnsureTreeNodeResults) {}
 
     rpc GetPermissions (GetPermissionsParams) returns (PermissionsInfoResults) {}
@@ -108,8 +109,16 @@ message EnsureTreeNodeResults {
     }
 }
 
-// permissions
+message GetTreeNodeParams {
+    UUID TreeId = 1;
+    int32 Id = 2;
+}
 
+message GetTreeNodeResults {
+    TreeNodeItemInfo Node = 1;
+}
+
+// permissions
 
 message PermissionsInfoResults {
     repeated  PermissionInfoResults Permissions = 1;
@@ -228,6 +237,8 @@ message EnsureRoleParams {
 message UserInfoResults {
     int32 UserId = 1;
     string Description = 2;
+    optional string ExternalStrId = 3;
+    optional int32 ExternalIntId = 4;
 }
 
 message GetUserParams {
@@ -249,6 +260,8 @@ message EnsureUserParams {
 message UserGroupInfoResults {
     int32 UserGroupId = 1;
     string Description = 2;
+    optional string ExternalStrId = 3;
+    optional int32 ExternalIntId = 4;
 }
 
 message UserGroupUsersInfoResults {
