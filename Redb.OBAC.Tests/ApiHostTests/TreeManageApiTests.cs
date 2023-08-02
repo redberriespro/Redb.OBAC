@@ -138,7 +138,7 @@ namespace Redb.OBAC.Tests.ApiHostTests
             //await api.DeleteTree(new DeleteTreeParams {TreeId = Tree2Id.ToGrpcUuid(), ForceDeleteIfNotEmpty=true}, null);
         }
 
-        [Test, Order(20)]
+        [Test, Order(10)]
         public async Task TreePermissions1acl2permission()
         {
             var api = GetApiHost();
@@ -194,7 +194,7 @@ namespace Redb.OBAC.Tests.ApiHostTests
                 ObjectId = Node1_2_id
             }, null);
             Assert.AreEqual(2, newAcl.Acl.Count);
-            Assert.AreEqual(gp.InheritParentPermissions, newAcl.InheritParentPermissions);
+            Assert.AreEqual(gp.DoNotInheritParentPermissions, newAcl.DoNotInheritParentPermissions);
             
             // user 1 must have reading and editing right to entire node1 subtree plus editor rights to node 1-2
             var ep = await api.GetEffectivePermissions(new GetEffectivePermissionsParams
@@ -208,7 +208,7 @@ namespace Redb.OBAC.Tests.ApiHostTests
             Assert.IsNotNull(ep.EffectivePermissions.Single(p=>p.Equals(Perm_Change.ToGrpcUuid())));
         }
 
-        [Test]
+        [Test, Order(20)]
         public async Task TreePermissions2acl2role()
         {
             var api = GetApiHost();
@@ -248,7 +248,7 @@ namespace Redb.OBAC.Tests.ApiHostTests
             }, null);
             Assert.AreEqual(1, newAcl.Acl.Count);
             Assert.AreEqual(AclItemParams.Types.PermissionTypeEnum.Role, newAcl.Acl[0].PermissionType);
-            Assert.AreEqual(gp.InheritParentPermissions, newAcl.InheritParentPermissions);
+            Assert.AreEqual(gp.DoNotInheritParentPermissions, newAcl.DoNotInheritParentPermissions);
             // user 1 must have reading and editing right to entire node1 subtree plus editor rights to node 1-2
             var ep = await api.GetEffectivePermissions(new GetEffectivePermissionsParams
             {                 
@@ -261,6 +261,12 @@ namespace Redb.OBAC.Tests.ApiHostTests
             Assert.AreEqual(2, ep.EffectivePermissions.Count);
             Assert.IsNotNull(ep.EffectivePermissions.Single(p=>p.Equals(Perm_Read.ToGrpcUuid())));
             Assert.IsNotNull(ep.EffectivePermissions.Single(p=>p.Equals(Perm_Change.ToGrpcUuid())));
+        }
+
+        [Test, Order(10)]
+        public async Task TestForInheritParentPermissions()
+        {
+            throw new NotImplementedException("todo");
         }
 
         private async Task SetupSecurityModel(ApiHostImpl api)

@@ -178,12 +178,12 @@ namespace Redb.OBAC.Tests.ThreeTests
                     {
                         NodeId = 111, UserId = 5, PermissionId = Perm_Delete
                     } 
-                }, null);
+                }, null, NodeParentPermissionInheritanceActionEnum.SetDoNotInherit);
             var addPermissions = feed.GetAll();
 
             AssertNodeActions(111, addPermissions, false, new[]
             {
-                new TreeNodePermissionInfo {NodeId = 110, UserId = 5, PermissionId = Perm_Delete},
+                new TreeNodePermissionInfo {NodeId = 111, UserId = 5, PermissionId = Perm_Delete},
             });
         }
         

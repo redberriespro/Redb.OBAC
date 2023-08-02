@@ -165,14 +165,14 @@ message GetAclParams {
 message GetAclResults {
     UUID ObjectType = 1;
     int32 ObjectId = 2;
-    bool InheritParentPermissions = 3;
+    bool DoNotInheritParentPermissions = 3;
     repeated AclItemParams Acl = 4;
 }
 
 message SetAclParams {
     UUID ObjectType = 1;
     int32 ObjectId = 2;
-    bool InheritParentPermissions = 3;
+    bool DoNotInheritParentPermissions = 3;
     repeated AclItemParams Acl = 4;
 }
 

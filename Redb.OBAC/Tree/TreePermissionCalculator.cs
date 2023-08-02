@@ -200,6 +200,14 @@ namespace Redb.OBAC.Tree
                     
                     var currentNodeGroupPermissions = await UnwindGroupBasedPermissions(ctx, currentNodePermissions);
                     
+                    var updatedInheritanceFlag = inheritParentPermissions switch
+                    {
+                        NodeParentPermissionInheritanceActionEnum.KeepSame => path.Node.InheritParentPermissions,
+                        NodeParentPermissionInheritanceActionEnum.SetInherit => true,
+                        NodeParentPermissionInheritanceActionEnum.SetDoNotInherit => false,
+                        _ => throw new ArgumentOutOfRangeException(nameof(inheritParentPermissions), inheritParentPermissions, null)
+                    };
+                    
                     // calculate current effective permissions based on current' everything (and a parents' E.P.) 
                     var currentEffectivePermissions = _effectivePermissionCalculator
                         .CalculateEffectivePermissions(path.Node.NodeId, path.Node.InheritParentPermissions,
@@ -227,13 +235,7 @@ namespace Redb.OBAC.Tree
                     var updatedParentEffectivePermissions =
                         path.Parent?.UpdatedEffectivePermissions ?? currentParentEffectivePermissions;
 
-                    var updatedInheritanceFlag = inheritParentPermissions switch
-                    {
-                        NodeParentPermissionInheritanceActionEnum.KeepSame => path.Node.InheritParentPermissions,
-                        NodeParentPermissionInheritanceActionEnum.SetInherit => true,
-                        NodeParentPermissionInheritanceActionEnum.SetDoNotInherit => false,
-                        _ => throw new ArgumentOutOfRangeException(nameof(inheritParentPermissions), inheritParentPermissions, null)
-                    };
+                   
 
                     // for nodeId and deeper nodes, effective permission list will be calculated, 
                     // while it is loaded from db for nodeId's parent's node

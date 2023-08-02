@@ -503,7 +503,7 @@ namespace Redb.OBAC.ApiHost
         {
             var res = new AclInfo
             {
-                InheritParentPermissions = request.InheritParentPermissions
+                InheritParentPermissions = !request.DoNotInheritParentPermissions
             };
             var items = new List<AclItemInfo>();
             
@@ -561,7 +561,7 @@ namespace Redb.OBAC.ApiHost
             {
                 ObjectType = request.ObjectType, 
                 ObjectId = request.ObjectId,
-                InheritParentPermissions = acl.InheritParentPermissions
+                DoNotInheritParentPermissions = !acl.InheritParentPermissions
             };
 
             foreach (var aclItem in acl.AclItems)
