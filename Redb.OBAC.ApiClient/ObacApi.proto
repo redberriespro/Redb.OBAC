@@ -26,6 +26,7 @@ service ObacApiHost
     rpc EnsureUser (EnsureUserParams) returns (UserInfoResults) {}
     rpc DeleteUser (DeleteUserParams) returns (NoResults) {}
 
+    rpc GetUserGroups (GetUserGroupsParams) returns (GetUserGroupsResults) {}
     rpc GetUserGroupById (GetUserGroupParams) returns (UserGroupInfoResults) {}
     rpc GetUserGroupUsers (GetUserGroupParams) returns (UserGroupUsersInfoResults) {}
 
@@ -268,6 +269,14 @@ message UserGroupUsersInfoResults {
     int32 UserGroupId = 1;
     repeated int32 MemberUserId = 2;
 }
+
+message GetUserGroupsParams {
+}
+
+message GetUserGroupsResults {
+    repeated UserGroupInfoResults UserGroup = 1;
+}
+
 
 message GetUserGroupParams {
     int32 UserGroupId = 1;

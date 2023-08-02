@@ -9,6 +9,7 @@ using Redb.OBAC.ApiClient;
 using Redb.OBAC.Core;
 using Redb.OBAC.Core.Models;
 using Redb.OBAC.Exceptions;
+using Redb.OBAC.Models;
 using Redberries.OBAC.Api;
 
 namespace Redb.OBAC.ApiHost
@@ -244,12 +245,30 @@ namespace Redb.OBAC.ApiHost
             return new NoResults();
         }
 
+        public override async Task<GetUserGroupsResults> GetUserGroups(GetUserGroupsParams request, ServerCallContext context)
+        {
+            var groups = await _objectManager.GetUserGroups();
+            var res = new GetUserGroupsResults();
+
+            foreach (var g in groups)
+            {
+                res.UserGroup.Add(UserGroupToGrpc(g));
+            }
+            
+            return res;
+        }
+
         public override async Task<UserGroupInfoResults> GetUserGroupById(GetUserGroupParams request,
             ServerCallContext context)
         {
             var info = await _objectManager.GetUserGroup(request.UserGroupId);
             if (info == null) return new UserGroupInfoResults();
 
+            return UserGroupToGrpc(info);
+        }
+
+        private static UserGroupInfoResults UserGroupToGrpc(SubjectInfo info)
+        {
             var res = new UserGroupInfoResults
             {
                 UserGroupId = info.SubjectId,
@@ -257,7 +276,6 @@ namespace Redb.OBAC.ApiHost
                 ExternalIntId = info.ExternalIntId ?? 0,
                 ExternalStrId = info.ExternalStringId,
             };
-
             return res;
         }
 

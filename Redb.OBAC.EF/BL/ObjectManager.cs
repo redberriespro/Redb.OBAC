@@ -296,6 +296,11 @@ namespace Redb.OBAC.EF.BL
     
             return user;
         }
+
+        public async Task<IReadOnlyCollection<SubjectInfo>> GetUserGroups()
+        {
+            return await _store.GetGroupSubjects();
+        }
         
         public async Task<SubjectInfo> GetUserGroup(int? userGroupId, int? intId, string stringId = null)
         {

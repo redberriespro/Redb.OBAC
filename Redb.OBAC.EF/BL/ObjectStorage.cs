@@ -330,7 +330,19 @@ namespace Redb.OBAC.EF.BL
             await ctx.SaveChangesAsync();
         }
 
-
+        public async Task<IReadOnlyCollection<SubjectInfo>> GetGroupSubjects()
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var gl = await ctx.ObacGroupSubjects.ToListAsync();
+            return gl.Select(p=>  new SubjectInfo
+                {
+                    SubjectId = p.Id,
+                    SubjectType = SubjectTypeEnum.UserGroup,
+                    Description = p.Description,
+                    ExternalIntId = p.ExternalIdInt,
+                    ExternalStringId = p.ExternalIdString
+                }).ToArray();
+        }
 
         public async Task<SubjectInfo> GetGroupSubjectById(int subjectId)
         {
@@ -1010,7 +1022,6 @@ namespace Redb.OBAC.EF.BL
             if (n != EP_BATCH_SZ)
                 await ctx.SaveChangesAsync();
         }
-
-
+        
     }
 }

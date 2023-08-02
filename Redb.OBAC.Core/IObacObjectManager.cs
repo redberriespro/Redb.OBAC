@@ -82,6 +82,8 @@ namespace Redb.OBAC.Core
         Task EnsureUserGroup(int userGroupId, string description, int? intId = null, string stringId=null);
         Task DeleteUserGroup(int userGroupId, bool force=false);
 
+        Task<IReadOnlyCollection<SubjectInfo>> GetUserGroups();
+        
         Task<SubjectInfo> GetUserGroup(int? userGroupId, int? intId = null, string stringId = null);
 
         Task<int[]> GetUserGroupMembers(int userGroupId);
