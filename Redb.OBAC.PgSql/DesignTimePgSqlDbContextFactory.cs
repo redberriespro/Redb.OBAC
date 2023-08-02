@@ -5,6 +5,7 @@ using Redb.OBAC.EF.DB;
 
 namespace Redb.OBAC.PgSql
 {
+    // ReSharper disable once UnusedType.Global
     public class DesignTimePgSqlDbContextFactory: IDesignTimeDbContextFactory<PgSqlObacDbContext>
     {
         public PgSqlObacDbContext CreateDbContext(string[] args)

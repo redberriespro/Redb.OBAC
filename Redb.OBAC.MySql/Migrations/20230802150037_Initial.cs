@@ -1,10 +1,9 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Redb.OBAC.MySql.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -75,8 +74,7 @@ namespace Redb.OBAC.MySql.Migrations
                 name: "obac_user_groups",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    id = table.Column<int>(type: "int", nullable: false),
                     external_id_int = table.Column<int>(type: "int", nullable: true),
                     external_id_str = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -109,8 +107,7 @@ namespace Redb.OBAC.MySql.Migrations
                 name: "obac_users",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    id = table.Column<int>(type: "int", nullable: false),
                     external_id_int = table.Column<int>(type: "int", nullable: true),
                     external_id_str = table.Column<string>(type: "varchar(255)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -153,6 +150,8 @@ namespace Redb.OBAC.MySql.Migrations
                     inherit_parent_perms = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     external_id_int = table.Column<int>(type: "int", nullable: true),
                     external_id_str = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    acl = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>

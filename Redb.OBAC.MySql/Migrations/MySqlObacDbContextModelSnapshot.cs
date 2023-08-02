@@ -17,10 +17,9 @@ namespace Redb.OBAC.MySql.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
                 .HasAnnotation("ProductVersion", "5.0.11");
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacGroupSubjectEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacGroupSubjectEntity", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("id");
 
@@ -42,7 +41,7 @@ namespace Redb.OBAC.MySql.Migrations
                     b.ToTable("obac_user_groups");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacObjectTypeEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacObjectTypeEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -63,7 +62,7 @@ namespace Redb.OBAC.MySql.Migrations
                     b.ToTable("obac_objecttypes");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacPermissionEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacPermissionEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -80,7 +79,7 @@ namespace Redb.OBAC.MySql.Migrations
                     b.ToTable("obac_permissions");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacPermissionRoleEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacPermissionRoleEntity", b =>
                 {
                     b.Property<Guid>("PermissionId")
                         .HasColumnType("char(36)")
@@ -97,7 +96,7 @@ namespace Redb.OBAC.MySql.Migrations
                     b.ToTable("obac_permissions_in_roles");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacRoleEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacRoleEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -114,7 +113,7 @@ namespace Redb.OBAC.MySql.Migrations
                     b.ToTable("obac_roles");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacTreeEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacTreeEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("char(36)")
@@ -137,7 +136,7 @@ namespace Redb.OBAC.MySql.Migrations
                     b.ToTable("obac_trees");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacTreeNodeEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacTreeNodeEntity", b =>
                 {
                     b.Property<Guid>("TreeId")
                         .HasColumnType("char(36)")
@@ -146,6 +145,10 @@ namespace Redb.OBAC.MySql.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int")
                         .HasColumnName("id");
+
+                    b.Property<string>("Acl")
+                        .HasColumnType("longtext")
+                        .HasColumnName("acl");
 
                     b.Property<int?>("ExternalIdInt")
                         .HasColumnType("int")
@@ -180,7 +183,7 @@ namespace Redb.OBAC.MySql.Migrations
                     b.ToTable("obac_tree_nodes");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacTreeNodePermissionEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacTreeNodePermissionEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -225,7 +228,7 @@ namespace Redb.OBAC.MySql.Migrations
                     b.ToTable("obac_tree_node_permissions");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacUserInGroupEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacUserInGroupEntity", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("int")
@@ -244,7 +247,7 @@ namespace Redb.OBAC.MySql.Migrations
                     b.ToTable("obac_users_in_groups");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacUserPermissionsEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacUserPermissionsEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -279,10 +282,9 @@ namespace Redb.OBAC.MySql.Migrations
                     b.ToTable("obac_userpermissions");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacUserSubjectEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacUserSubjectEntity", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("id");
 
@@ -308,9 +310,9 @@ namespace Redb.OBAC.MySql.Migrations
                     b.ToTable("obac_users");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacPermissionRoleEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacPermissionRoleEntity", b =>
                 {
-                    b.HasOne("Redb.OBAC.DB.Entities.ObacRoleEntity", "Role")
+                    b.HasOne("Redb.OBAC.EF.DB.Entities.ObacRoleEntity", "Role")
                         .WithMany("Permissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -319,21 +321,21 @@ namespace Redb.OBAC.MySql.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacTreeNodeEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacTreeNodeEntity", b =>
                 {
-                    b.HasOne("Redb.OBAC.DB.Entities.ObacUserSubjectEntity", "Owner")
+                    b.HasOne("Redb.OBAC.EF.DB.Entities.ObacUserSubjectEntity", "Owner")
                         .WithMany()
                         .HasForeignKey("OwnerUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Redb.OBAC.DB.Entities.ObacTreeEntity", "Tree")
+                    b.HasOne("Redb.OBAC.EF.DB.Entities.ObacTreeEntity", "Tree")
                         .WithMany()
                         .HasForeignKey("TreeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Redb.OBAC.DB.Entities.ObacTreeNodeEntity", "Parent")
+                    b.HasOne("Redb.OBAC.EF.DB.Entities.ObacTreeNodeEntity", "Parent")
                         .WithMany()
                         .HasForeignKey("TreeId", "ParentId");
 
@@ -344,19 +346,19 @@ namespace Redb.OBAC.MySql.Migrations
                     b.Navigation("Tree");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacTreeNodePermissionEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacTreeNodePermissionEntity", b =>
                 {
-                    b.HasOne("Redb.OBAC.DB.Entities.ObacGroupSubjectEntity", "UserGroup")
+                    b.HasOne("Redb.OBAC.EF.DB.Entities.ObacGroupSubjectEntity", "UserGroup")
                         .WithMany()
                         .HasForeignKey("UserGroupId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Redb.OBAC.DB.Entities.ObacUserSubjectEntity", "User")
+                    b.HasOne("Redb.OBAC.EF.DB.Entities.ObacUserSubjectEntity", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Redb.OBAC.DB.Entities.ObacTreeNodeEntity", "Node")
+                    b.HasOne("Redb.OBAC.EF.DB.Entities.ObacTreeNodeEntity", "Node")
                         .WithMany()
                         .HasForeignKey("TreeId", "NodeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -369,15 +371,15 @@ namespace Redb.OBAC.MySql.Migrations
                     b.Navigation("UserGroup");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacUserInGroupEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacUserInGroupEntity", b =>
                 {
-                    b.HasOne("Redb.OBAC.DB.Entities.ObacGroupSubjectEntity", "Group")
+                    b.HasOne("Redb.OBAC.EF.DB.Entities.ObacGroupSubjectEntity", "Group")
                         .WithMany("Users")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Redb.OBAC.DB.Entities.ObacUserSubjectEntity", "User")
+                    b.HasOne("Redb.OBAC.EF.DB.Entities.ObacUserSubjectEntity", "User")
                         .WithMany("Groups")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -388,17 +390,17 @@ namespace Redb.OBAC.MySql.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacGroupSubjectEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacGroupSubjectEntity", b =>
                 {
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacRoleEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacRoleEntity", b =>
                 {
                     b.Navigation("Permissions");
                 });
 
-            modelBuilder.Entity("Redb.OBAC.DB.Entities.ObacUserSubjectEntity", b =>
+            modelBuilder.Entity("Redb.OBAC.EF.DB.Entities.ObacUserSubjectEntity", b =>
                 {
                     b.Navigation("Groups");
                 });
