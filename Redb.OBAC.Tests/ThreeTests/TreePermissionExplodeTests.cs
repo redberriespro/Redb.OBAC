@@ -125,6 +125,68 @@ namespace Redb.OBAC.Tests.ThreeTests
             });
         }
 
+        [Test]
+        public async Task IncrementalAddTo110and111()
+        {
+            // add read_perm to 110 for user 77
+            // make sure node 111 gets the same read permission
+            
+            var tc = new TreePermissionCalculator();
+            var permissions = MakePermSet1();
+            
+            var tr = MakeCtx1(permissions);
+
+            var feed = new InMemoryEffectivePermissionQueue();
+            await tc.ChangePermissions(feed, tr, 110,
+                new[]
+                {
+                    new TreeNodePermissionInfo
+                    {
+                        NodeId = 110, UserId = 77, PermissionId = Perm_Read
+                    } 
+                }, null);
+            var addPermissions = feed.GetAll();
+
+            AssertNodeActions(110, addPermissions, false, new[]
+            {
+                new TreeNodePermissionInfo {NodeId = 110, UserId = 77, PermissionId = Perm_Read},
+            });
+            AssertNodeActions(111, addPermissions, false, new[]
+            {
+                new TreeNodePermissionInfo {NodeId = 111, UserId = 77, PermissionId = Perm_Read},
+            });
+        }
+        
+        [Test]
+        public async Task IncrementalAddTo110reAddOn111()
+        {
+            // make sure if a permission exists on parent level (110) UserId = 5, PermissionId = Perm_Delete
+            // AND inheritParentPermission set to false to 111
+            // AND permission should be added at level 111
+            // it is really added
+            
+            var tc = new TreePermissionCalculator();
+            var permissions = MakePermSet1();
+            
+            var tr = MakeCtx1(permissions);
+
+            var feed = new InMemoryEffectivePermissionQueue();
+            await tc.ChangePermissions(feed, tr, 111,
+                new[]
+                {
+                    new TreeNodePermissionInfo
+                    {
+                        NodeId = 111, UserId = 5, PermissionId = Perm_Delete
+                    } 
+                }, null);
+            var addPermissions = feed.GetAll();
+
+            AssertNodeActions(111, addPermissions, false, new[]
+            {
+                new TreeNodePermissionInfo {NodeId = 110, UserId = 5, PermissionId = Perm_Delete},
+            });
+        }
+        
 
         [Test]
         public async Task IncrementalAdd1()

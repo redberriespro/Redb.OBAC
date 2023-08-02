@@ -573,7 +573,7 @@ namespace Redb.OBAC.ApiHost
                 {
                     DenyPermission = aclItem.Kind == PermissionKindEnum.Deny,
                     Permission = aclItem.PermissionId.ToGrpcUuid(),
-
+                    PermissionType = aclItem.PermissionType== AclItemInfoPermissionType.Permission? AclItemParams.Types.PermissionTypeEnum.Permission: AclItemParams.Types.PermissionTypeEnum.Role,
                     UserId = aclItem.UserId ?? 0,
                     ExternalUserIntId = aclUser?.ExternalIntId ?? 0,
 

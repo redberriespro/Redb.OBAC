@@ -20,7 +20,10 @@ namespace Redb.OBAC.Core.Models
         public override string ToString()
         {
             var k = Kind==PermissionKindEnum.Allow ? 'A' : 'D';
-            return $"{UserId}:{UserGroupId}:{PermissionId}:{k}";
+            var r = PermissionType == AclItemInfoPermissionType.Permission
+                ? PermissionId.ToString()
+                : $"R{PermissionId}";
+            return $"{UserId}:{UserGroupId}:{r}:{k}";
         }
         
         public static AclItemInfo Parse(string aclInfo)

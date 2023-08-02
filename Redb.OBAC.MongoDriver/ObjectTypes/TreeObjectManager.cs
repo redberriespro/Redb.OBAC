@@ -247,7 +247,33 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
         /// </summary>
         private async Task<AclInfo> ExplodeAcl(AclInfo acl)
         {
-            return acl; // todo
+            var itemsExploded = new List<AclItemInfo>();
+            
+            foreach (var aclItem in acl.AclItems)
+            {
+                if (aclItem.PermissionType == AclItemInfoPermissionType.Permission)
+                {
+                    itemsExploded.Add(aclItem);
+                    continue;
+                }
+
+                var role = await _storage.GetRoleById(aclItem.PermissionId);
+                foreach (var permId in role.PermissionIds)
+                {
+                    itemsExploded.Add(new AclItemInfo
+                    {
+                        Kind = aclItem.Kind,
+                        PermissionType = AclItemInfoPermissionType.Permission,
+                        PermissionId = permId, UserId = aclItem.UserId, UserGroupId = aclItem.UserGroupId
+                    });
+                }
+            }
+
+            return new AclInfo
+            {
+                InheritParentPermissions = acl.InheritParentPermissions,
+                AclItems = itemsExploded.ToArray()
+            };
         }
 
         private IEffectivePermissionFeed GetEffectivePermissionsFeed()

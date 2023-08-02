@@ -103,7 +103,7 @@ namespace Redb.OBAC.Tests.ApiHostTests
             var apiS =             GetApiHost();
         }
 
-        [Test]
+        [Test, Order(10)]
         public async Task TreeManipulation()
         {
             var api = GetApiHost();
@@ -138,7 +138,7 @@ namespace Redb.OBAC.Tests.ApiHostTests
             //await api.DeleteTree(new DeleteTreeParams {TreeId = Tree2Id.ToGrpcUuid(), ForceDeleteIfNotEmpty=true}, null);
         }
 
-        [Test]
+        [Test, Order(20)]
         public async Task TreePermissions1acl2permission()
         {
             var api = GetApiHost();
@@ -187,7 +187,6 @@ namespace Redb.OBAC.Tests.ApiHostTests
             await api.SetAcl(gp, null);
 
             // user 1 must have reading right to entire node1 subtree plus editor rights to node 1-2
-            // todo check with authorize method
             
             var newAcl = await api.GetAcl(new GetAclParams
             {
@@ -196,12 +195,22 @@ namespace Redb.OBAC.Tests.ApiHostTests
             }, null);
             Assert.AreEqual(2, newAcl.Acl.Count);
             Assert.AreEqual(gp.InheritParentPermissions, newAcl.InheritParentPermissions);
+            
+            // user 1 must have reading and editing right to entire node1 subtree plus editor rights to node 1-2
+            var ep = await api.GetEffectivePermissions(new GetEffectivePermissionsParams
+            {                 
+                ObjectType = Tree3Id.ToGrpcUuid(),
+                ObjectId = Node1_2_id,
+                UserId = User3Id,
+            }, null);
+            Assert.AreEqual(2, ep.EffectivePermissions.Count);
+            Assert.IsNotNull(ep.EffectivePermissions.Single(p=>p.Equals(Perm_Read.ToGrpcUuid())));
+            Assert.IsNotNull(ep.EffectivePermissions.Single(p=>p.Equals(Perm_Change.ToGrpcUuid())));
         }
-        
+
         [Test]
         public async Task TreePermissions2acl2role()
         {
-            throw new NotImplementedException("todo assign permission to role");
             var api = GetApiHost();
 
             await api.EnsureTree(new EnsureTreeParams
@@ -224,30 +233,34 @@ namespace Redb.OBAC.Tests.ApiHostTests
             gp.Acl.Add(new AclItemParams
             {
                 UserId = User3Id,
-                Permission = Perm_Read.ToGrpcUuid(),
+                Permission = Role_Editor.ToGrpcUuid(),
                 PermissionType = AclItemParams.Types.PermissionTypeEnum.Role,
             });
             await api.SetAcl(gp, null);
-            
 
-            gp = new SetAclParams()
+
+            // todo check with authorize method
+
+            var newAcl = await api.GetAcl(new GetAclParams
             {
                 ObjectType = Tree3Id.ToGrpcUuid(),
-                ObjectId = Node1_2_id
-            };
-            gp.Acl.Add(new AclItemParams
-            {
+                ObjectId = Node1_id,
+            }, null);
+            Assert.AreEqual(1, newAcl.Acl.Count);
+            Assert.AreEqual(AclItemParams.Types.PermissionTypeEnum.Role, newAcl.Acl[0].PermissionType);
+            Assert.AreEqual(gp.InheritParentPermissions, newAcl.InheritParentPermissions);
+            // user 1 must have reading and editing right to entire node1 subtree plus editor rights to node 1-2
+            var ep = await api.GetEffectivePermissions(new GetEffectivePermissionsParams
+            {                 
+                ObjectType = Tree3Id.ToGrpcUuid(),
+                ObjectId = Node1_id,
                 UserId = User3Id,
-                Permission = Perm_Read.ToGrpcUuid() 
-            });
-            gp.Acl.Add(new AclItemParams
-            {
-                UserId = User3Id,
-                Permission = Perm_Change.ToGrpcUuid() 
-            });
-            await api.SetAcl(gp, null);
-            
-            // user 1 must have reading right to entire node1 subtree plus editor rights to node 1-2
+
+                
+            }, null);
+            Assert.AreEqual(2, ep.EffectivePermissions.Count);
+            Assert.IsNotNull(ep.EffectivePermissions.Single(p=>p.Equals(Perm_Read.ToGrpcUuid())));
+            Assert.IsNotNull(ep.EffectivePermissions.Single(p=>p.Equals(Perm_Change.ToGrpcUuid())));
         }
 
         private async Task SetupSecurityModel(ApiHostImpl api)
