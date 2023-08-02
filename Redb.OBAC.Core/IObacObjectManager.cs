@@ -14,7 +14,7 @@ namespace Redb.OBAC.Core
         
         #region tree objects
         
-        Task<TreeObjectTypeInfo> GetTree(Guid treeObjectTypeId);
+        Task<TreeObjectTypeInfo> GetTree(Guid? treeObjectTypeId, int? intId = null, string stringId=null);
         Task DeleteTree(Guid treeObjectTypeId, bool force=false);
 
         Task<TreeObjectTypeInfo> EnsureTree(Guid treeObjectTypeId, string description = null, 
@@ -22,7 +22,7 @@ namespace Redb.OBAC.Core
         
         Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId);
 
-        Task<TreeNodeInfo> GetTreeNode(Guid treeId, int treeNodeId);
+        Task<TreeNodeInfo> GetTreeNode(Guid treeId, int? treeNodeId, int? intId = null, string stringId=null);
         Task<List<TreeNodeInfo>> GetTreeNodes(Guid treeId, int? startingNodeId=null, bool deep=false);
         
         

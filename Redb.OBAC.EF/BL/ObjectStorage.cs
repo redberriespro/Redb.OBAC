@@ -680,11 +680,63 @@ namespace Redb.OBAC.EF.BL
                 }
             };
         }
+        
+        public async Task<TreeObjectTypeInfo> GetTreeObjectByExternalIntId(int externalId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var res = await ctx.ObacTree.FirstOrDefaultAsync(t => t.ExternalIdInt == externalId);
+            return res switch
+            {
+                null => null,
+                _ => new TreeObjectTypeInfo
+                {
+                    TreeObjectTypeId = res.Id,
+                    Description = res.Description
+                }
+            };
+        }
+        
+        public async Task<TreeObjectTypeInfo> GetTreeObjectByExternalStringId(string externalId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var res = await ctx.ObacTree.FirstOrDefaultAsync(t => t.ExternalIdString == externalId);
+            return res switch
+            {
+                null => null,
+                _ => new TreeObjectTypeInfo
+                {
+                    TreeObjectTypeId = res.Id,
+                    Description = res.Description
+                }
+            };
+        }
 
         public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, int nodeId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             var nd = await ctx.ObacTreeNodes.SingleOrDefaultAsync(tn => tn.TreeId == treeId && tn.Id == nodeId);
+            return nd switch
+            {
+                null => null,
+                _ => MakeTreeNodeInfo(treeId, nd)
+            };
+        }
+        
+        public async Task<TreeNodeInfo> GetTreeNodeByExternalIntId(Guid treeId, int externalId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var nd = await ctx.ObacTreeNodes.SingleOrDefaultAsync(tn => tn.TreeId == treeId && tn.ExternalIdInt == externalId);
+            return nd switch
+            {
+                null => null,
+                _ => MakeTreeNodeInfo(treeId, nd)
+            };
+        }
+        
+        public async Task<TreeNodeInfo> GetTreeNodeByExternalStringId(Guid treeId, string externalId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var nd = await ctx.ObacTreeNodes.SingleOrDefaultAsync(tn => tn.TreeId == treeId && tn.ExternalIdString == externalId);
             return nd switch
             {
                 null => null,

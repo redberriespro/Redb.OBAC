@@ -431,7 +431,7 @@ namespace Redb.OBAC.ApiHost
                 {
                     res.Add(new ResolveExternalIdsResults.Types.ResolveExternalItemResult
                     {
-                        ExternalItem = userItem, Success = true, ItemId = u.SubjectId
+                        ExternalItem = userItem, Success = true, ItemIdGuid = u.TreeObjectTypeId.ToGrpcUuid()
                     });
                 }
             }
@@ -445,6 +445,7 @@ namespace Redb.OBAC.ApiHost
             foreach (var userItem in items)
             {
                 var u = await _objectManager.GetTreeNode(
+                    userItem.NodeTypeId.ToGuid(),
                     null, 
                     userItem.ExternalIntId == 0? null:
                         userItem.ExternalIntId, 
@@ -461,7 +462,7 @@ namespace Redb.OBAC.ApiHost
                 {
                     res.Add(new ResolveExternalIdsResults.Types.ResolveExternalItemResult
                     {
-                        ExternalItem = userItem, Success = true, ItemId = u.SubjectId
+                        ExternalItem = userItem, Success = true, ItemId = u.NodeId
                     });
                 }
             }

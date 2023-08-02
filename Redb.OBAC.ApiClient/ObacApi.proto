@@ -293,7 +293,8 @@ message ResolveExternalIdsResults {
     message ResolveExternalItemResult {
         ResolveExternalItem ExternalItem = 1;
         int32 ItemId = 2;
-        bool Success = 3;
+        UUID ItemIdGuid = 3;
+        bool Success = 4;
     }
     repeated ResolveExternalItemResult Items = 1;
 }

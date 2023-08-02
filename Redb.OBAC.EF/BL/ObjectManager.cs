@@ -30,9 +30,15 @@ namespace Redb.OBAC.EF.BL
             _treeObjectManager = new TreeObjectManager(store, cacheBackend, extraEpFeeds);
         }
 
-        public async Task<TreeObjectTypeInfo> GetTree(Guid treeObjectTypeId)
+        public async Task<TreeObjectTypeInfo> GetTree(Guid? treeObjectTypeId, int? intId = null, string stringId=null)
         {
-            return await _treeObjectManager.GetTreeObjectById(treeObjectTypeId);
+            if (stringId != null)
+                return await _treeObjectManager.GetTreeObjectByExternalStringId(stringId);
+            if (intId.HasValue) 
+                return await _treeObjectManager.GetTreeObjectByExternalIntId(intId.Value);
+            if (treeObjectTypeId.HasValue)
+                return await _treeObjectManager.GetTreeObjectById(treeObjectTypeId.Value);
+            throw new ArgumentException("GetTree - no ID is provided");
         }
 
         public async Task DeleteTree(Guid treeObjectTypeId, bool force = false)
@@ -55,10 +61,15 @@ namespace Redb.OBAC.EF.BL
             return await _treeObjectManager.GetTreeNodes(treeId, startingNodeId, deep);
         }
         
-        public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, int treeNodeId)
+        public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, int? treeNodeId, int? intId = null, string stringId=null)
         {
-            return await _treeObjectManager.GetTreeNode(treeId, treeNodeId);
-
+            if (stringId != null)
+                return await _treeObjectManager.GetTreeNodeByExternalStringId(treeId, stringId);
+            if (intId.HasValue) 
+                return await _treeObjectManager.GetTreeNodeByExternalIntId(treeId, intId.Value);
+            if (treeNodeId.HasValue)
+                return await _treeObjectManager.GetTreeNode(treeId, treeNodeId.Value);
+            throw new ArgumentException("GetTreeNode - no ID is provided");
         }
 
 
