@@ -686,7 +686,8 @@ namespace Redb.OBAC.MongoDriver.BL
                 NodeId = nd.NodeId,
                 ParentNodeId = nd.ParentId,
                 InheritParentPermissions = nd.InheritParentPermissions,
-                OwnerUserid = nd.OwnerUserId
+                OwnerUserid = nd.OwnerUserId,
+                Acl = nd.Acl
             };
         }
 
@@ -756,10 +757,11 @@ namespace Redb.OBAC.MongoDriver.BL
 
         public async Task SetTreeNodePermissions(Guid treeId,
             int treeNodeId,
-            bool inheritParentPermissions,
+            AclInfo acl, 
             TreeNodePermissionInfo[] ptoadd,
             TreeNodePermissionInfo[] ptodel)
         {
+            var inheritParentPermissions = acl.InheritParentPermissions; 
             await using var ctx = _storageProvider.CreateObacContext();
             foreach (var addItem in ptoadd)
             {
@@ -769,7 +771,12 @@ namespace Redb.OBAC.MongoDriver.BL
             }
 
             var nd = await ctx.ObacTreeNodes.
-            UpdateOneAsync(n => n.TreeId == treeId && n.NodeId == treeNodeId, Builders<ObacTreeNodeEntity>.Update.Set(x => x.InheritParentPermissions, inheritParentPermissions));
+            UpdateOneAsync(n => n.TreeId == treeId && n.NodeId == treeNodeId,
+                Builders<ObacTreeNodeEntity>
+                    .Update
+                    .Set(x => x.InheritParentPermissions, inheritParentPermissions)
+                    .Set(x => x.Acl, acl)
+                );
 
             foreach (var delItem in ptodel)
             {

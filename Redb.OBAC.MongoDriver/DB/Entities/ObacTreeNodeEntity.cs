@@ -1,5 +1,6 @@
 using MongoDB.Bson.Serialization.Attributes;
 using System;
+using Redb.OBAC.Core.Models;
 
 namespace Redb.OBAC.MongoDriver.DB.Entities
 {
@@ -28,8 +29,10 @@ namespace Redb.OBAC.MongoDriver.DB.Entities
         
         [BsonElement("inherit_parent_perms")]
         public bool InheritParentPermissions { get; set; }
-
         
+        [BsonElement("acl")]
+        public AclInfo Acl { get; set; }
+
         [BsonElement("external_id_int")] 
         public int? ExternalIdInt { get; set; }
 

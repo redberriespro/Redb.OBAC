@@ -752,6 +752,7 @@ namespace Redb.OBAC.EF.BL
                 NodeId = nd.Id,
                 ParentNodeId = nd.ParentId,
                 InheritParentPermissions = nd.InheritParentPermissions,
+                Acl = nd.AclJSON,
                 OwnerUserid = nd.OwnerUserId
             };
         }
@@ -816,17 +817,21 @@ namespace Redb.OBAC.EF.BL
 
         public async Task SetTreeNodePermissions(Guid treeId,
             int treeNodeId,
-            bool inheritParentPermissions,
+            AclInfo acl,
             TreeNodePermissionInfo[] ptoadd,
             TreeNodePermissionInfo[] ptodel)
         {
+            var inheritParentPermissions = acl.InheritParentPermissions;
+
             await using var ctx = _storageProvider.CreateObacContext();
 
             var nd = await ctx.ObacTreeNodes.SingleAsync(n => n.TreeId == treeId
                                                             && n.Id == treeNodeId
                 );
             nd.InheritParentPermissions = inheritParentPermissions;
+            nd.AclJSON = acl;
             ctx.Entry(nd).Property(a => a.InheritParentPermissions).IsModified = true;
+            ctx.Entry(nd).Property(a => a.Acl).IsModified = true;
 
             foreach (var delItem in ptodel)
             {

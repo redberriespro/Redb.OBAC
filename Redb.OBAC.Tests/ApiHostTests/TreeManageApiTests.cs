@@ -139,7 +139,7 @@ namespace Redb.OBAC.Tests.ApiHostTests
         }
 
         [Test]
-        public async Task TreePermissions1()
+        public async Task TreePermissions1acl2permission()
         {
             var api = GetApiHost();
 
@@ -163,7 +163,60 @@ namespace Redb.OBAC.Tests.ApiHostTests
             gp.Acl.Add(new AclItemParams
             {
                 UserId = User3Id,
+                PermissionType = AclItemParams.Types.PermissionTypeEnum.Permission,
                 Permission = Perm_Read.ToGrpcUuid() 
+            });
+            await api.SetAcl(gp, null);
+            
+
+            gp = new SetAclParams()
+            {
+                ObjectType = Tree3Id.ToGrpcUuid(),
+                ObjectId = Node1_2_id
+            };
+            gp.Acl.Add(new AclItemParams
+            {
+                UserId = User3Id,
+                Permission = Perm_Read.ToGrpcUuid() 
+            });
+            gp.Acl.Add(new AclItemParams
+            {
+                UserId = User3Id,
+                Permission = Perm_Change.ToGrpcUuid() 
+            });
+            await api.SetAcl(gp, null);
+            
+            // user 1 must have reading right to entire node1 subtree plus editor rights to node 1-2
+        }
+        
+        [Test]
+        public async Task TreePermissions2acl2role()
+        {
+            throw new NotImplementedException("todo assign permission to role");
+            var api = GetApiHost();
+
+            await api.EnsureTree(new EnsureTreeParams
+            {
+                TreeId = Tree3Id.ToGrpcUuid(),
+                Description = "test3",
+                ExternalIntId = 33,
+                ExternalStrId = "3-1"
+            }, null);
+
+            await SetupUsersAndGroups(api);
+            await MakeSimpleTree(api, Tree3Id);
+            await SetupSecurityModel(api);
+
+            var gp = new SetAclParams()
+            {
+                ObjectType = Tree3Id.ToGrpcUuid(),
+                ObjectId = Node1_id
+            };
+            gp.Acl.Add(new AclItemParams
+            {
+                UserId = User3Id,
+                Permission = Perm_Read.ToGrpcUuid(),
+                PermissionType = AclItemParams.Types.PermissionTypeEnum.Role,
             });
             await api.SetAcl(gp, null);
             

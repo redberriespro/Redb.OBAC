@@ -60,6 +60,8 @@ namespace Redb.OBAC.EF.DB
                 .WithMany()
                 .HasForeignKey(p => p.OwnerUserId);
 
+            // acl - permissions part
+            
             builder.Entity<ObacTreeNodePermissionEntity>()
                 .HasIndex(k => new { k.UserId, k.UserGroupId, k.TreeId, k.NodeId, k.PermissionId })
                 .IsUnique();
@@ -92,9 +94,7 @@ namespace Redb.OBAC.EF.DB
                 .WithMany()
                 .HasForeignKey(p => new { p.TreeId, p.NodeId })
                 .OnDelete(DeleteBehavior.Cascade);
-
-
-
+            
             // userGroups
             builder.Entity<ObacUserInGroupEntity>().HasKey(x => new { x.UserId, x.GroupId });
             builder.Entity<ObacUserInGroupEntity>().HasIndex(x => x.UserId);

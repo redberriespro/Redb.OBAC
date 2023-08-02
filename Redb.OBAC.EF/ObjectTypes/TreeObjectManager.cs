@@ -16,6 +16,9 @@ using Redb.OBAC.Tree;
 
 namespace Redb.OBAC.EF.ObjectTypes
 {
+    /// <summary>
+    /// todo merge with Mongo.TreeObjectManager, introduce IObjectStorage interface, pull up the manager to OBAC.Core
+    /// </summary>
     public class TreeObjectManager
     {
         private readonly ObjectStorage _storage;
@@ -179,16 +182,33 @@ namespace Redb.OBAC.EF.ObjectTypes
                 tr, treeNodeId);
         }
 
+        public async Task<AclInfo> GetTreeNodeAcl(Guid treeId, int treeNodeId)
+        {
+            var tn = await _storage.GetTreeNode(treeId, treeNodeId);
+            return tn.Acl;
+        }
+        
         public async Task SetTreeNodeAcl(Guid treeId, int treeNodeId, AclInfo acl)
         {
-            //throw new NotImplementedException("Role based permissions needs to be supported!");
+            // that's how we deal with role-based ACL items:
+            // internally, TreePermissioinCalculator doesn't know about roles at all
+            // we explode toles to a set of individual permissions
+            // on the other hand, we store information about roles within db (see) _storage.SetTreeNodePermissions. In addition,
+            
+            // TODO - store in the DB a list of individual permission has been set at the moment of SetACL call
+            // just in case role's permission set will change in the future
+            
             try
             {
+                EnsureAclValid(acl);
+
                 var oldAcl = await GetTreeNodeAcl(treeId, treeNodeId);
 
-                var diff = AclComparer.CompareAcls(oldAcl, acl);
+                var oldAclExploded = await ExplodeAcl(oldAcl);
+                var newAclExploded = await ExplodeAcl(acl);
+                
+                var diff = AclComparer.CompareAcls(oldAclExploded, newAclExploded);
 
-                EnsureAclValid(acl);
 
                 if (!diff.AclItemsToBeAdded.Any()
                     && !diff.AclItemsToBeRemoved.Any()
@@ -210,13 +230,25 @@ namespace Redb.OBAC.EF.ObjectTypes
                     ptodel,
                     diff.InheritParentPermissionsAction);
 
-                await _storage.SetTreeNodePermissions(treeId, treeNodeId, acl.InheritParentPermissions, ptoadd, ptodel);
+                await _storage.SetTreeNodePermissions(treeId,
+                    treeNodeId, 
+                    acl,
+                    ptoadd,
+                    ptodel);
             }
             catch (DbUpdateException ex)
             {
                 await RepairTreeNodeEffectivePermissions(treeId, treeNodeId);
                 throw new ObacException("Error when ACL set", ex);
             }
+        }
+
+        /// <summary>
+        /// Replace role-based acl with individual permissions exploded for roles
+        /// </summary>
+        private async Task<AclInfo> ExplodeAcl(AclInfo acl)
+        {
+            return acl; // todo
         }
 
         private IEffectivePermissionFeed GetEffectivePermissionsFeed()
@@ -245,19 +277,6 @@ namespace Redb.OBAC.EF.ObjectTypes
                 if (item.UserId.HasValue && item.UserGroupId.HasValue) 
                     throw new ObacException($"{item.ToString()}: both user id and user group has set");
             }
-        }
-
-        public async Task<AclInfo> GetTreeNodeAcl(Guid treeId, int treeNodeId)
-        {
-            var tn = await _storage.GetTreeNode(treeId, treeNodeId);
-            var perms = await _storage.GetTreeNodePermissions(treeId, treeNodeId);
-            var aclItems = TreeObjectMapper.TreeObjectPermissionsToAclList(perms);
-                
-            return new AclInfo
-            {
-                InheritParentPermissions = tn.InheritParentPermissions,
-                AclItems = aclItems
-            };
         }
         
         private TreeActionContext MakeTreeActionContext(Guid treeId)

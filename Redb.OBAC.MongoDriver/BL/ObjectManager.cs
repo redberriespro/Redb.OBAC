@@ -15,6 +15,7 @@ namespace Redb.OBAC.MongoDriver.BL
     /// <summary>
     /// aggregator class managing all types of objects with their
     /// respective sub-managers
+    /// todo merge with EF.TreeObjectManager, introduce IObjectStorage interface, pull up the manager to OBAC.Core
     /// </summary>
     public class ObjectManager: IObacObjectManager
     {

@@ -1,5 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
+using Redb.OBAC.Core.Models;
 
 namespace Redb.OBAC.EF.DB.Entities
 {
@@ -32,5 +34,26 @@ namespace Redb.OBAC.EF.DB.Entities
         [Column("external_id_int")] public int? ExternalIdInt { get; set; }
 
         [Column("external_id_str")] public string ExternalIdString { get; set; }
+        
+        /// <summary>
+        /// Access Control List set for the node
+        /// </summary>
+        [Column("acl")] public string Acl { get; set; }
+
+        [NotMapped]
+        public AclInfo AclJSON
+        {
+            get
+            {
+                if (String.IsNullOrWhiteSpace(Acl)) return new AclInfo
+                {
+                    InheritParentPermissions = InheritParentPermissions,
+                    AclItems = Array.Empty<AclItemInfo>()
+                };
+                
+                return JsonConvert.DeserializeObject<AclInfo>(Acl);
+            }
+            set { Acl = JsonConvert.SerializeObject(value); }
+        }
     }
 }

@@ -158,6 +158,7 @@ namespace Redb.OBAC.Tree
                     NodeId = n.NodeId,
                     ParentNodeId = n.ParentNodeId,
                     InheritParentPermissions = n.InheritParentPermissions,
+                    
                     OwnerUserid = n.OwnerUserid
                 };
                 nodesToAdd[n.NodeId] = ni;

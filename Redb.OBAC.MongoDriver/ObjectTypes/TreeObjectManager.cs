@@ -16,6 +16,9 @@ using Redb.OBAC.Tree;
 
 namespace Redb.OBAC.MongoDriver.ObjectTypes
 {
+    /// <summary>
+    /// todo merge with EF.TreeObjectManager, introduce IObjectStorage interface, pull up the manager to OBAC.Core
+    /// </summary>
     public class TreeObjectManager
     {
         private readonly ObjectStorage _storage;
@@ -178,8 +181,15 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
                 tr, treeNodeId);
         }
 
+        public async Task<AclInfo> GetTreeNodeAcl(Guid treeId, int treeNodeId)
+        {
+            var tn = await _storage.GetTreeNode(treeId, treeNodeId);
+            return tn.Acl;
+        }
+        
         public async Task SetTreeNodeAcl(Guid treeId, int treeNodeId, AclInfo acl)
         {
+            throw new NotImplementedException("sync with EF version");
             try
             {
                 var oldAcl = await GetTreeNodeAcl(treeId, treeNodeId);
@@ -208,7 +218,7 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
                     ptodel,
                     diff.InheritParentPermissionsAction);
 
-                await _storage.SetTreeNodePermissions(treeId, treeNodeId, acl.InheritParentPermissions, ptoadd, ptodel);
+                await _storage.SetTreeNodePermissions(treeId, treeNodeId, acl, ptoadd, ptodel);
             }
             catch(Exception ex)
             {
@@ -244,19 +254,6 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
                 if (item.UserId.HasValue && item.UserGroupId.HasValue)
                     throw new ObacException($"{item.ToString()}: both user id and user group has set");
             }
-        }
-
-        public async Task<AclInfo> GetTreeNodeAcl(Guid treeId, int treeNodeId)
-        {
-            var tn = await _storage.GetTreeNode(treeId, treeNodeId);
-            var perms = await _storage.GetTreeNodePermissions(treeId, treeNodeId);
-            var aclItems = TreeObjectMapper.TreeObjectPermissionsToAclList(perms);
-
-            return new AclInfo
-            {
-                InheritParentPermissions = tn.InheritParentPermissions,
-                AclItems = aclItems
-            };
         }
 
         private TreeActionContext MakeTreeActionContext(Guid treeId)
