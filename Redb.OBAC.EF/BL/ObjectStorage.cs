@@ -897,7 +897,7 @@ namespace Redb.OBAC.EF.BL
             if (startingNodeId.HasValue)
             {
                 // start from given node
-                var qry = @"select id,  tree_id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id
+                var qry = @"select id,  tree_id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id, acl
             from obac_tree_nodes
             where parent_id = {0} and tree_id={1} order by id desc";
 
@@ -907,7 +907,7 @@ namespace Redb.OBAC.EF.BL
             else
             {
                 // start from root
-                var qry = @"select id, tree_id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id
+                var qry = @"select id, tree_id, parent_id, external_id_int, external_id_str, inherit_parent_perms, owner_user_id, acl
             from obac_tree_nodes
             where parent_id is null and tree_id={0} order by id desc";
 

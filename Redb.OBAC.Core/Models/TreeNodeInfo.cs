@@ -11,8 +11,8 @@ namespace Redb.OBAC.Core.Models
             get => Acl.InheritParentPermissions;
             set { Acl.InheritParentPermissions = value; }
         }
-        
-        public AclInfo Acl { get; set; } 
+
+        public AclInfo Acl { get; set; } = new AclInfo();
         public int OwnerUserid { get; set; }
     }
 }
