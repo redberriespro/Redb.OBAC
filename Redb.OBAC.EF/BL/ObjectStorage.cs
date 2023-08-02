@@ -757,7 +757,7 @@ namespace Redb.OBAC.EF.BL
             };
         }
 
-        public async Task CreateTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId)
+        public async Task CreateTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId, int? intId = null, string stringId=null)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             await ctx.ObacTreeNodes.AddAsync(new ObacTreeNodeEntity
@@ -766,6 +766,8 @@ namespace Redb.OBAC.EF.BL
                 Id = nodeId,
                 ParentId = parentId,
                 OwnerUserId = ownerUserId,
+                ExternalIdInt = intId,
+                ExternalIdString = stringId,
                 InheritParentPermissions = true
             });
             await ctx.SaveChangesAsync();

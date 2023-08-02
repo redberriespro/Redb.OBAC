@@ -52,9 +52,9 @@ namespace Redb.OBAC.EF.BL
             return await _treeObjectManager.EnsureTreeObject(treeObjectTypeId, description,intId, stringId);
         }
 
-        public async Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId)
+        public async Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId,  int? intId = null, string stringId=null)
         {
-            await _treeObjectManager.EnsureTreeNode(treeId, nodeId, parentId, ownerUserId);
+            await _treeObjectManager.EnsureTreeNode(treeId, nodeId, parentId, ownerUserId, intId, stringId);
         }
 
         public async Task<List<TreeNodeInfo>> GetTreeNodes(Guid treeId, int? startingNodeId = null, bool deep=false)

@@ -88,12 +88,12 @@ namespace Redb.OBAC.EF.ObjectTypes
             };
         }
 
-        public async Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId)
+        public async Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId, int? intId = null, string stringId=null)
         {
             var nd = await _storage.GetTreeNode(treeId, nodeId);
             if (nd == null)
             {
-                await CreateTreeNode(treeId, nodeId, parentId, ownerUserId);
+                await CreateTreeNode(treeId, nodeId, parentId, ownerUserId, intId, stringId);
             }
             else
             {
@@ -120,13 +120,13 @@ namespace Redb.OBAC.EF.ObjectTypes
                 await tc.RepairNodePermissions(GetEffectivePermissionsFeed(), tr, oldParent.Value);
         }
 
-        private async Task CreateTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId)
+        private async Task CreateTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId,int? intId = null, string stringId=null)
         {
             // create new Node
             var tc = new TreePermissionCalculator();
             var tr = MakeTreeActionContext(treeId);
             
-            await _storage.CreateTreeNode(treeId, nodeId, parentId, ownerUserId);
+            await _storage.CreateTreeNode(treeId, nodeId, parentId, ownerUserId, intId, stringId);
 
             await tc.AfterNodeInserted(
                 GetEffectivePermissionsFeed(),

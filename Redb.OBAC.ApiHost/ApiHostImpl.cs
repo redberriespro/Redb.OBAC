@@ -64,7 +64,7 @@ namespace Redb.OBAC.ApiHost
                     0 => null,
                     _ => request.ExternalIntId
                 },
-                request.ExternalStrId);
+                  string.IsNullOrEmpty(request.ExternalStrId)?null:request.ExternalStrId);
             
             return new TreeInfoResults
             {
@@ -86,7 +86,10 @@ namespace Redb.OBAC.ApiHost
                         0 => null,
                         _ => ni.ParentId
                     },
-                    ni.OwnerUserId);
+                    ni.OwnerUserId,
+                    ni.ExternalIntId==0?null:ni.ExternalIntId,
+                    String.IsNullOrEmpty(ni.ExternalStrId)?null:ni.ExternalStrId
+                );
             }
 
             return new EnsureTreeNodeResults { TreeId = request.TreeId};
@@ -209,7 +212,9 @@ namespace Redb.OBAC.ApiHost
             ServerCallContext context)
         {
             await _objectManager.EnsureUser(
-                request.UserId, request.Description, request.ExternalIntId, request.ExternalStrId);
+                request.UserId, request.Description,
+                request.ExternalIntId == 0?null:request.ExternalIntId,
+                 string.IsNullOrEmpty(request.ExternalStrId)?null:request.ExternalStrId);
 
             var res = new UserInfoResults
             {
@@ -261,7 +266,10 @@ namespace Redb.OBAC.ApiHost
             ServerCallContext context)
         {
             await _objectManager.EnsureUserGroup(
-                request.UserGroupId, request.Description, request.ExternalIntId, request.ExternalStrId);
+                request.UserGroupId,
+                request.Description,
+                request.ExternalIntId == 0?null:request.ExternalIntId, 
+                string.IsNullOrEmpty(request.ExternalStrId)?null:request.ExternalStrId);
 
             var res = new UserGroupInfoResults
             {
@@ -356,9 +364,8 @@ namespace Redb.OBAC.ApiHost
             {
                 var u = await _objectManager.GetUser(
                     null, 
-                    userItem.ExternalIntId == 0? null:
-                        userItem.ExternalIntId, 
-                    userItem.ExternalStringId);
+                    userItem.ExternalIntId == 0? null: userItem.ExternalIntId, 
+                    string.IsNullOrEmpty(userItem.ExternalStringId)?null:userItem.ExternalStringId);
                 
                 if (u == null)
                 {
@@ -386,9 +393,8 @@ namespace Redb.OBAC.ApiHost
             {
                 var u = await _objectManager.GetUserGroup(
                     null, 
-                    userItem.ExternalIntId == 0? null:
-                        userItem.ExternalIntId, 
-                    userItem.ExternalStringId);
+                    userItem.ExternalIntId == 0? null: userItem.ExternalIntId, 
+                    string.IsNullOrEmpty(userItem.ExternalStringId)?null:userItem.ExternalStringId);
                 
                 if (u == null)
                 {
@@ -416,9 +422,8 @@ namespace Redb.OBAC.ApiHost
             {
                 var u = await _objectManager.GetTree(
                     null, 
-                    userItem.ExternalIntId == 0? null:
-                        userItem.ExternalIntId, 
-                    userItem.ExternalStringId);
+                    userItem.ExternalIntId == 0? null: userItem.ExternalIntId, 
+                    string.IsNullOrEmpty(userItem.ExternalStringId)?null:userItem.ExternalStringId);
                 
                 if (u == null)
                 {
@@ -447,9 +452,8 @@ namespace Redb.OBAC.ApiHost
                 var u = await _objectManager.GetTreeNode(
                     userItem.NodeTypeId.ToGuid(),
                     null, 
-                    userItem.ExternalIntId == 0? null:
-                        userItem.ExternalIntId, 
-                    userItem.ExternalStringId);
+                    userItem.ExternalIntId == 0? null: userItem.ExternalIntId, 
+                    string.IsNullOrEmpty(userItem.ExternalStringId)?null:userItem.ExternalStringId);
                 
                 if (u == null)
                 {

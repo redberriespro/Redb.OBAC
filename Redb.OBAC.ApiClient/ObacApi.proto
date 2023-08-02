@@ -58,6 +58,8 @@ message TreeNodeItemInfo {
     int32 Id=2;
     int32 ParentId=3; // 0 for root node
     int32 OwnerUserId = 4;
+    optional string ExternalStrId = 5;
+    optional int32 ExternalIntId = 6;
 }
 
 message TreeInfoResults {
@@ -81,8 +83,8 @@ message DeleteTreeParams {
 message EnsureTreeParams {
     UUID TreeId = 1;
     string Description = 2;
-    string ExternalStrId = 3;
-    int32 ExternalIntId = 4;
+    optional string ExternalStrId = 3;
+    optional int32 ExternalIntId = 4;
 }
 
 message TreeNodeInfo {
@@ -231,8 +233,8 @@ message DeleteUserParams {
 message EnsureUserParams {
     int32 UserId = 1;
     string Description = 2;
-    string ExternalStrId = 3;
-    int32 ExternalIntId = 4;
+    optional string ExternalStrId = 3;
+    optional int32 ExternalIntId = 4;
 }
 
 message UserGroupInfoResults {
@@ -257,8 +259,8 @@ message DeleteUserGroupParams {
 message EnsureUserGroupParams {
     int32 UserGroupId = 1;
     string Description = 2;
-    string ExternalStrId = 3;
-    int32 ExternalIntId = 4;
+    optional string ExternalStrId = 3;
+    optional int32 ExternalIntId = 4;
 }
 
 message AddUserToGroupParams {

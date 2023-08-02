@@ -20,7 +20,7 @@ namespace Redb.OBAC.Core
         Task<TreeObjectTypeInfo> EnsureTree(Guid treeObjectTypeId, string description = null, 
             int? intId = null, string stringId=null);
         
-        Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId);
+        Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId, int? intId = null, string stringId=null);
 
         Task<TreeNodeInfo> GetTreeNode(Guid treeId, int? treeNodeId, int? intId = null, string stringId=null);
         Task<List<TreeNodeInfo>> GetTreeNodes(Guid treeId, int? startingNodeId=null, bool deep=false);
