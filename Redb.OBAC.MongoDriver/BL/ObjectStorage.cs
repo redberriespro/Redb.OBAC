@@ -687,7 +687,7 @@ namespace Redb.OBAC.MongoDriver.BL
                 ParentNodeId = nd.ParentId,
                 InheritParentPermissions = nd.InheritParentPermissions,
                 OwnerUserid = nd.OwnerUserId,
-                Acl = nd.Acl
+                Acl = nd.Acl ?? new AclInfo()
             };
         }
 

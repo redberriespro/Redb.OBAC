@@ -189,14 +189,25 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
         
         public async Task SetTreeNodeAcl(Guid treeId, int treeNodeId, AclInfo acl)
         {
-            throw new NotImplementedException("sync with EF version");
+                    // that's how we deal with role-based ACL items:
+            // internally, TreePermissioinCalculator doesn't know about roles at all
+            // we explode toles to a set of individual permissions
+            // on the other hand, we store information about roles within db (see) _storage.SetTreeNodePermissions. In addition,
+            
+            // TODO - store in the DB a list of individual permission has been set at the moment of SetACL call
+            // just in case role's permission set will change in the future
+            
             try
             {
+                EnsureAclValid(acl);
+
                 var oldAcl = await GetTreeNodeAcl(treeId, treeNodeId);
 
-                var diff = AclComparer.CompareAcls(oldAcl, acl);
+                var oldAclExploded = await ExplodeAcl(oldAcl);
+                var newAclExploded = await ExplodeAcl(acl);
+                
+                var diff = AclComparer.CompareAcls(oldAclExploded, newAclExploded);
 
-                EnsureAclValid(acl);
 
                 if (!diff.AclItemsToBeAdded.Any()
                     && !diff.AclItemsToBeRemoved.Any()
@@ -218,14 +229,25 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
                     ptodel,
                     diff.InheritParentPermissionsAction);
 
-                await _storage.SetTreeNodePermissions(treeId, treeNodeId, acl, ptoadd, ptodel);
+                await _storage.SetTreeNodePermissions(treeId,
+                    treeNodeId, 
+                    acl,
+                    ptoadd,
+                    ptodel);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await RepairTreeNodeEffectivePermissions(treeId, treeNodeId);
-                throw new ObacException("Error when ACL set");
+                throw new ObacException("Error when ACL set", ex);
             }
+        }
 
+        /// <summary>
+        /// Replace role-based acl with individual permissions exploded for roles
+        /// </summary>
+        private async Task<AclInfo> ExplodeAcl(AclInfo acl)
+        {
+            return acl; // todo
         }
 
         private IEffectivePermissionFeed GetEffectivePermissionsFeed()

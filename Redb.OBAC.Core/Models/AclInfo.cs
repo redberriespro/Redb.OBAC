@@ -39,7 +39,7 @@ namespace Redb.OBAC.Core.Models
     
     public class AclInfo
     {
-        public AclItemInfo[] AclItems { get; set; }
+        public AclItemInfo[] AclItems { get; set; } = Array.Empty<AclItemInfo>();
         public bool InheritParentPermissions { get; set; }
     }
 }

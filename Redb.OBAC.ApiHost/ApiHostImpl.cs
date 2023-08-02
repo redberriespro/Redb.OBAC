@@ -568,21 +568,28 @@ namespace Redb.OBAC.ApiHost
             {
                 var aclUser =  aclItem.UserId.HasValue ? await _objectManager.GetUser(aclItem.UserId) : null;
                 var aclUserGroup = aclItem.UserGroupId.HasValue ? await _objectManager.GetUserGroup(aclItem.UserGroupId) : null;
-                
-                res.Acl.Add(new AclItemParams
+
+                var aclItemGrpc = new AclItemParams
                 {
                     DenyPermission = aclItem.Kind == PermissionKindEnum.Deny,
                     Permission = aclItem.PermissionId.ToGrpcUuid(),
-                    
-                    UserId = aclItem.UserId??0,
-                    ExternalUserIntId = aclUser?.ExternalIntId??0,
-                    ExternalUserStringId = aclUser?.ExternalStringId,
-                    
-                    UserGroupId = aclItem.UserGroupId??0,
-                    ExternalUserGroupIntId = aclUserGroup?.ExternalIntId??0,
-                    ExternalUserGroupStringId = aclUserGroup?.ExternalStringId,
 
-                });
+                    UserId = aclItem.UserId ?? 0,
+                    ExternalUserIntId = aclUser?.ExternalIntId ?? 0,
+
+                    UserGroupId = aclItem.UserGroupId ?? 0,
+                    ExternalUserGroupIntId = aclUserGroup?.ExternalIntId ?? 0,
+                };
+
+                if (aclUser?.ExternalStringId != null)
+                    aclItemGrpc.ExternalUserStringId = aclUser?.ExternalStringId;
+
+                if (aclUserGroup?.ExternalStringId != null)
+                    aclItemGrpc.ExternalUserGroupStringId = aclUserGroup?.ExternalStringId;
+
+                        
+                res.Acl.Add(aclItemGrpc);
+
             }
 
             return res;

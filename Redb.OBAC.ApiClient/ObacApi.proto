@@ -151,10 +151,10 @@ message AclItemParams {
     PermissionTypeEnum PermissionType = 4;
     UUID Permission = 5;
     bool DenyPermission = 6;
-    int32 ExternalUserIntId = 7;
-    string ExternalUserStringId = 8;
-    int32 ExternalUserGroupIntId = 9;
-    string ExternalUserGroupStringId = 10;
+    optional int32 ExternalUserIntId = 7;
+    optional string ExternalUserStringId = 8;
+    optional int32 ExternalUserGroupIntId = 9;
+    optional string ExternalUserGroupStringId = 10;
 }
 
 message GetAclParams {
@@ -280,8 +280,8 @@ enum ResolveExternalItemType {
 
 message ResolveExternalItem {
     ResolveExternalItemType Type = 1;
-    int32 ExternalIntId = 2;
-    string ExternalStringId = 3;
+    optional int32 ExternalIntId = 2;
+    optional string ExternalStringId = 3;
     UUID NodeTypeId = 4;
 }
 

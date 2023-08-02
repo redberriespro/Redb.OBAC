@@ -185,8 +185,17 @@ namespace Redb.OBAC.Tests.ApiHostTests
                 Permission = Perm_Change.ToGrpcUuid() 
             });
             await api.SetAcl(gp, null);
-            
+
             // user 1 must have reading right to entire node1 subtree plus editor rights to node 1-2
+            // todo check with authorize method
+            
+            var newAcl = await api.GetAcl(new GetAclParams
+            {
+                ObjectType = Tree3Id.ToGrpcUuid(),
+                ObjectId = Node1_2_id
+            }, null);
+            Assert.AreEqual(2, newAcl.Acl.Count);
+            Assert.AreEqual(gp.InheritParentPermissions, newAcl.InheritParentPermissions);
         }
         
         [Test]
