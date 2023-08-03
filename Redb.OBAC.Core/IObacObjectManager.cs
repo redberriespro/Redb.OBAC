@@ -22,6 +22,9 @@ namespace Redb.OBAC.Core
         
         Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId, int? intId = null, string stringId=null);
 
+        Task DeleteTreeNode(Guid treeId, int requestId);
+
+        
         Task<TreeNodeInfo> GetTreeNode(Guid treeId, int? treeNodeId, int? intId = null, string stringId=null);
         Task<List<TreeNodeInfo>> GetTreeNodes(Guid treeId, int? startingNodeId=null, bool deep=false);
         
@@ -93,6 +96,6 @@ namespace Redb.OBAC.Core
         Task RemoveUserFromUserGroup(int userGroupId, int memberUserId);
         
         #endregion
-        
+
     }
 }

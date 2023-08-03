@@ -781,6 +781,14 @@ namespace Redb.OBAC.EF.BL
             };
         }
 
+        public async Task DeleteTreeNode(Guid treeId, int nodeId, int? ndParentNodeId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var n = await ctx.ObacTreeNodes.SingleAsync(n=>n.TreeId == treeId && n.Id == nodeId);
+            ctx.ObacTreeNodes.Remove(n);
+            await ctx.SaveChangesAsync();        
+        }
+        
         public async Task CreateTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId, int? intId = null, string stringId=null)
         {
             await using var ctx = _storageProvider.CreateObacContext();
@@ -1033,6 +1041,7 @@ namespace Redb.OBAC.EF.BL
                 await ctx.SaveChangesAsync();
         }
 
-     
+
+       
     }
 }

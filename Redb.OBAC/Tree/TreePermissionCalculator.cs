@@ -130,6 +130,11 @@ namespace Redb.OBAC.Tree
         {
             await RepairNodePermissions(feed, ctx, nodeId);
         }
+        
+        public async Task AfterNodeDeleted(IEffectivePermissionFeed feed, TreeActionContext ctx, int nodeId)
+        {
+            await RepairNodePermissions(feed, ctx, nodeId);
+        }
 
         /// <summary>
         /// incremental action set will be generated.
@@ -340,6 +345,7 @@ namespace Redb.OBAC.Tree
 
             return ngp.ToArray();
         }
+
 
      
     }

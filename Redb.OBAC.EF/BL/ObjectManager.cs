@@ -58,6 +58,12 @@ namespace Redb.OBAC.EF.BL
             await _treeObjectManager.EnsureTreeNode(treeId, nodeId, parentId, ownerUserId, intId, stringId);
         }
 
+        public async Task DeleteTreeNode(Guid treeId, int nodeId)
+        {
+            await _treeObjectManager.DeleteTreeNode(treeId, nodeId);
+        }
+
+
         public async Task<List<TreeNodeInfo>> GetTreeNodes(Guid treeId, int? startingNodeId = null, bool deep=false)
         {
             return await _treeObjectManager.GetTreeNodes(treeId, startingNodeId, deep);

@@ -88,6 +88,23 @@ namespace Redb.OBAC.EF.ObjectTypes
             };
         }
 
+        public async Task DeleteTreeNode(Guid treeId, int nodeId)
+        {
+            var nd = await _storage.GetTreeNode(treeId, nodeId);
+            if (nd == null)
+                return; // nothing to delete
+            var tc = new TreePermissionCalculator();
+            var tr = MakeTreeActionContext(treeId);
+
+            await tc.AfterNodeDeleted(
+                GetEffectivePermissionsFeed(),
+                tr, nodeId);
+
+            // todo move this before AfterNodeDeleted call and make sure it works (at this moment, it does not remove EP for deleted node
+            await _storage.DeleteTreeNode(treeId, nodeId, nd.ParentNodeId);
+
+        }
+        
         public async Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId, int? intId = null, string stringId=null)
         {
             var nd = await _storage.GetTreeNode(treeId, nodeId);
@@ -366,6 +383,8 @@ namespace Redb.OBAC.EF.ObjectTypes
                 await RepairTreeNodeEffectivePermissions(treeId, n);
             }
         }
+
+     
     }
 
 

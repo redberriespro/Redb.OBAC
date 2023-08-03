@@ -11,6 +11,7 @@ service ObacApiHost
 
     rpc GetTreeNodeById (GetTreeNodeParams) returns (GetTreeNodeResults) {}
     rpc EnsureTreeNodes (EnsureTreeNodeParams) returns (EnsureTreeNodeResults) {}
+    rpc DeleteTreeNode (DeleteTreeNodeParams) returns (DeleteTreeNodeResults) {}
 
     rpc GetPermissions (GetPermissionsParams) returns (PermissionsInfoResults) {}
     rpc GetPermissionById (GetPermissionParams) returns (PermissionInfoResults) {}
@@ -111,6 +112,15 @@ message EnsureTreeNodeResults {
         int32 Id=1;
     }
 }
+
+message DeleteTreeNodeParams {
+    UUID TreeId = 1;
+    int32 Id = 2;
+}
+
+message DeleteTreeNodeResults {
+}
+
 
 message GetTreeNodeParams {
     UUID TreeId = 1;

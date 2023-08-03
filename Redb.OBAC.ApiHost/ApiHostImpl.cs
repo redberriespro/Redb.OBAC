@@ -73,7 +73,14 @@ namespace Redb.OBAC.ApiHost
                 Description = ct.Description
             };
         }
-        
+
+        public override async Task<DeleteTreeNodeResults> DeleteTreeNode(DeleteTreeNodeParams request, ServerCallContext context)
+        {
+            var treeId = request.TreeId.ToGuid();
+            await _objectManager.DeleteTreeNode(treeId, request.Id);
+            return new DeleteTreeNodeResults();
+        }
+
         public override async Task<GetTreeNodeResults> GetTreeNodeById(GetTreeNodeParams request, ServerCallContext context)
         {
             var treeId = request.TreeId.ToGuid();
