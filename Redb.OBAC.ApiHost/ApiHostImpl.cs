@@ -341,6 +341,18 @@ namespace Redb.OBAC.ApiHost
             return new NoResults();
         }
 
+        public override async Task<EffectivePermissionsBatchResults> GetEffectivePermissionsBatch(GetEffectivePermissionsBatchParams request, ServerCallContext context)
+        {
+            var res = new EffectivePermissionsBatchResults(); 
+            foreach (var r in request.Batch)
+            {
+                var r2 = await GetEffectivePermissions(r, context);
+                res.Result.Add(r2);
+            }
+
+            return res;
+        }
+
         public override async Task<EffectivePermissionsResults> GetEffectivePermissions(GetEffectivePermissionsParams request,
             ServerCallContext context)
         {

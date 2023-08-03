@@ -39,6 +39,7 @@ service ObacApiHost
     rpc SetAcl(SetAclParams) returns (NoResults) {}
 
     rpc GetEffectivePermissions(GetEffectivePermissionsParams) returns (EffectivePermissionsResults) {}
+    rpc GetEffectivePermissionsBatch(GetEffectivePermissionsBatchParams) returns (EffectivePermissionsBatchResults) {}
 
     rpc ResolveExternalIds (ResolveExternalIdsParams) returns (ResolveExternalIdsResults) {}
 
@@ -192,7 +193,7 @@ message SetAclParams {
 message GetEffectivePermissionsParams {
     int32 UserId = 1;
     UUID ObjectType = 2;
-    int32 ObjectId = 3; 
+    int32 ObjectId = 3;
 }
 
 message EffectivePermissionsResults {
@@ -200,6 +201,14 @@ message EffectivePermissionsResults {
     UUID ObjectType = 2;
     int32 ObjectId = 3;
     repeated UUID EffectivePermissions = 4;
+}
+
+message GetEffectivePermissionsBatchParams {
+    repeated GetEffectivePermissionsParams Batch = 1; 
+}
+
+message EffectivePermissionsBatchResults {
+    repeated EffectivePermissionsResults Result = 2;
 }
 
 // roles
