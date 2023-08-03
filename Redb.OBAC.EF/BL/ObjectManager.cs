@@ -269,6 +269,12 @@ namespace Redb.OBAC.EF.BL
             _cacheBackend.InvalidateForUserGroup(userGroupId);
         }
 
+        public async Task<int[]> GetUserGroupsForUser(int userId)
+        {
+            return await _store.GetGroupsForUser(userId);
+        }
+
+        
         public async Task<SubjectInfo> GetUser(int? userId, int? intId = null, string stringId=null)
         {
             if (!userId.HasValue && !intId.HasValue && stringId == null)

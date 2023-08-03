@@ -75,6 +75,7 @@ namespace Redb.OBAC.Core
 
         Task<SubjectInfo> GetUser(int? userId, int? intId = null, string stringId=null);
 
+        Task<int[]> GetUserGroupsForUser(int userId);
         
         #endregion
 
@@ -93,9 +94,5 @@ namespace Redb.OBAC.Core
         
         #endregion
         
-        // todo sort these out        
-        //Task<SubjectInfo> GetSubjectByExternalIntId(SubjectTypeEnum subjectType, int extId);
-        //Task<SubjectInfo> GetSubjectByExternalStringId(SubjectTypeEnum subjectType, string extId);
-
     }
 }

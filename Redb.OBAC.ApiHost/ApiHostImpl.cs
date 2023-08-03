@@ -279,6 +279,14 @@ namespace Redb.OBAC.ApiHost
             return res;
         }
 
+        public override async Task<GetUserGroupsForUserResults> GetUserGroupsForUser(GetUserGroupsForUserParams request, ServerCallContext context)
+        {
+            var info = await _objectManager.GetUserGroupsForUser(request.UserId);
+            var res = new GetUserGroupsForUserResults();
+            res.UserGroupId.AddRange(info);
+            return res;
+        }
+
         public override async Task<UserGroupUsersInfoResults> GetUserGroupUsers(GetUserGroupParams request,
             ServerCallContext context)
         {

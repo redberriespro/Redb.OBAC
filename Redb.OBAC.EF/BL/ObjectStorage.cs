@@ -330,6 +330,16 @@ namespace Redb.OBAC.EF.BL
             await ctx.SaveChangesAsync();
         }
 
+        public async Task<int[]> GetGroupsForUser(int userId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var gl = await ctx
+                .ObacUsersInGroups
+                .Where(u=>u.UserId == userId)
+                .ToListAsync();
+            return gl.Select(g => g.GroupId).ToArray();
+        }
+        
         public async Task<IReadOnlyCollection<SubjectInfo>> GetGroupSubjects()
         {
             await using var ctx = _storageProvider.CreateObacContext();
@@ -1022,6 +1032,7 @@ namespace Redb.OBAC.EF.BL
             if (n != EP_BATCH_SZ)
                 await ctx.SaveChangesAsync();
         }
-        
+
+     
     }
 }
