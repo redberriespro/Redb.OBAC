@@ -10,9 +10,9 @@ Discussions: [Telegram Chat](https://t.me/+InGrdq8qXeYyOTNi)
 It's ALPHA version of the second generation code. "Alpha" means core APIs are more or less stable but *MIGHT* be changed before it becomes beta.
 
 Technologies Supported
-- NetCore 3.1/Net5.0
-- PostgreSQL as DB engine (Supporting MySQL is in the roadmap)
-- gRPC (for accessing OBAC API from outside .Net)
+- NetCore Net6/Net7
+- Backend engines: PostgreSQL, MySQL, Microsoft MSSQL, MongoDB
+- gRPC Service (for accessing OBAC API from outside .Net)
 
 ## Features
 - Users and UserGroups support
@@ -21,6 +21,7 @@ Technologies Supported
 - Set ACL to an object or a node (object tree structures are supported)
 - Allow or Deny Permission to an Object for User ot User Group. 
 - Inherit-permissions-from-parent flag
+- External identifiers support (both string and integer ones). Good for external API integration.
 - Can be used by any language by calling OBAC's API via gRPC protocol (API Host process is included)
 
 ## Code Examples
