@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Redb.OBAC.Backends;
@@ -30,9 +31,8 @@ namespace Redb.OBAC.MongoDriver.BL
             _cacheBackend = cacheBackend;
             _treeObjectManager = new TreeObjectManager(store, cacheBackend, extraEpFeeds);
         }
-        
 
-        public async Task<TreeObjectTypeInfo> GetTree(Guid? treeObjectTypeId, int? intId = null, string stringId = null)
+        public async Task<TreeObjectTypeInfo> GetTree(Guid? treeObjectTypeId, int? intId = null, string stringId=null)
         {
             if (stringId != null)
                 return await _treeObjectManager.GetTreeObjectByExternalStringId(stringId);
@@ -40,7 +40,8 @@ namespace Redb.OBAC.MongoDriver.BL
                 return await _treeObjectManager.GetTreeObjectByExternalIntId(intId.Value);
             if (treeObjectTypeId.HasValue)
                 return await _treeObjectManager.GetTreeObjectById(treeObjectTypeId.Value);
-            throw new ArgumentException("GetTree - no ID is provided");        }
+            throw new ArgumentException("GetTree - no ID is provided");
+        }
 
         public async Task DeleteTree(Guid treeObjectTypeId, bool force = false)
         {
@@ -52,12 +53,23 @@ namespace Redb.OBAC.MongoDriver.BL
             return await _treeObjectManager.EnsureTreeObject(treeObjectTypeId, description,intId, stringId);
         }
 
-        public async Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId)
+        public async Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId,  int? intId = null, string stringId=null)
         {
-            await _treeObjectManager.EnsureTreeNode(treeId, nodeId, parentId, ownerUserId);
+            await _treeObjectManager.EnsureTreeNode(treeId, nodeId, parentId, ownerUserId, intId, stringId);
         }
 
-        public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, int? treeNodeId, int? intId = null, string stringId = null)
+                public async Task DeleteTreeNode(Guid treeId, int nodeId)
+        {
+            await _treeObjectManager.DeleteTreeNode(treeId, nodeId);
+        }
+
+
+              public async Task<List<TreeNodeInfo>> GetTreeNodes(Guid treeId, int? startingNodeId = null, bool deep=false)
+        {
+            return await _treeObjectManager.GetTreeNodes(treeId, startingNodeId, deep);
+        }
+        
+        public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, int? treeNodeId, int? intId = null, string stringId=null)
         {
             if (stringId != null)
                 return await _treeObjectManager.GetTreeNodeByExternalStringId(treeId, stringId);
@@ -65,17 +77,7 @@ namespace Redb.OBAC.MongoDriver.BL
                 return await _treeObjectManager.GetTreeNodeByExternalIntId(treeId, intId.Value);
             if (treeNodeId.HasValue)
                 return await _treeObjectManager.GetTreeNode(treeId, treeNodeId.Value);
-            throw new ArgumentException("GetTreeNode - no ID is provided");        }
-
-        public async Task<List<TreeNodeInfo>> GetTreeNodes(Guid treeId, int? startingNodeId = null, bool deep=false)
-        {
-            return await _treeObjectManager.GetTreeNodes(treeId, startingNodeId, deep);
-        }
-        
-        public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, int treeNodeId)
-        {
-            return await _treeObjectManager.GetTreeNode(treeId, treeNodeId);
-
+            throw new ArgumentException("GetTreeNode - no ID is provided");
         }
 
 
@@ -105,12 +107,13 @@ namespace Redb.OBAC.MongoDriver.BL
             return await _treeObjectManager.GetTreeNodes(treeId, null);
         }
 
-        public Task<IReadOnlyCollection<PermissionInfo>> GetPermissions()
+
+        public async Task<IReadOnlyCollection<PermissionInfo>> GetPermissions()
         {
-            throw new NotImplementedException();
+            return await _store.ListPermissions();
         }
 
-
+        
         public async Task<PermissionInfo> GetPermission(Guid permissionId)
         {
             return await _store.GetPermissionById(permissionId);
@@ -177,6 +180,12 @@ namespace Redb.OBAC.MongoDriver.BL
             return await _store.GetRoleById(roleId);
         }
 
+        public async Task<IReadOnlyCollection<RoleInfo>> GetRoles()
+        {
+            return (await _store.GetAllRoles()).ToArray();
+        }
+
+
         public async Task EnsureRole(Guid roleId, string description, Guid[] permissionIds, bool force = false)
         {
             var perm = await _store.GetRoleById(roleId);
@@ -208,6 +217,7 @@ namespace Redb.OBAC.MongoDriver.BL
 
         public async Task EnsureUser(int userId, string description = null, int? intId = null, string stringId = null)
         {
+            // todo auto-generate user id if zero. consider always do it, protecting user id from being changed
             var perm = await _store.GetUserSubjectById(userId);
             if (perm == null)
             {
@@ -232,9 +242,7 @@ namespace Redb.OBAC.MongoDriver.BL
 
             throw new NotImplementedException("Unsupported subject type: " + subjectType);
         }
-
       
-
         public async Task EnsureUserGroup(int userGroupId, string description = null, int? intId = null, string stringId = null)
         {
             var perm = await _store.GetGroupSubjectById(userGroupId);
@@ -266,6 +274,12 @@ namespace Redb.OBAC.MongoDriver.BL
             await _store.DeleteUserGroupSubject(userGroupId);
             _cacheBackend.InvalidateForUserGroup(userGroupId);
         }
+
+        public async Task<int[]> GetUserGroupsForUser(int userId)
+        {
+            return await _store.GetGroupsForUser(userId);
+        }
+
         
         public async Task<SubjectInfo> GetUser(int? userId, int? intId = null, string stringId=null)
         {
@@ -293,6 +307,11 @@ namespace Redb.OBAC.MongoDriver.BL
             }
     
             return user;
+        }
+
+        public async Task<IReadOnlyCollection<SubjectInfo>> GetUserGroups()
+        {
+            return await _store.GetGroupSubjects();
         }
         
         public async Task<SubjectInfo> GetUserGroup(int? userGroupId, int? intId, string stringId = null)
@@ -322,9 +341,7 @@ namespace Redb.OBAC.MongoDriver.BL
     
             return grp;
         }
-
       
-
         public async Task<int[]> GetUserGroupMembers(int userGroupId)
         {
             return await _store.GetGroupMembers(userGroupId);

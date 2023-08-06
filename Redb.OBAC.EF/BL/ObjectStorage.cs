@@ -765,7 +765,23 @@ namespace Redb.OBAC.EF.BL
                 _ => MakeTreeNodeInfo(treeId, nd)
             };
         }
-
+        
+        public async Task CreateTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId, int? intId = null, string stringId=null)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            await ctx.ObacTreeNodes.AddAsync(new ObacTreeNodeEntity
+            {
+                TreeId = treeId,
+                Id = nodeId,
+                ParentId = parentId,
+                OwnerUserId = ownerUserId,
+                ExternalIdInt = intId,
+                ExternalIdString = stringId,
+                InheritParentPermissions = true
+            });
+            await ctx.SaveChangesAsync();
+        }
+        
         private static TreeNodeInfo MakeTreeNodeInfo(Guid treeId, ObacTreeNodeEntity nd)
         {
             return new TreeNodeInfo
@@ -789,22 +805,6 @@ namespace Redb.OBAC.EF.BL
             await ctx.SaveChangesAsync();        
         }
         
-        public async Task CreateTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId, int? intId = null, string stringId=null)
-        {
-            await using var ctx = _storageProvider.CreateObacContext();
-            await ctx.ObacTreeNodes.AddAsync(new ObacTreeNodeEntity
-            {
-                TreeId = treeId,
-                Id = nodeId,
-                ParentId = parentId,
-                OwnerUserId = ownerUserId,
-                ExternalIdInt = intId,
-                ExternalIdString = stringId,
-                InheritParentPermissions = true
-            });
-            await ctx.SaveChangesAsync();
-        }
-
         public async Task<int?> ReplaceTreeNode(Guid treeId, int nodeId, int? newParentNodeId)
         {
             await using var ctx = _storageProvider.CreateObacContext();

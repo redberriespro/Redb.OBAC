@@ -46,7 +46,7 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
             var res = await _storage.GetTreeObjectByExternalIntId(externalId);
             return res;
         }
-        
+
         public async Task<TreeObjectTypeInfo> GetTreeObjectByExternalStringId(string externalId)
         {
             var res = await _storage.GetTreeObjectByExternalStringId(externalId);
@@ -88,12 +88,30 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
             };
         }
 
-        public async Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId)
+
+        public async Task DeleteTreeNode(Guid treeId, int nodeId)
+        {
+            var nd = await _storage.GetTreeNode(treeId, nodeId);
+            if (nd == null)
+                return; // nothing to delete
+            var tc = new TreePermissionCalculator();
+            var tr = MakeTreeActionContext(treeId);
+
+            await tc.AfterNodeDeleted(
+                GetEffectivePermissionsFeed(),
+                tr, nodeId);
+
+            // todo move this before AfterNodeDeleted call and make sure it works (at this moment, it does not remove EP for deleted node
+            await _storage.DeleteTreeNode(treeId, nodeId, nd.ParentNodeId);
+
+        }
+        
+        public async Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId, int? intId = null, string stringId=null)
         {
             var nd = await _storage.GetTreeNode(treeId, nodeId);
             if (nd == null)
             {
-                await CreateTreeNode(treeId, nodeId, parentId, ownerUserId);
+                await CreateTreeNode(treeId, nodeId, parentId, ownerUserId, intId, stringId);
             }
             else
             {
@@ -108,9 +126,9 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
         private async Task ChangeTreeNodeParent(Guid treeId, int nodeId, int? parentId)
         {
             // switch parent Id
-            var oldParent = await _storage.ReplaceTreeNode(treeId, nodeId, parentId);
-
-            if (oldParent == parentId) return;
+            var oldParent= await _storage.ReplaceTreeNode(treeId, nodeId, parentId);
+            
+            if (oldParent==parentId) return;
 
             var tc = new TreePermissionCalculator();
             var tr = MakeTreeActionContext(treeId);
@@ -120,20 +138,20 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
                 await tc.RepairNodePermissions(GetEffectivePermissionsFeed(), tr, oldParent.Value);
         }
 
-        private async Task CreateTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId)
+        private async Task CreateTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId,int? intId = null, string stringId=null)
         {
             // create new Node
             var tc = new TreePermissionCalculator();
             var tr = MakeTreeActionContext(treeId);
-
-            await _storage.CreateTreeNode(treeId, nodeId, parentId, ownerUserId);
+            
+            await _storage.CreateTreeNode(treeId, nodeId, parentId, ownerUserId, intId, stringId);
 
             await tc.AfterNodeInserted(
                 GetEffectivePermissionsFeed(),
                 tr, nodeId);
         }
 
-        public async Task<List<TreeNodeInfo>> GetTreeNodes(Guid treeId, int? startingNodeId, bool deep = true)
+        public async Task<List<TreeNodeInfo>> GetTreeNodes(Guid treeId, int? startingNodeId, bool deep=true)
         {
             var res = new List<TreeNodeInfo>();
 
@@ -141,7 +159,7 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
             {
                 res.Add(new TreeNodeInfo
                 {
-                    TreeObjectTypeId = treeId,
+                    TreeObjectTypeId = treeId, 
                     NodeId = startingNodeId.Value
                 });
             }
@@ -155,27 +173,28 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
 
             return res;
         }
-
+        
         public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, int treeNodeId)
         {
             return await _storage.GetTreeNode(treeId, treeNodeId);
         }
-        
+
         public async Task<TreeNodeInfo> GetTreeNodeByExternalIntId(Guid treeId, int externalId)
         {
             return await _storage.GetTreeNodeByExternalIntId(treeId, externalId);
         }
-        
+
         public async Task<TreeNodeInfo> GetTreeNodeByExternalStringId(Guid treeId, string externalId)
         {
             return await _storage.GetTreeNodeByExternalStringId(treeId, externalId);
         }
 
+        
         public async Task RepairTreeNodeEffectivePermissions(Guid treeId, int treeNodeId)
         {
             var tc = new TreePermissionCalculator();
             var tr = MakeTreeActionContext(treeId);
-
+            
             await tc.RepairNodePermissions(
                 GetEffectivePermissionsFeed(),
                 tr, treeNodeId);
@@ -280,7 +299,7 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
         {
             // todo aggregation, workflow etc
             if (_mainFeed != null) return _mainFeed;
-
+            
             var feeds = new List<IEffectivePermissionFeed>();
             feeds.Add(_storage);
             feeds.Add(new EPCacheInvalidator(_cacheBackend));
@@ -296,18 +315,18 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
             if (acl.AclItems == null) throw new ObacException("ACL item list not defined");
             foreach (var item in acl.AclItems)
             {
-                if (!item.UserId.HasValue && !item.UserGroupId.HasValue)
+                if (!item.UserId.HasValue && !item.UserGroupId.HasValue) 
                     throw new ObacException($"{item.ToString()}: neither user id not user group has set");
 
-                if (item.UserId.HasValue && item.UserGroupId.HasValue)
+                if (item.UserId.HasValue && item.UserGroupId.HasValue) 
                     throw new ObacException($"{item.ToString()}: both user id and user group has set");
             }
         }
-
+        
         private TreeActionContext MakeTreeActionContext(Guid treeId)
         {
             var treeCache = new LazyTree(treeId, _storage);
-
+            
             return new TreeActionContext
             {
                 TreeId = treeId,
@@ -351,13 +370,13 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
         private async Task UpdatePermissionsUsersGroupChangedInternal(Guid treeId, ObacTreeNodePermissionEntity[] treeNodes)
         {
             var lt = new LazyTree(treeId, _storage);
-
+            
             // 1 - load tree segment containing all the nodes affected
             foreach (var tnode in treeNodes)
             {
                 await lt.EnsureTreeSegment(tnode.NodeId);
             }
-
+            
             // 2 - obtain upper nodes
             var nodesToRebuild = lt.GetUpperNodeIds();
             foreach (var n in nodesToRebuild)
@@ -365,6 +384,8 @@ namespace Redb.OBAC.MongoDriver.ObjectTypes
                 await RepairTreeNodeEffectivePermissions(treeId, n);
             }
         }
+
+     
     }
 
 

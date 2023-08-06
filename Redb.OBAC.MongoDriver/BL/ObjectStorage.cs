@@ -43,6 +43,16 @@ namespace Redb.OBAC.MongoDriver.BL
             ctx.ObacUserSubjects.DeleteMany(x => true);
         }
 
+        public async Task<IReadOnlyCollection<PermissionInfo>> ListPermissions()
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+
+            return (await  
+                    (await ctx.ObacPermissions.FindAsync(a=>true))
+                .ToListAsync()
+                    ).Select(p => new PermissionInfo { PermissionId = p.Id, Description = p.Description })
+                    .ToList();
+        }
         public async Task<PermissionInfo> GetPermissionById(Guid permissionId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
@@ -282,6 +292,31 @@ namespace Redb.OBAC.MongoDriver.BL
         {
             await using var ctx = _storageProvider.CreateObacContext();
             await ctx.ObacUserSubjects.DeleteOneAsync(a => a.Id == subjectId);
+        }
+        
+        public async Task<int[]> GetGroupsForUser(int userId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var gl = await (await ctx
+                    .ObacUsersInGroups.FindAsync(u => u.UserId == userId)
+                ).ToListAsync();
+                
+            return gl.Select(g => g.GroupId).ToArray();
+        }
+        
+        public async Task<IReadOnlyCollection<SubjectInfo>> GetGroupSubjects()
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            var gl = await (await ctx.ObacGroupSubjects.FindAsync(a=>true))
+                .ToListAsync();
+            return gl.Select(p=>  new SubjectInfo
+            {
+                SubjectId = p.Id,
+                SubjectType = SubjectTypeEnum.UserGroup,
+                Description = p.Description,
+                ExternalIntId = p.ExternalIdInt,
+                ExternalStringId = p.ExternalIdString
+            }).ToArray();
         }
 
         public async Task<SubjectInfo> GetGroupSubjectById(int subjectId)
@@ -691,7 +726,7 @@ namespace Redb.OBAC.MongoDriver.BL
             };
         }
 
-        public async Task CreateTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId)
+        public async Task CreateTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId, int? intId = null, string stringId=null)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             var newNode = new ObacTreeNodeEntity
@@ -700,6 +735,8 @@ namespace Redb.OBAC.MongoDriver.BL
                 NodeId = nodeId,
                 ParentId = parentId,
                 OwnerUserId = ownerUserId,
+                ExternalIdInt = intId,
+                ExternalIdString = stringId,
                 InheritParentPermissions = true
             };
             try
@@ -711,6 +748,12 @@ namespace Redb.OBAC.MongoDriver.BL
 
         }
 
+        public async Task DeleteTreeNode(Guid treeId, int nodeId, int? ndParentNodeId)
+        {
+            await using var ctx = _storageProvider.CreateObacContext();
+            await ctx.ObacTreeNodes.DeleteOneAsync(n => n.TreeId == treeId && n.NodeId == nodeId);
+        }
+        
         public async Task<int?> ReplaceTreeNode(Guid treeId, int nodeId, int? newParentNodeId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
