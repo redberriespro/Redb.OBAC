@@ -175,7 +175,7 @@ namespace Redb.OBAC.Tests.Utils
             return Task.Run(() => houseDbContext.Database.EnsureCreated());
         }
 
-        internal override IEffectivePermissionsAware CreateHouseDbContext()
+        internal override IObacEpContext CreateHouseDbContext()
         {
             return new HouseTestMsSqlDbContext(settings.ConnectionTest);
         }
@@ -275,7 +275,7 @@ namespace Redb.OBAC.Tests.Utils
             return Task.Run(() => houseDbContext.Database.EnsureCreated());
         }
 
-        internal override IEffectivePermissionsAware CreateHouseDbContext()
+        internal override IObacEpContext CreateHouseDbContext()
         {
             return new HouseTestMySqlDbContext(settings.ConnectionTest);
         }
@@ -376,7 +376,7 @@ namespace Redb.OBAC.Tests.Utils
             return Task.Run(() => houseDbContext.Database.EnsureCreated());
         }
 
-        internal override IEffectivePermissionsAware CreateHouseDbContext()
+        internal override IObacEpContext CreateHouseDbContext()
         {
             return new HouseTestPgDbContext(settings.ConnectionTest);
         }

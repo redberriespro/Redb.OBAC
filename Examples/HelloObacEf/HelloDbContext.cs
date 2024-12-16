@@ -3,7 +3,7 @@ using Redb.OBAC.Client;
 
 namespace HelloObac
 {
-    public class HelloDbContext: ObacEpContextBase
+    public class HelloDbContext: ObacEpContextBase, IHelloDbContext
     {
         public DbSet<DocumentEntity> Documents { get; set; }
         
