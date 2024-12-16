@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Redb.OBAC;
 using Redb.OBAC.Client.EffectivePermissionsReceiver;
 using Redb.OBAC.Core;
 using Redb.OBAC.Core.Models;
@@ -13,12 +12,7 @@ namespace HelloObac
 {
     public class Program
     {
-        private static IObacObjectManager obacManager;
-        private static HelloDbContext ctx;
         private static Guid docTypeId;
-
-        
-        // two postgres databases will be created for the example:
         
         // internal OBAC database
         public const string OBAC_CONNECTION =
@@ -28,14 +22,37 @@ namespace HelloObac
         public const string TEST_CONNECTION =
             "Host=localhost;Port=5432;Database=obac_hello_ef;Username=postgres;Password=12345678";
 
+        // 'user-level' database containing domain entities and effective permission cache and identity tables
+        public const string TEST_CONNECTION_IDENTITY =
+            "Host=localhost;Port=5432;Database=obac_hello_identity_ef;Username=postgres;Password=12345678";
+
         public static async Task Main()
         {
+            // EXAMPLE #1 - OBAC tables in separate schema + obac_EP (cache) in app's schema. App's schema has no identity.
+
             // initialize local DB
-            ctx = new HelloDbContext(); // the context must inherit ObacEpContextBase to be able to receive EP messages.
+            var ctx = new HelloDbContext(); // the context must inherit ObacEpContextBase to be able to receive EP messages.
             await ctx.Database.EnsureCreatedAsync();
-            
+
+            // obac in own schema while cache in app's schema
+            await MainInternal(ctx, OBAC_CONNECTION);
+
+
+
+            // EXAMPLE #2 - OBAC tables and obac_ep (cache) in app's schema. App's schema has identity.
+
+            // initialize local DB
+            var identityCtx = new HelloIdentityDbContext(); // the context must inherit ObacEpIdentityContextBase to be able to receive EP messages and have identity tables
+            await identityCtx.Database.EnsureCreatedAsync();
+
+            // obac and cache in app's schema
+            await MainInternal(identityCtx, TEST_CONNECTION_IDENTITY);
+        }
+
+        private static async Task MainInternal(IHelloDbContext ctx, string obacConnectionString)
+        {
             // configure OBAC
-            var pgStorage = new PgSqlObacStorageProvider(OBAC_CONNECTION);
+            var pgStorage = new PgSqlObacStorageProvider(obacConnectionString);
             await pgStorage.EnsureDatabaseExists();
             
             // NOTE the context instance passed to the receiver could not be used across other program when in production code
@@ -44,7 +61,7 @@ namespace HelloObac
             // initialize OBAC with out effective permission's receiver
             var obacConfiguration = ObacManager.CreateConfiguration(pgStorage, epHouseReceiver);
 
-            obacManager = obacConfiguration.GetObjectManager();
+            var obacManager = obacConfiguration.GetObjectManager();
             
             // initialize object types and permissions
             docTypeId = new Guid("5B068FE3-A694-4489-B396-37CE1AE13A23");
@@ -65,7 +82,7 @@ namespace HelloObac
             // doc 3 available to read for user 2
             // in this example, we don't use threes and complex data structures, just flat list of
             // documents reduced with user's effective permissions
-            await EnsureDocument( 1, "doc1");
+            await EnsureDocument(ctx, obacManager, 1, "doc1");
             await obacManager.SetTreeNodeAcl(docTypeId, 1, new AclInfo
             {
                 AclItems = new[]
@@ -75,7 +92,7 @@ namespace HelloObac
             });
             
             
-            await EnsureDocument(2, "doc2");
+            await EnsureDocument(ctx, obacManager, 2, "doc2");
             await obacManager.SetTreeNodeAcl(docTypeId, 2, new AclInfo
             {
                 AclItems = new[]
@@ -85,7 +102,7 @@ namespace HelloObac
                 }
             });
             
-            await EnsureDocument(3, "doc3");
+            await EnsureDocument(ctx, obacManager, 3, "doc3");
             await obacManager.SetTreeNodeAcl(docTypeId, 3, new AclInfo
             {
                 InheritParentPermissions = false,
@@ -96,13 +113,13 @@ namespace HelloObac
             });
             
             // get the docs available for read for user 1
-            await DumpDocs(1, readPermission, "read");
+            await DumpDocs(ctx, 1, readPermission, "read");
 
             // get the docs available for write for user 1
-            await DumpDocs(1, writePermission, "write");
+            await DumpDocs(ctx, 1, writePermission, "write");
             
             // get the docs available for read for user 2
-            await DumpDocs(2, readPermission, "read");
+            await DumpDocs(ctx,2, readPermission, "read");
 
             // alternate way - don't use local DB
             var user1checker = obacConfiguration.GetPermissionChecker(1);
@@ -115,7 +132,7 @@ namespace HelloObac
             Console.WriteLine("User 1 has write permission to doc1: " + (await user1checker.CheckObjectPermissions(docTypeId, 1, writePermission)));
         }
 
-        private static async Task DumpDocs(int userId, Guid permissionId, string permissionName)
+        private static async Task DumpDocs(IHelloDbContext ctx, int userId, Guid permissionId, string permissionName)
         {
             var docs = from d in ctx.Documents
                 join p in ctx.EffectivePermissions // join document's table with effective permissions cache
@@ -135,13 +152,13 @@ namespace HelloObac
 
         }
 
-        private static async Task EnsureDocument(int id, string name)
+        private static async Task EnsureDocument(IHelloDbContext crx, IObacObjectManager obacManager, int id, string name)
         {
             // check if object already exists
-            if (await ctx.Documents.AnyAsync(a => a.Id == id)) return;
+            if (await crx.Documents.AnyAsync(a => a.Id == id)) return;
             
             // create object in main database
-            await ctx.Documents.AddAsync(new DocumentEntity {Id = id, Name = name});
+            await crx.Documents.AddAsync(new DocumentEntity {Id = id, Name = name});
             // register object's replica in OBAC
             await obacManager.EnsureTreeNode(docTypeId, id, null, 1);
         }
