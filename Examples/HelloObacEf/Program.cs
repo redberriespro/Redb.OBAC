@@ -56,7 +56,7 @@ namespace HelloObac
             await pgStorage.EnsureDatabaseExists();
             
             // NOTE the context instance passed to the receiver could not be used across other program when in production code
-            var epHouseReceiver = new EffectivePermissionsEfReceiver(ctx); 
+            var epHouseReceiver = new EffectivePermissionsEfReceiver(() => ctx); 
             
             // initialize OBAC with out effective permission's receiver
             var obacConfiguration = ObacManager.CreateConfiguration(pgStorage, epHouseReceiver);

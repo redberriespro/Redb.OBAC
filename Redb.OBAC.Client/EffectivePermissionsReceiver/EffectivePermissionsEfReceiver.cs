@@ -9,10 +9,10 @@ namespace Redb.OBAC.Client.EffectivePermissionsReceiver
 {
     public class EffectivePermissionsEfReceiver : IEffectivePermissionFeed
     {
-        private readonly IObacEpContext _obacEpContext;
+        private readonly Func<IObacEpContext> _obacEpContext;
         private const int EP_BATCH_SZ = 100;
 
-        public EffectivePermissionsEfReceiver(IObacEpContext obacEpContext)
+        public EffectivePermissionsEfReceiver(Func<IObacEpContext> obacEpContext)
         {
             _obacEpContext = obacEpContext;
         }
@@ -22,19 +22,21 @@ namespace Redb.OBAC.Client.EffectivePermissionsReceiver
             // todo improve
             int n = EP_BATCH_SZ;
 
+            var cxt = _obacEpContext();
+
             foreach (var a in actions)
             {
                 switch (a.Action)
                 {
                     case PermissionActionEnum.RemoveAllObjectsDirectPermission:
                     {
-                        await _obacEpContext.DropEffectivePermissions(a.ObjectTypeId, a.ObjectId);
+                        await cxt.DropEffectivePermissions(a.ObjectTypeId, a.ObjectId);
                     }
                         break;
 
                     case PermissionActionEnum.RemoveDirectPermission:
                     {
-                        var p = await _obacEpContext
+                        var p = await cxt
                             .EffectivePermissions
                             .SingleOrDefaultAsync(
                                 p => p.ObjectTypeId == a.ObjectTypeId
@@ -43,13 +45,13 @@ namespace Redb.OBAC.Client.EffectivePermissionsReceiver
                                      && p.UserId == a.UserId);
                         if (p != null)
                         {
-                            _obacEpContext.EffectivePermissions.Remove(p);
+                            cxt.EffectivePermissions.Remove(p);
                         }
                     }
                         break;
                     case PermissionActionEnum.AddDirectPermission:
                     {
-                        await _obacEpContext.EffectivePermissions.AddAsync(new ObacEffectivePermissionsEntity()
+                        await cxt.EffectivePermissions.AddAsync(new ObacEffectivePermissionsEntity()
                         {
                             Id = new Guid(),
                             PermissionId = a.PermissionId,
@@ -67,11 +69,11 @@ namespace Redb.OBAC.Client.EffectivePermissionsReceiver
                 if (n > 0) continue;
 
                 n = EP_BATCH_SZ;
-                await _obacEpContext.SaveChangesAsync();
+                await cxt.SaveChangesAsync();
             }
 
             if (n != EP_BATCH_SZ)
-                await _obacEpContext.SaveChangesAsync();
+                await cxt.SaveChangesAsync();
         }
     }
 }
