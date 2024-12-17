@@ -118,7 +118,7 @@ namespace Redb.OBAC.Tests.Utils
             TestUserDbCleaner();
             await EnsureCreatedAsync();
 
-            epHouseReceiver = new EffectivePermissionsEfReceiver(CreateHouseDbContext());
+            epHouseReceiver = new EffectivePermissionsEfReceiver(CreateHouseDbContext);
 
             // register OBAC configuration
             if (config == null) config = Redb.OBAC.EF.ObacManager.CreateConfiguration(DbProvider, epHouseReceiver);
@@ -224,7 +224,7 @@ namespace Redb.OBAC.Tests.Utils
             TestUserDbCleaner();
             await EnsureCreatedAsync();
 
-            epHouseReceiver = new EffectivePermissionsEfReceiver(CreateHouseDbContext());
+            epHouseReceiver = new EffectivePermissionsEfReceiver(CreateHouseDbContext);
 
             // register OBAC configuration
             if (config == null) config = Redb.OBAC.EF.ObacManager.CreateConfiguration(DbProvider, epHouseReceiver);
@@ -324,7 +324,7 @@ namespace Redb.OBAC.Tests.Utils
             TestUserDbCleaner();
             await EnsureCreatedAsync();
 
-            epHouseReceiver = new EffectivePermissionsEfReceiver(CreateHouseDbContext());
+            epHouseReceiver = new EffectivePermissionsEfReceiver(CreateHouseDbContext);
 
             // register OBAC configuration
             if (config == null) config = Redb.OBAC.EF.ObacManager.CreateConfiguration(DbProvider, epHouseReceiver);
