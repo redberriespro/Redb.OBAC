@@ -48,14 +48,14 @@ namespace TreeExample
             // catalog 2 with file 3
             // file4 with no catalog
 
-            var catalog1 = await EnsureCatalog(ctx, obacManager, treeId, 1);
-            var file1 = await EnsureFile(ctx, obacManager, treeId, 10, catalog1);
-            var file2 = await EnsureFile(ctx, obacManager, treeId, 11, catalog1);
+            var catalog1 = await EnsureCatalog(ctx, obacManager, treeId);
+            var file1 = await EnsureFile(ctx, obacManager, treeId, catalog1);
+            var file2 = await EnsureFile(ctx, obacManager, treeId, catalog1);
 
-            var catalog2 = await EnsureCatalog(ctx, obacManager, treeId, 2);
-            var file3 = await EnsureFile(ctx, obacManager, treeId, 12, catalog2);
+            var catalog2 = await EnsureCatalog(ctx, obacManager, treeId);
+            var file3 = await EnsureFile(ctx, obacManager, treeId, catalog2);
 
-            var file4 = await EnsureFile(ctx, obacManager, treeId, 13);
+            var file4 = await EnsureFile(ctx, obacManager, treeId);
 
 
             // user 1 have perm to catalog1
@@ -75,10 +75,10 @@ namespace TreeExample
             var file2Perm = await permChecker.GetObjectPermissions(treeId, file2.Id).ConfigureAwait(false);
         }
 
-        private static async Task<CatalogEntity> EnsureCatalog(TreeDbContext ctx, IObacObjectManager obacManager, Guid treeId, int id)
+        private static async Task<CatalogEntity> EnsureCatalog(TreeDbContext ctx, IObacObjectManager obacManager, Guid treeId)
         {
             // create object in main database
-            var result = await ctx.Catalogs.AddAsync(new CatalogEntity { Id = id/*Guid = Guid.NewGuid()*/ });
+            var result = await ctx.Catalogs.AddAsync(new CatalogEntity { /*Guid = Guid.NewGuid()*/ });
 
             await ctx.SaveChangesAsync();
 
@@ -88,10 +88,10 @@ namespace TreeExample
             return result.Entity;
         }
 
-        private static async Task<FileEntity> EnsureFile(TreeDbContext ctx, IObacObjectManager obacManager, Guid treeId, int id, CatalogEntity? catalog = null)
+        private static async Task<FileEntity> EnsureFile(TreeDbContext ctx, IObacObjectManager obacManager, Guid treeId, CatalogEntity? catalog = null)
         {
             // create object in main database
-            var result = await ctx.Files.AddAsync(new FileEntity() { Version = 1, Id = id });
+            var result = await ctx.Files.AddAsync(new FileEntity() { Version = 1 });
 
             await ctx.SaveChangesAsync();
 

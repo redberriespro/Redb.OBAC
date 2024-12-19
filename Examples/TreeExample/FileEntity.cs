@@ -9,7 +9,7 @@ namespace TreeExample
 {
     internal class FileEntity
     {
-        //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("key")]
         public int Id { get; set; }
 
