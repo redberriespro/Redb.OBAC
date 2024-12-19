@@ -24,7 +24,7 @@ namespace Redb.OBAC.EF.DB.Entities
         public Guid TreeId { get; set; }
         
         [Column("tree_node_id")]
-        public int NodeId { get; set; }
+        public Guid NodeId { get; set; }
         
         [Column("perm_id")]
         public Guid PermissionId { get; set; }

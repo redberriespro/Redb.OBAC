@@ -6,7 +6,7 @@ namespace Redb.OBAC.Backends.InMemory
     public class UserCacheEntry {
         private ConcurrentDictionary<Guid, ObjectTypeCacheEntry> _userCache = new ConcurrentDictionary<Guid, ObjectTypeCacheEntry>();
 
-        public void Set(Guid objectTypeId, int? objectId, Guid permission)
+        public void Set(Guid objectTypeId, Guid? objectId, Guid permission)
         {
             if (!_userCache.ContainsKey(objectTypeId))
             {
@@ -23,7 +23,7 @@ namespace Redb.OBAC.Backends.InMemory
             }
         }
 
-        public Guid[] GetPermissions(Guid objectTypeId, int? objectId)
+        public Guid[] GetPermissions(Guid objectTypeId, Guid? objectId)
         {
             if (_userCache.ContainsKey(objectTypeId))
                 return _userCache[objectTypeId].GetPermissions(objectId);
@@ -31,7 +31,7 @@ namespace Redb.OBAC.Backends.InMemory
             return null;
         }
 
-        public void InvalidatePermissionsForObject(Guid objectTypeId, int? objectId)
+        public void InvalidatePermissionsForObject(Guid objectTypeId, Guid? objectId)
         {
             if (!_userCache.TryGetValue(objectTypeId, out var otCache)) return;
             otCache.InvalidatePermissionsForObject(objectId);

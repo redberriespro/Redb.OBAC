@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Net.NetworkInformation;
-using Redb.OBAC.Core.Hierarchy;
 using Redb.OBAC.Models;
 
 namespace Redb.OBAC.Backends.InMemory
@@ -26,7 +23,7 @@ namespace Redb.OBAC.Backends.InMemory
         {
         }
 
-        public void InvalidatePermissionsForObject(Guid objectTypeId, int? objectId = null)
+        public void InvalidatePermissionsForObject(Guid objectTypeId, Guid? objectId = null)
         {
             foreach (var userCache in _cache.Values)
             {
@@ -34,7 +31,7 @@ namespace Redb.OBAC.Backends.InMemory
             }
         }
         
-        public void InvalidateForUser(int userId, Guid? objectTypeId = null, int? objectId = null)
+        public void InvalidateForUser(int userId, Guid? objectTypeId = null, Guid? objectId = null)
         {
             _cache.TryRemove(userId, out _);
             
@@ -61,7 +58,7 @@ namespace Redb.OBAC.Backends.InMemory
             }
         }
 
-        private void SetPermission(int userId, Guid objectTypeId, int? objectId, Guid permission)
+        private void SetPermission(int userId, Guid objectTypeId, Guid? objectId, Guid permission)
         {
             if (!_cache.ContainsKey(userId))
             {
@@ -106,7 +103,7 @@ namespace Redb.OBAC.Backends.InMemory
             // }
         }
 
-        public void SetPermissions(int userId, Guid objectTypeId, int? objectId, Guid[] permissionIds)
+        public void SetPermissions(int userId, Guid objectTypeId, Guid? objectId, Guid[] permissionIds)
         {
             foreach (var permissionId in permissionIds)
             {
@@ -114,7 +111,7 @@ namespace Redb.OBAC.Backends.InMemory
             }
         }
 
-        public Guid[] GetPermissionsFor(int userId, Guid objectTypeId, int? objectId)
+        public Guid[] GetPermissionsFor(int userId, Guid objectTypeId, Guid? objectId)
         {
             if (_cache.ContainsKey(userId))
                 return _cache[userId].GetPermissions(objectTypeId, objectId);

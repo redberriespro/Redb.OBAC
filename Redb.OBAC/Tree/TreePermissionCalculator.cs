@@ -36,17 +36,17 @@ namespace Redb.OBAC.Tree
         /// <summary>
         /// provide subnode list for a given node of a current tree
         /// </summary>
-        public Func<Guid, int, Task<TreeNodeItem>> GetTreeNode { get; set; }
+        public Func<Guid, Guid, Task<TreeNodeItem>> GetTreeNode { get; set; }
         
         /// <summary>
         /// provide original permission set for a given tree node
         /// </summary>
-        public Func<Guid, int, Task<TreeNodePermissionInfo[]>> GetTreeNodePermissions { get; set; }
+        public Func<Guid, Guid, Task<TreeNodePermissionInfo[]>> GetTreeNodePermissions { get; set; }
         
         /// <summary>
         /// get requested list of permissions values for a given set of nodes
         /// </summary>
-        public Func<Guid, IEnumerable<int>, IEnumerable<Guid>, Task<TreeNodePermissionInfo[]>> GetTreeNodePermissionList { get; set; }
+        public Func<Guid, IEnumerable<Guid>, IEnumerable<Guid>, Task<TreeNodePermissionInfo[]>> GetTreeNodePermissionList { get; set; }
         
         /// <summary>
         /// unwind user groups
@@ -56,7 +56,7 @@ namespace Redb.OBAC.Tree
         /// <summary>
         /// load or calculate effective permissions for a certain node 
         /// </summary>
-        public Func<Guid, int, Task<TreeNodePermissionInfo[]>> GetNodeEffectivePermissions { get; set; }
+        public Func<Guid, Guid, Task<TreeNodePermissionInfo[]>> GetNodeEffectivePermissions { get; set; }
 
         
     }
@@ -74,7 +74,7 @@ namespace Redb.OBAC.Tree
         /// <returns></returns>
         public async Task RepairNodePermissions(
             IEffectivePermissionFeed feed, 
-            TreeActionContext ctx, int nodeId
+            TreeActionContext ctx, Guid nodeId
         )
         {
             var visitor = new SimpleTreeVisitor();
@@ -126,12 +126,12 @@ namespace Redb.OBAC.Tree
         /// incremental action set will be generated.
         /// the result will contain actions required to insert a node or subtree to a new location
         /// </summary>
-        public async Task AfterNodeInserted(IEffectivePermissionFeed feed, TreeActionContext ctx, int nodeId)
+        public async Task AfterNodeInserted(IEffectivePermissionFeed feed, TreeActionContext ctx, Guid nodeId)
         {
             await RepairNodePermissions(feed, ctx, nodeId);
         }
         
-        public async Task AfterNodeDeleted(IEffectivePermissionFeed feed, TreeActionContext ctx, int nodeId)
+        public async Task AfterNodeDeleted(IEffectivePermissionFeed feed, TreeActionContext ctx, Guid nodeId)
         {
             await RepairNodePermissions(feed, ctx, nodeId);
         }
@@ -140,7 +140,7 @@ namespace Redb.OBAC.Tree
         /// incremental action set will be generated.
         /// the result will contain actions required to subtree removal
         /// </summary>
-        public async Task BeforeNodeRemoved(IEffectivePermissionFeed feed, TreeActionContext ctx, int nodeId)
+        public async Task BeforeNodeRemoved(IEffectivePermissionFeed feed, TreeActionContext ctx, Guid nodeId)
         {
             var visitor = new SimpleTreeVisitor();
             
@@ -165,7 +165,7 @@ namespace Redb.OBAC.Tree
         /// incremental action set will be generated.
         /// the result will contain permissionToAdd/remove properly Added 
         /// </summary>
-        public async Task ChangePermissions(IEffectivePermissionFeed feed, TreeActionContext ctx, int nodeId, 
+        public async Task ChangePermissions(IEffectivePermissionFeed feed, TreeActionContext ctx, Guid nodeId, 
             TreeNodePermissionInfo[] permissionsToAdd, 
             TreeNodePermissionInfo[] permissionsToRemove,
             NodeParentPermissionInheritanceActionEnum inheritParentPermissions = NodeParentPermissionInheritanceActionEnum.KeepSame)
@@ -302,12 +302,12 @@ namespace Redb.OBAC.Tree
         
 
        
-        private async Task<Dictionary<int, List<TreeNodePermissionInfo>>> GetPermissionsForNodeSet(TreeActionContext ctx, IEnumerable<int> nodeIds, IEnumerable<Guid> permissionIds)
+        private async Task<Dictionary<Guid, List<TreeNodePermissionInfo>>> GetPermissionsForNodeSet(TreeActionContext ctx, IEnumerable<Guid> nodeIds, IEnumerable<Guid> permissionIds)
         {
             // todo split onto chunks (4instance, split by 200) during retreival
             var perms = await ctx.GetTreeNodePermissionList(ctx.TreeId, nodeIds, permissionIds);
 
-            var res = new Dictionary<int, List<TreeNodePermissionInfo>>();
+            var res = new Dictionary<Guid, List<TreeNodePermissionInfo>>();
             foreach (var p in perms)
             {
                 List<TreeNodePermissionInfo> nest = null;

@@ -14,25 +14,24 @@ namespace Redb.OBAC.Core
         
         #region tree objects
         
-        Task<TreeObjectTypeInfo> GetTree(Guid? treeObjectTypeId, int? intId = null, string stringId=null);
+        Task<TreeObjectTypeInfo> GetTree(Guid? treeObjectTypeId);
         Task DeleteTree(Guid treeObjectTypeId, bool force=false);
 
-        Task<TreeObjectTypeInfo> EnsureTree(Guid treeObjectTypeId, string description = null, 
-            int? intId = null, string stringId=null);
+        Task<TreeObjectTypeInfo> EnsureTree(Guid treeObjectTypeId, string description = null);
         
-        Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId, int? intId = null, string stringId=null);
+        Task EnsureTreeNode(Guid treeId, Guid nodeId, Guid? parentId, int ownerUserId);
 
-        Task DeleteTreeNode(Guid treeId, int requestId);
+        Task DeleteTreeNode(Guid treeId, Guid requestId);
 
         
-        Task<TreeNodeInfo> GetTreeNode(Guid treeId, int? treeNodeId, int? intId = null, string stringId=null);
-        Task<List<TreeNodeInfo>> GetTreeNodes(Guid treeId, int? startingNodeId=null, bool deep=false);
+        Task<TreeNodeInfo> GetTreeNode(Guid treeId, Guid? treeNodeId);
+        Task<List<TreeNodeInfo>> GetTreeNodes(Guid treeId, Guid? startingNodeId=null, bool deep=false);
         
         
-        Task SetTreeNodeAcl(Guid treeId, int treeNodeId, AclInfo acl);
-        Task<AclInfo> GetTreeNodeAcl(Guid treeId, int treeNodeId);
+        Task SetTreeNodeAcl(Guid treeId, Guid treeNodeId, AclInfo acl);
+        Task<AclInfo> GetTreeNodeAcl(Guid treeId, Guid treeNodeId);
         
-        Task RepairTreeNodeEffectivePermissions(Guid treeId, int treeNodeId);
+        Task RepairTreeNodeEffectivePermissions(Guid treeId, Guid treeNodeId);
 
         
         #endregion
@@ -42,10 +41,9 @@ namespace Redb.OBAC.Core
         Task<TreeObjectTypeInfo> GetList(Guid listObjectTypeId);
         Task DeleteList(Guid listObjectTypeId, bool force=false);
 
-        Task<TreeObjectTypeInfo> EnsureList(Guid listObjectTypeId, string description = null, 
-            int? intId = null, string stringId=null);
+        Task<TreeObjectTypeInfo> EnsureList(Guid listObjectTypeId, string description = null);
         
-        Task EnsureListItem(Guid treeId, int objectId, int ownerUserId);
+        Task EnsureListItem(Guid treeId, Guid objectId, int ownerUserId);
 
         Task<List<TreeNodeInfo>> GetListItems(Guid treeId);
 

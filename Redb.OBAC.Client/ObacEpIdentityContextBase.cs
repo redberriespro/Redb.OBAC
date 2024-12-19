@@ -28,7 +28,7 @@ namespace Redb.OBAC.Client
             return SaveChangesAsync();
         }
 
-        public async Task DropEffectivePermissions(Guid objectTypeId, int objectId)
+        public async Task DropEffectivePermissions(Guid objectTypeId, Guid objectId)
         {
             await Database.ExecuteSqlRawAsync(
                 "DELETE FROM obac_ep WHERE objtypeid = {0} and objid = {1}",

@@ -12,12 +12,12 @@ namespace Redb.OBAC.EF.DB.Entities
         public Guid TreeId { get; set; }
         
         [Column("id")] 
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         
         public ObacTreeEntity Tree { get; set; }
         
         [Column("parent_id")] 
-        public int? ParentId { get; set; }
+        public Guid? ParentId { get; set; }
         
         public ObacTreeNodeEntity Parent { get; set; }
         
@@ -29,11 +29,6 @@ namespace Redb.OBAC.EF.DB.Entities
         
         [Column("inherit_parent_perms")]
         public bool InheritParentPermissions { get; set; }
-
-        
-        [Column("external_id_int")] public int? ExternalIdInt { get; set; }
-
-        [Column("external_id_str")] public string ExternalIdString { get; set; }
         
         /// <summary>
         /// Access Control List set for the node

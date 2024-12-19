@@ -7,9 +7,9 @@ namespace Redb.OBAC.Tree
 {
     public interface ILazyTreeDataProvider
     {
-        public Task<TreeNodeInfo> GetTreeNode(Guid treeId, int nodeId);
+        public Task<TreeNodeInfo> GetTreeNode(Guid treeId, Guid nodeId);
 
-        public Task<IEnumerable<TreeNodeInfo>> GetTreeSubnodesDeep(Guid treeId, int? startingNodeId = null);
-        public Task<IEnumerable<TreeNodeInfo>> GetTreeSubnodesShallow(Guid treeId, int? startingNodeId = null);
+        public Task<IEnumerable<TreeNodeInfo>> GetTreeSubnodesDeep(Guid treeId, Guid? startingNodeId = null);
+        public Task<IEnumerable<TreeNodeInfo>> GetTreeSubnodesShallow(Guid treeId, Guid? startingNodeId = null);
     }
 }

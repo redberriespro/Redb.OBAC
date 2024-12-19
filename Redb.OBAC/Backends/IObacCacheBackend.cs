@@ -7,16 +7,16 @@ namespace Redb.OBAC.Backends
 {
     public interface IObacCacheBackend
     {
-        void InvalidateForUser(int userId, Guid? objectTypeId = null, int? objectId = null);
+        void InvalidateForUser(int userId, Guid? objectTypeId = null, Guid? objectId = null);
         void InvalidateForUserGroup(int groupId);
-        public void InvalidatePermissionsForObject(Guid objectTypeId, int? objectId = null);
+        public void InvalidatePermissionsForObject(Guid objectTypeId, Guid? objectId = null);
 
 
         //void SetPermission(int userId, Guid objectTypeId, int? objectId, Guid permission);
-        Guid[] GetPermissionsFor(int userId, Guid objectTypeId, int? objectId);
+        Guid[] GetPermissionsFor(int userId, Guid objectTypeId, Guid? objectId);
 
 
-        void SetPermissions(int userId, Guid objectTypeId, int? objectId, Guid[] permissionIds);
+        void SetPermissions(int userId, Guid objectTypeId, Guid? objectId, Guid[] permissionIds);
         
         void SetUserId(SubjectInfo subjectInfo);
 

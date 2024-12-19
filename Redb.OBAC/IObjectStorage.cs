@@ -10,6 +10,6 @@ namespace Redb.OBAC
 {
     public interface IObjectStorage: ILazyTreeDataProvider, IEffectivePermissionFeed
     {
-        Task<List<TreeNodePermissionInfo>> GetEffectivePermissionsForAllUsers(Guid objectTypeId, int? objectId);
+        Task<List<TreeNodePermissionInfo>> GetEffectivePermissionsForAllUsers(Guid objectTypeId, Guid? objectId);
     }
 }

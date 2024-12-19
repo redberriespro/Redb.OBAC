@@ -29,7 +29,7 @@ namespace Redb.OBAC.Tree
         };
         public async Task VisitNodes(
             TreeActionContext ctx,
-            int nodeId,
+            Guid nodeId,
             Func<TreePathNode, Task<WhatToDoNext>> action,
             VisitOptions options = null)
         {

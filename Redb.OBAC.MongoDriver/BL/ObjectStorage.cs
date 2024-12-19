@@ -493,7 +493,7 @@ namespace Redb.OBAC.MongoDriver.BL
             });
         }
 
-        public async Task<Guid?> GetUserEffectivePermission(int subjectId, Guid permissionId, Guid objectTypeId, int? objectId)
+        public async Task<Guid?> GetUserEffectivePermission(int subjectId, Guid permissionId, Guid objectTypeId, Guid? objectId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
 
@@ -505,7 +505,7 @@ namespace Redb.OBAC.MongoDriver.BL
             return obj?.Id;
         }
 
-        public async Task AddUserEffectivePermission(int subjectId, Guid[] permissionIds, Guid objectTypeId, int? objectId, bool deleteExisting)
+        public async Task AddUserEffectivePermission(int subjectId, Guid[] permissionIds, Guid objectTypeId, Guid? objectId, bool deleteExisting)
         {
             await using var ctx = _storageProvider.CreateObacContext();
 
@@ -529,7 +529,7 @@ namespace Redb.OBAC.MongoDriver.BL
             }
         }
 
-        public async Task DeleteUserEffectivePermission(int subjectId, Guid permissionId, Guid objectTypeId, int? objectId)
+        public async Task DeleteUserEffectivePermission(int subjectId, Guid permissionId, Guid objectTypeId, Guid? objectId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
 
@@ -538,7 +538,7 @@ namespace Redb.OBAC.MongoDriver.BL
                 p.ObjectId == objectId);
         }
 
-        public async Task<Guid[]> GetEffectivePermissionsForUser(int userId, Guid objectTypeId, int? objectId)
+        public async Task<Guid[]> GetEffectivePermissionsForUser(int userId, Guid objectTypeId, Guid? objectId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             return (await ctx.ObacUserPermissions
@@ -546,7 +546,7 @@ namespace Redb.OBAC.MongoDriver.BL
                 .ToListAsync()).Select(a => a.PermissionId).ToArray();
         }
 
-        public async Task<List<TreeNodePermissionInfo>> GetEffectivePermissionsForAllUsers(Guid objectTypeId, int? objectId)
+        public async Task<List<TreeNodePermissionInfo>> GetEffectivePermissionsForAllUsers(Guid objectTypeId, Guid? objectId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             return (await ctx.ObacUserPermissions
@@ -562,7 +562,7 @@ namespace Redb.OBAC.MongoDriver.BL
                 }).ToList();
         }
 
-        public async Task<IEnumerable<UserPermissionInfo>> GetDirectPermissionsOnObject(Guid objectType, int objectId)
+        public async Task<IEnumerable<UserPermissionInfo>> GetDirectPermissionsOnObject(Guid objectType, Guid objectId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             return (await ctx.ObacUserPermissions
@@ -574,64 +574,26 @@ namespace Redb.OBAC.MongoDriver.BL
 
         // tree manipulations
 
-        private async Task TreeEnsureNoExternalIds(ObacMongoDriverContext ctx, int? intId, string stringId)
-        {
-            if (intId.HasValue)
-            {
-                var cntInt = await ctx.ObacTree.CountDocumentsAsync(u => u.ExternalIdInt == intId.Value);
-                if (cntInt > 0) throw new ObacException($"Tree with external int id {intId} already exists");
-            }
-
-            if (stringId != null)
-            {
-                var cntStr = await ctx.ObacTree.CountDocumentsAsync(u => u.ExternalIdString == stringId);
-                if (cntStr > 0) throw new ObacException($"Tree with external string id {stringId} already exists");
-            }
-        }
-
-        public async Task CreateObjectTree(Guid treeId, string description, int? intId, string stringId)
+        public async Task CreateObjectTree(Guid treeId, string description)
         {
             await using var ctx = _storageProvider.CreateObacContext();
-
-            await TreeEnsureNoExternalIds(ctx, intId, stringId);
 
             var entity = new ObacTreeEntity
             {
                 Id = treeId,
-                Description = description,
-                ExternalIdInt = intId,
-                ExternalIdString = stringId
+                Description = description
             };
             await ctx.ObacTree.InsertOneAsync(entity);
         }
 
-        public async Task UpdateObjectTree(Guid treeId, string description, int? intId, string stringId)
+        public async Task UpdateObjectTree(Guid treeId, string description)
         {
             await using var ctx = _storageProvider.CreateObacContext();
 
             var entity = await ctx.ObacTree.Find(a => a.Id == treeId).FirstAsync();
 
             entity.Description = description;
-
-            if (entity.ExternalIdInt != intId && intId != null)
-            {
-                // check no other is using this id
-                var cntInt = await ctx
-                    .ObacTree
-                    .CountDocumentsAsync(u => u.ExternalIdInt == intId.Value && u.Id != treeId);
-                if (cntInt > 0) throw new ObacException("external int id already used");
-            }
-            entity.ExternalIdInt = intId;
-
-            if (entity.ExternalIdString != stringId && stringId != null)
-            {
-                // check no other is using this id
-                var cntInt = await ctx
-                    .ObacTree
-                    .CountDocumentsAsync(u => u.ExternalIdString == stringId && u.Id != treeId);
-                if (cntInt > 0) throw new ObacException("external string id already used");
-            }
-            entity.ExternalIdString = stringId;
+           
             await ctx.ObacTree.ReplaceOneAsync(a => a.Id == treeId, entity);
         }
 
@@ -649,63 +611,11 @@ namespace Redb.OBAC.MongoDriver.BL
                 }
             };
         }
-        
-        public async Task<TreeObjectTypeInfo> GetTreeObjectByExternalIntId(int externalId)
-        {
-            await using var ctx = _storageProvider.CreateObacContext();
-            var res = await ctx.ObacTree.Find(t => t.ExternalIdInt == externalId).FirstOrDefaultAsync();
-            return res switch
-            {
-                null => null,
-                _ => new TreeObjectTypeInfo
-                {
-                    TreeObjectTypeId = res.Id,
-                    Description = res.Description
-                }
-            };
-        }
-        
-        public async Task<TreeObjectTypeInfo> GetTreeObjectByExternalStringId(string externalId)
-        {
-            await using var ctx = _storageProvider.CreateObacContext();
-            var res = await ctx.ObacTree.Find(t => t.ExternalIdString == externalId).FirstOrDefaultAsync();
-            return res switch
-            {
-                null => null,
-                _ => new TreeObjectTypeInfo
-                {
-                    TreeObjectTypeId = res.Id,
-                    Description = res.Description
-                }
-            };
-        }
 
-        public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, int nodeId)
+        public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, Guid nodeId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             var nd = await ctx.ObacTreeNodes.Find(tn => tn.TreeId == treeId && tn.NodeId == nodeId).FirstOrDefaultAsync();
-            return nd switch
-            {
-                null => null,
-                _ => MakeTreeNodeInfo(treeId, nd)
-            };
-        }
-        
-        public async Task<TreeNodeInfo> GetTreeNodeByExternalIntId(Guid treeId, int externalId)
-        {
-            await using var ctx = _storageProvider.CreateObacContext();
-            var nd = await ctx.ObacTreeNodes.Find(tn => tn.TreeId == treeId && tn.ExternalIdInt == externalId).FirstOrDefaultAsync();
-            return nd switch
-            {
-                null => null,
-                _ => MakeTreeNodeInfo(treeId, nd)
-            };
-        }
-        
-        public async Task<TreeNodeInfo> GetTreeNodeByExternalStringId(Guid treeId, string externalId)
-        {
-            await using var ctx = _storageProvider.CreateObacContext();
-            var nd = await ctx.ObacTreeNodes.Find(tn => tn.TreeId == treeId && tn.ExternalIdString == externalId).FirstOrDefaultAsync();
             return nd switch
             {
                 null => null,
@@ -726,7 +636,7 @@ namespace Redb.OBAC.MongoDriver.BL
             };
         }
 
-        public async Task CreateTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId, int? intId = null, string stringId=null)
+        public async Task CreateTreeNode(Guid treeId, Guid nodeId, Guid? parentId, int ownerUserId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             var newNode = new ObacTreeNodeEntity
@@ -735,8 +645,6 @@ namespace Redb.OBAC.MongoDriver.BL
                 NodeId = nodeId,
                 ParentId = parentId,
                 OwnerUserId = ownerUserId,
-                ExternalIdInt = intId,
-                ExternalIdString = stringId,
                 InheritParentPermissions = true
             };
             try
@@ -748,13 +656,13 @@ namespace Redb.OBAC.MongoDriver.BL
 
         }
 
-        public async Task DeleteTreeNode(Guid treeId, int nodeId, int? ndParentNodeId)
+        public async Task DeleteTreeNode(Guid treeId, Guid nodeId, Guid? ndParentNodeId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             await ctx.ObacTreeNodes.DeleteOneAsync(n => n.TreeId == treeId && n.NodeId == nodeId);
         }
         
-        public async Task<int?> ReplaceTreeNode(Guid treeId, int nodeId, int? newParentNodeId)
+        public async Task<Guid?> ReplaceTreeNode(Guid treeId, Guid nodeId, Guid? newParentNodeId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             var nd = await ctx.ObacTreeNodes.Find(n => n.TreeId == treeId && n.NodeId == nodeId).FirstAsync();
@@ -768,7 +676,7 @@ namespace Redb.OBAC.MongoDriver.BL
             return oldParentId;
         }
 
-        public async Task<IEnumerable<ObacTreeNodePermissionEntity>> GetTreeNodePermissions(Guid treeId, int treeNodeId)
+        public async Task<IEnumerable<ObacTreeNodePermissionEntity>> GetTreeNodePermissions(Guid treeId, Guid treeNodeId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             return await ctx
@@ -786,7 +694,7 @@ namespace Redb.OBAC.MongoDriver.BL
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<ObacTreeNodePermissionEntity>> GetTreeNodePermissionList(Guid treeId, int[] treeNodeIds, Guid[] permissionIds)
+        public async Task<IEnumerable<ObacTreeNodePermissionEntity>> GetTreeNodePermissionList(Guid treeId, Guid[] treeNodeIds, Guid[] permissionIds)
         {
             await using var ctx = _storageProvider.CreateObacContext();
             return await ctx
@@ -799,7 +707,7 @@ namespace Redb.OBAC.MongoDriver.BL
         }
 
         public async Task SetTreeNodePermissions(Guid treeId,
-            int treeNodeId,
+            Guid treeNodeId,
             AclInfo acl, 
             TreeNodePermissionInfo[] ptoadd,
             TreeNodePermissionInfo[] ptodel)
@@ -850,7 +758,7 @@ namespace Redb.OBAC.MongoDriver.BL
 
 
 
-        public async Task<IEnumerable<TreeNodeInfo>> GetTreeSubnodesDeep(Guid treeId, int? startingNodeId = null)
+        public async Task<IEnumerable<TreeNodeInfo>> GetTreeSubnodesDeep(Guid treeId, Guid? startingNodeId = null)
         {
             await using var ctx = _storageProvider.CreateObacContext();
 
@@ -901,7 +809,7 @@ namespace Redb.OBAC.MongoDriver.BL
             return null;
         }
 
-        public async Task<IEnumerable<TreeNodeInfo>> GetTreeSubnodesShallow(Guid treeId, int? startingNodeId = null)
+        public async Task<IEnumerable<TreeNodeInfo>> GetTreeSubnodesShallow(Guid treeId, Guid? startingNodeId = null)
         {
             await using var ctx = _storageProvider.CreateObacContext();
 

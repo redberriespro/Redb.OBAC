@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Redb.OBAC.Core.Models;
@@ -27,7 +28,7 @@ namespace Redb.OBAC.EF.ModelsPrivate
                 UserGroupId = npe.UserGroupId
             };
 
-        public static TreeNodePermissionInfo AclToPermissionInfo(int nodeId, AclItemInfo aclItem)
+        public static TreeNodePermissionInfo AclToPermissionInfo(Guid nodeId, AclItemInfo aclItem)
             => new TreeNodePermissionInfo
             {
                 NodeId = nodeId, PermissionId = aclItem.PermissionId, UserId = aclItem.UserId,

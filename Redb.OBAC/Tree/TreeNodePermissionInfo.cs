@@ -19,7 +19,7 @@ namespace Redb.OBAC.Core.Models
             return Equals((TreeNodePermissionInfo) obj);
         }
 
-        public int NodeId;
+        public Guid NodeId;
         public int? UserId;
         public int? UserGroupId;
         public Guid PermissionId;
@@ -41,7 +41,7 @@ namespace Redb.OBAC.Core.Models
             if (parts.Length != 5) throw new ArgumentException("wrong permInfo format");
             return new TreeNodePermissionInfo
             {
-                NodeId = int.Parse(parts[0]),
+                NodeId = Guid.Parse(parts[0]),
                 UserId = int.TryParse(parts[1], out var f) ? (int?)f : null, 
                 UserGroupId = int.TryParse(parts[2], out var f2) ? (int?)f2 : null, 
                 PermissionId = Guid.Parse(parts[3]),

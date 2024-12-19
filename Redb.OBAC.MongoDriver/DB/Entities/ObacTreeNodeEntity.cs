@@ -12,12 +12,12 @@ namespace Redb.OBAC.MongoDriver.DB.Entities
         public Guid TreeId { get; set; }
         
         [BsonElement("node_id")] 
-        public int NodeId { get; set; }
+        public Guid NodeId { get; set; }
         
         public ObacTreeEntity Tree { get; set; }
         
         [BsonElement("parent_id")] 
-        public int? ParentId { get; set; }
+        public Guid? ParentId { get; set; }
         
         public ObacTreeNodeEntity Parent { get; set; }
         
@@ -32,11 +32,5 @@ namespace Redb.OBAC.MongoDriver.DB.Entities
         
         [BsonElement("acl")]
         public AclInfo Acl { get; set; }
-
-        [BsonElement("external_id_int")] 
-        public int? ExternalIdInt { get; set; }
-
-        [BsonElement("external_id_str")] 
-        public string ExternalIdString { get; set; }
     }
 }

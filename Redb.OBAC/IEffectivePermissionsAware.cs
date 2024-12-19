@@ -7,6 +7,6 @@ namespace Redb.OBAC
     {
         Task SaveChangesAsync();
 
-        Task DropEffectivePermissions(Guid objectTypeId, int objectId);
+        Task DropEffectivePermissions(Guid objectTypeId, Guid objectId);
     }
 }

@@ -40,18 +40,6 @@ namespace Redb.OBAC.EF.ObjectTypes
             var res = await _storage.GetObjectTreeById(treeObjectTypeId);
             return res;
         }
-        
-        public async Task<TreeObjectTypeInfo> GetTreeObjectByExternalIntId(int externalId)
-        {
-            var res = await _storage.GetTreeObjectByExternalIntId(externalId);
-            return res;
-        }
-
-        public async Task<TreeObjectTypeInfo> GetTreeObjectByExternalStringId(string externalId)
-        {
-            var res = await _storage.GetTreeObjectByExternalStringId(externalId);
-            return res;
-        }
 
         public async Task DeleteTreeObjectType(Guid treeObjectTypeId, bool force)
         {
@@ -67,18 +55,17 @@ namespace Redb.OBAC.EF.ObjectTypes
             await _storage.DeleteObjectType(treeObjectTypeId);
         }
 
-        public async Task<TreeObjectTypeInfo> EnsureTreeObject(Guid treeObjectTypeId, string description, int? intId,
-            string stringId)
+        public async Task<TreeObjectTypeInfo> EnsureTreeObject(Guid treeObjectTypeId, string description)
         {
             var tr = await _storage.GetObjectTreeById(treeObjectTypeId);
             if (tr == null)
             {
                 await _storage.AddObjectType(treeObjectTypeId, description, ObjectTypeEnum.TreeObject);
-                await _storage.CreateObjectTree(treeObjectTypeId, description, intId, stringId);
+                await _storage.CreateObjectTree(treeObjectTypeId, description);
             }
             else
             {
-                await _storage.UpdateObjectTree(treeObjectTypeId, description, intId, stringId);
+                await _storage.UpdateObjectTree(treeObjectTypeId, description);
             }
 
             return new TreeObjectTypeInfo
@@ -88,7 +75,7 @@ namespace Redb.OBAC.EF.ObjectTypes
             };
         }
 
-        public async Task DeleteTreeNode(Guid treeId, int nodeId)
+        public async Task DeleteTreeNode(Guid treeId, Guid nodeId)
         {
             var nd = await _storage.GetTreeNode(treeId, nodeId);
             if (nd == null)
@@ -105,12 +92,12 @@ namespace Redb.OBAC.EF.ObjectTypes
 
         }
         
-        public async Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId, int? intId = null, string stringId=null)
+        public async Task EnsureTreeNode(Guid treeId, Guid nodeId, Guid? parentId, int ownerUserId)
         {
             var nd = await _storage.GetTreeNode(treeId, nodeId);
             if (nd == null)
             {
-                await CreateTreeNode(treeId, nodeId, parentId, ownerUserId, intId, stringId);
+                await CreateTreeNode(treeId, nodeId, parentId, ownerUserId);
             }
             else
             {
@@ -122,7 +109,7 @@ namespace Redb.OBAC.EF.ObjectTypes
             }
         }
 
-        private async Task ChangeTreeNodeParent(Guid treeId, int nodeId, int? parentId)
+        private async Task ChangeTreeNodeParent(Guid treeId, Guid nodeId, Guid? parentId)
         {
             // switch parent Id
             var oldParent= await _storage.ReplaceTreeNode(treeId, nodeId, parentId);
@@ -137,20 +124,20 @@ namespace Redb.OBAC.EF.ObjectTypes
                 await tc.RepairNodePermissions(GetEffectivePermissionsFeed(), tr, oldParent.Value);
         }
 
-        private async Task CreateTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId,int? intId = null, string stringId=null)
+        private async Task CreateTreeNode(Guid treeId, Guid nodeId, Guid? parentId, int ownerUserId)
         {
             // create new Node
             var tc = new TreePermissionCalculator();
             var tr = MakeTreeActionContext(treeId);
             
-            await _storage.CreateTreeNode(treeId, nodeId, parentId, ownerUserId, intId, stringId);
+            await _storage.CreateTreeNode(treeId, nodeId, parentId, ownerUserId);
 
             await tc.AfterNodeInserted(
                 GetEffectivePermissionsFeed(),
                 tr, nodeId);
         }
 
-        public async Task<List<TreeNodeInfo>> GetTreeNodes(Guid treeId, int? startingNodeId, bool deep=true)
+        public async Task<List<TreeNodeInfo>> GetTreeNodes(Guid treeId, Guid? startingNodeId, bool deep=true)
         {
             var res = new List<TreeNodeInfo>();
 
@@ -173,23 +160,12 @@ namespace Redb.OBAC.EF.ObjectTypes
             return res;
         }
         
-        public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, int treeNodeId)
+        public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, Guid treeNodeId)
         {
             return await _storage.GetTreeNode(treeId, treeNodeId);
         }
-
-        public async Task<TreeNodeInfo> GetTreeNodeByExternalIntId(Guid treeId, int externalId)
-        {
-            return await _storage.GetTreeNodeByExternalIntId(treeId, externalId);
-        }
-
-        public async Task<TreeNodeInfo> GetTreeNodeByExternalStringId(Guid treeId, string externalId)
-        {
-            return await _storage.GetTreeNodeByExternalStringId(treeId, externalId);
-        }
-
         
-        public async Task RepairTreeNodeEffectivePermissions(Guid treeId, int treeNodeId)
+        public async Task RepairTreeNodeEffectivePermissions(Guid treeId, Guid treeNodeId)
         {
             var tc = new TreePermissionCalculator();
             var tr = MakeTreeActionContext(treeId);
@@ -199,13 +175,13 @@ namespace Redb.OBAC.EF.ObjectTypes
                 tr, treeNodeId);
         }
 
-        public async Task<AclInfo> GetTreeNodeAcl(Guid treeId, int treeNodeId)
+        public async Task<AclInfo> GetTreeNodeAcl(Guid treeId, Guid treeNodeId)
         {
             var tn = await _storage.GetTreeNode(treeId, treeNodeId);
             return tn.Acl;
         }
         
-        public async Task SetTreeNodeAcl(Guid treeId, int treeNodeId, AclInfo acl)
+        public async Task SetTreeNodeAcl(Guid treeId, Guid treeNodeId, AclInfo acl)
         {
             // that's how we deal with role-based ACL items:
             // internally, TreePermissioinCalculator doesn't know about roles at all

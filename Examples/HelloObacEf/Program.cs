@@ -76,6 +76,9 @@ namespace HelloObac
             await obacManager.EnsureUser(1, "user 1");
             await obacManager.EnsureUser(2, "user 2");
 
+            await obacManager.EnsureUserGroup(1, "user group 1");
+            await obacManager.AddUserToUserGroup(1, 1);
+
             // now we create the documents and sets the permissions
             // doc 1 available to read for user 1 
             // doc 2 available to read and write for user 1
@@ -109,6 +112,14 @@ namespace HelloObac
                 AclItems = new[]
                 {
                     new AclItemInfo { UserId = 2, PermissionId = readPermission, Kind = PermissionKindEnum.Allow},
+                    new AclItemInfo { UserGroupId = 1, PermissionId = readPermission, Kind = PermissionKindEnum.Allow},
+
+                    //TODO: how to set permission on project and inherit them in spec - need to create example here! Looks like OBAC in not ready for it (YURA - see string ext ID)
+                    //TODO: workaround is to grab all specs from project and set them manually (but need to control changes in relation project<->spec).
+
+                    //TODO: tree per project ??? or single tree and projects inside?
+
+                    //TODO: how to handle spec id ??? versions has the same sequential (and different versions)
                 }
             });
             

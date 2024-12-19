@@ -5,11 +5,11 @@ namespace Redb.OBAC.Backends.InMemory
 {
     public class ObjectTypeCacheEntry
     {
-        private ConcurrentDictionary<int, ConcurrentBag<Guid>> _otCache = new ConcurrentDictionary<int, ConcurrentBag<Guid>>();
+        private ConcurrentDictionary<Guid, ConcurrentBag<Guid>> _otCache = new ConcurrentDictionary<Guid, ConcurrentBag<Guid>>();
         
-        public void Set(int? objectId, Guid permission)
+        public void Set(Guid? objectId, Guid permission)
         {
-            var oid = objectId ?? int.MinValue;
+            var oid = objectId ?? Guid.Empty;
             
             if (!_otCache.ContainsKey(oid))
             {
@@ -25,14 +25,14 @@ namespace Redb.OBAC.Backends.InMemory
             }
         }
 
-        public void InvalidatePermissionsForObject(int? objectId)
+        public void InvalidatePermissionsForObject(Guid? objectId)
         {
-            _otCache.TryRemove(objectId ?? Int32.MinValue, out _);
+            _otCache.TryRemove(objectId ?? Guid.Empty, out _);
         }
 
-        public Guid[] GetPermissions(int? objectId)
+        public Guid[] GetPermissions(Guid? objectId)
         {
-            var oid = objectId ?? int.MinValue;
+            var oid = objectId ?? Guid.Empty;
 
             if (_otCache.ContainsKey(oid))
                 return _otCache[oid].ToArray();

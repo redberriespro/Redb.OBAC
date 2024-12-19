@@ -10,17 +10,17 @@ namespace Redb.OBAC.Tree
 {
     public class TreeNodeItem
     {
-        public int NodeId;
-        public int? ParentNodeId;
+        public Guid NodeId;
+        public Guid? ParentNodeId;
         public bool InheritParentPermissions;
         public int OwnerUserid { get; set; }
 
 
         public HashSet<TreeNodeItem> Subnodes = new HashSet<TreeNodeItem>();
 
-        public List<int> GetNodeIds(bool deep, bool visitChildrenWhoDoesNotHaveRightsInheritance=true)
+        public List<Guid> GetNodeIds(bool deep, bool visitChildrenWhoDoesNotHaveRightsInheritance=true)
         {
-            var res = new List<int> {NodeId};
+            var res = new List<Guid> {NodeId};
             foreach (var subnode in Subnodes)
             {
                 res.Add(subnode.NodeId);
@@ -31,7 +31,7 @@ namespace Redb.OBAC.Tree
 
             return res;
         }
-        public TreeNodeItem FindNode(int nodeId, bool deep)
+        public TreeNodeItem FindNode(Guid nodeId, bool deep)
         {
             if (this.NodeId == nodeId) return this;
             
@@ -53,7 +53,7 @@ namespace Redb.OBAC.Tree
     {
         // todo add synchronization primitives, rwlocks etc
         
-        private Dictionary<int, TreeNodeItem> _allNodes = new Dictionary<int, TreeNodeItem>();
+        private Dictionary<Guid, TreeNodeItem> _allNodes = new Dictionary<Guid, TreeNodeItem>();
         private TreeNodeItem _rootNode;
 
         private Guid _treeId;
@@ -68,7 +68,7 @@ namespace Redb.OBAC.Tree
         public void Clear()
         {
             _rootNode = null;
-            _allNodes = new Dictionary<int, TreeNodeItem>();
+            _allNodes = new Dictionary<Guid, TreeNodeItem>();
         }
 
         public async Task<TreeNodeItem> GetRootNode()
@@ -103,16 +103,16 @@ namespace Redb.OBAC.Tree
             return _rootNode;
         }
 
-        public async Task<TreeNodeItem> GetNode(int nodeId)
+        public async Task<TreeNodeItem> GetNode(Guid nodeId)
         {
             if (!_allNodes.ContainsKey(nodeId))
                 await EnsureTreeSegment(nodeId);
             return _allNodes[nodeId];
         }
         
-        public List<int> GetUpperNodeIds()
+        public List<Guid> GetUpperNodeIds()
         {
-            var res = new List<int>();
+            var res = new List<Guid>();
             foreach (var subnode in _allNodes.Values)
             {
                 if (subnode.ParentNodeId.HasValue && _allNodes.ContainsKey(subnode.ParentNodeId.Value))
@@ -124,7 +124,7 @@ namespace Redb.OBAC.Tree
         }
 
 
-        public async Task EnsureTreeSegment(int nodeId)
+        public async Task EnsureTreeSegment(Guid nodeId)
         {
             var node = await _dataProvider.GetTreeNode(_treeId, nodeId);
             if (node == null) throw new ObacException("node not found " + nodeId);
@@ -149,7 +149,7 @@ namespace Redb.OBAC.Tree
 
         private void SettleNodes(TreeNodeInfo[] subnodeInfos)
         {
-            var nodesToAdd = new Dictionary<int, TreeNodeItem>();
+            var nodesToAdd = new Dictionary<Guid, TreeNodeItem>();
 
             foreach (var n in subnodeInfos)
             {
@@ -197,13 +197,13 @@ namespace Redb.OBAC.Tree
             if (_rootNode != null) return;
             _rootNode = new TreeNodeItem // dummy node
             {
-                NodeId = 0, Subnodes = new HashSet<TreeNodeItem>()
+                NodeId = Guid.Empty, Subnodes = new HashSet<TreeNodeItem>()
             };
         }
 
         public int Count => _allNodes.Count;
 
-        public void InvalidateNode(int nodeId)
+        public void InvalidateNode(Guid nodeId)
         {
             if (!_allNodes.TryGetValue(nodeId, out var node)) return; // no node found
             var toRemove = node.GetNodeIds(true);

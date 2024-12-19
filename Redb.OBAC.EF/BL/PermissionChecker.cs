@@ -22,7 +22,7 @@ namespace Redb.OBAC.EF.BL
         }
 
        
-        public async Task<Guid[]> GetObjectPermissions(Guid objectTypeId, int? objectId = null)
+        public async Task<Guid[]> GetObjectPermissions(Guid objectTypeId, Guid? objectId = null)
         {
             var permList = _cacheBackend.GetPermissionsFor(_userId, objectTypeId, objectId);
             if (permList != null)
@@ -35,13 +35,13 @@ namespace Redb.OBAC.EF.BL
         }
 
 
-        public async Task<bool> CheckObjectPermissions(Guid objectTypeId, int objectId, Guid permissionId)
+        public async Task<bool> CheckObjectPermissions(Guid objectTypeId, Guid objectId, Guid permissionId)
         {
             var effPermissions = await GetObjectPermissions(objectTypeId, objectId);
             return effPermissions.Contains(permissionId);
         }
 
-        public async Task<bool> CheckObjectPermissions(Guid objectTypeId, int objectId, Guid[] permissionIds)
+        public async Task<bool> CheckObjectPermissions(Guid objectTypeId, Guid objectId, Guid[] permissionIds)
         {
             var effPermissions = await GetObjectPermissions(objectTypeId, objectId);
             return permissionIds.All(pid => effPermissions.Contains(pid));

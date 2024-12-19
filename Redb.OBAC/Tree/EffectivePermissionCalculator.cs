@@ -9,7 +9,7 @@ namespace Redb.OBAC.Tree
     public class EffectivePermissionCalculator
     {
         public TreeNodePermissionInfo[] CalculateEffectivePermissions(
-            int nodeId,
+            Guid nodeId,
             bool inheritParentPermissions,
             TreeNodePermissionInfo[] nodeDirectPermissionsRaw,
             TreeNodePermissionInfo[] nodeGroupPermissionsRaw,
@@ -39,7 +39,7 @@ namespace Redb.OBAC.Tree
         }
 
         private TreeNodePermissionInfo[] FoldPair(
-            int nodeId,
+            Guid nodeId,
             TreeNodePermissionInfo[] higher, TreeNodePermissionInfo[] lower)
         {
             var res = new HashSet<(Guid, int)>(); // permid + userid

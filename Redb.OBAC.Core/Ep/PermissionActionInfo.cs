@@ -12,7 +12,7 @@ namespace Redb.OBAC.Core.Ep
     {
         public PermissionActionEnum Action { get; set; }
         public int UserId { get; set; }
-        public int ObjectId { get; set; }
+        public Guid ObjectId { get; set; }
         public Guid ObjectTypeId { get; set; }
         public Guid PermissionId { get; set; }
     }

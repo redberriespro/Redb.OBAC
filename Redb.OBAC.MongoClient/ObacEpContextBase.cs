@@ -31,7 +31,7 @@ namespace Redb.OBAC.MongoDbClient
             //return SaveChangesAsync();
         }
 
-        public async Task DropEffectivePermissions(Guid objectTypeId, int objectId)
+        public async Task DropEffectivePermissions(Guid objectTypeId, Guid objectId)
         {
             await EffectivePermissions.DeleteManyAsync(x=>x.ObjectTypeId==objectTypeId&&x.ObjectId==objectId);
 

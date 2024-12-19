@@ -23,7 +23,7 @@ namespace Redb.OBAC.MongoDriver.DB.Entities
         public Guid TreeId { get; set; }
         
         [BsonElement("tree_node_id")]
-        public int NodeId { get; set; }
+        public Guid NodeId { get; set; }
         
         [BsonElement("perm_id")]
         public Guid PermissionId { get; set; }

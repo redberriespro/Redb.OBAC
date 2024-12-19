@@ -23,6 +23,6 @@ namespace Redb.OBAC.EF.DB.Entities
         public Guid ObjectTypeId { get; set; }
         
         [Column("objid")]
-        public int? ObjectId { get; set; }
+        public Guid? ObjectId { get; set; }
     }
 }

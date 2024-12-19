@@ -10,8 +10,8 @@ using Redb.OBAC.PgSql;
 namespace Redb.OBAC.PgSql.Migrations
 {
     [DbContext(typeof(PgSqlObacDbContext))]
-    [Migration("20230802143836_Acl")]
-    partial class Acl
+    [Migration("20241219091528_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -127,14 +127,6 @@ namespace Redb.OBAC.PgSql.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<int?>("ExternalIdInt")
-                        .HasColumnType("integer")
-                        .HasColumnName("external_id_int");
-
-                    b.Property<string>("ExternalIdString")
-                        .HasColumnType("text")
-                        .HasColumnName("external_id_str");
-
                     b.HasKey("Id");
 
                     b.ToTable("obac_trees");
@@ -146,21 +138,13 @@ namespace Redb.OBAC.PgSql.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("tree_id");
 
-                    b.Property<int>("Id")
-                        .HasColumnType("integer")
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
                         .HasColumnName("id");
 
                     b.Property<string>("Acl")
                         .HasColumnType("text")
                         .HasColumnName("acl");
-
-                    b.Property<int?>("ExternalIdInt")
-                        .HasColumnType("integer")
-                        .HasColumnName("external_id_int");
-
-                    b.Property<string>("ExternalIdString")
-                        .HasColumnType("text")
-                        .HasColumnName("external_id_str");
 
                     b.Property<bool>("InheritParentPermissions")
                         .HasColumnType("boolean")
@@ -170,8 +154,8 @@ namespace Redb.OBAC.PgSql.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("owner_user_id");
 
-                    b.Property<int?>("ParentId")
-                        .HasColumnType("integer")
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uuid")
                         .HasColumnName("parent_id");
 
                     b.HasKey("TreeId", "Id");
@@ -198,8 +182,8 @@ namespace Redb.OBAC.PgSql.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_deny");
 
-                    b.Property<int>("NodeId")
-                        .HasColumnType("integer")
+                    b.Property<Guid>("NodeId")
+                        .HasColumnType("uuid")
                         .HasColumnName("tree_node_id");
 
                     b.Property<Guid>("PermissionId")
@@ -258,8 +242,8 @@ namespace Redb.OBAC.PgSql.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<int?>("ObjectId")
-                        .HasColumnType("integer")
+                    b.Property<Guid?>("ObjectId")
+                        .HasColumnType("uuid")
                         .HasColumnName("objid");
 
                     b.Property<Guid>("ObjectTypeId")

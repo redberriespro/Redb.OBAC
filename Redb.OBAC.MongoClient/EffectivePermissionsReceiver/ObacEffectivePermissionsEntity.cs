@@ -19,6 +19,6 @@ namespace Redb.OBAC.MongoDbClient.EffectivePermissionsReceiver
         public Guid ObjectTypeId { get; set; }
         
         [BsonElement("objid")]
-        public int? ObjectId { get; set; }
+        public Guid? ObjectId { get; set; }
     }
 }

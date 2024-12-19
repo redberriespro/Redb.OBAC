@@ -32,12 +32,8 @@ namespace Redb.OBAC.MongoDriver.BL
             _treeObjectManager = new TreeObjectManager(store, cacheBackend, extraEpFeeds);
         }
 
-        public async Task<TreeObjectTypeInfo> GetTree(Guid? treeObjectTypeId, int? intId = null, string stringId=null)
+        public async Task<TreeObjectTypeInfo> GetTree(Guid? treeObjectTypeId)
         {
-            if (stringId != null)
-                return await _treeObjectManager.GetTreeObjectByExternalStringId(stringId);
-            if (intId.HasValue) 
-                return await _treeObjectManager.GetTreeObjectByExternalIntId(intId.Value);
             if (treeObjectTypeId.HasValue)
                 return await _treeObjectManager.GetTreeObjectById(treeObjectTypeId.Value);
             throw new ArgumentException("GetTree - no ID is provided");
@@ -48,33 +44,29 @@ namespace Redb.OBAC.MongoDriver.BL
             await _treeObjectManager.DeleteTreeObjectType(treeObjectTypeId, force);
         }
 
-        public async Task<TreeObjectTypeInfo> EnsureTree(Guid treeObjectTypeId, string description = null, int? intId = null, string stringId = null)
+        public async Task<TreeObjectTypeInfo> EnsureTree(Guid treeObjectTypeId, string description = null)
         {
-            return await _treeObjectManager.EnsureTreeObject(treeObjectTypeId, description,intId, stringId);
+            return await _treeObjectManager.EnsureTreeObject(treeObjectTypeId, description);
         }
 
-        public async Task EnsureTreeNode(Guid treeId, int nodeId, int? parentId, int ownerUserId,  int? intId = null, string stringId=null)
+        public async Task EnsureTreeNode(Guid treeId, Guid nodeId, Guid? parentId, int ownerUserId)
         {
-            await _treeObjectManager.EnsureTreeNode(treeId, nodeId, parentId, ownerUserId, intId, stringId);
+            await _treeObjectManager.EnsureTreeNode(treeId, nodeId, parentId, ownerUserId);
         }
 
-                public async Task DeleteTreeNode(Guid treeId, int nodeId)
+                public async Task DeleteTreeNode(Guid treeId, Guid nodeId)
         {
             await _treeObjectManager.DeleteTreeNode(treeId, nodeId);
         }
 
 
-              public async Task<List<TreeNodeInfo>> GetTreeNodes(Guid treeId, int? startingNodeId = null, bool deep=false)
+              public async Task<List<TreeNodeInfo>> GetTreeNodes(Guid treeId, Guid? startingNodeId = null, bool deep=false)
         {
             return await _treeObjectManager.GetTreeNodes(treeId, startingNodeId, deep);
         }
         
-        public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, int? treeNodeId, int? intId = null, string stringId=null)
+        public async Task<TreeNodeInfo> GetTreeNode(Guid treeId, Guid? treeNodeId)
         {
-            if (stringId != null)
-                return await _treeObjectManager.GetTreeNodeByExternalStringId(treeId, stringId);
-            if (intId.HasValue) 
-                return await _treeObjectManager.GetTreeNodeByExternalIntId(treeId, intId.Value);
             if (treeNodeId.HasValue)
                 return await _treeObjectManager.GetTreeNode(treeId, treeNodeId.Value);
             throw new ArgumentException("GetTreeNode - no ID is provided");
@@ -91,13 +83,12 @@ namespace Redb.OBAC.MongoDriver.BL
             await _treeObjectManager.DeleteTreeObjectType(treeObjectTypeId, force);
         }
 
-        public async Task<TreeObjectTypeInfo> EnsureList(Guid treeObjectTypeId, string description = null,
-            int? intId = null, string stringId = null)
+        public async Task<TreeObjectTypeInfo> EnsureList(Guid treeObjectTypeId, string description = null)
         {
-            return await _treeObjectManager.EnsureTreeObject(treeObjectTypeId, description,intId, stringId);
+            return await _treeObjectManager.EnsureTreeObject(treeObjectTypeId, description);
         }
 
-        public async Task EnsureListItem(Guid treeId, int objectId, int ownerUserId)
+        public async Task EnsureListItem(Guid treeId, Guid objectId, int ownerUserId)
         {
             await _treeObjectManager.EnsureTreeNode(treeId, objectId, null, ownerUserId);
         }
@@ -159,18 +150,18 @@ namespace Redb.OBAC.MongoDriver.BL
         //     await _treeObjectType2.AddUserPermissionsToAnObject(subjectId, permissionIds, objectTypeId, objectId, deleteExisting:true);
         // }
 
-        public async Task RepairTreeNodeEffectivePermissions(Guid treeId, int treeNodeId)
+        public async Task RepairTreeNodeEffectivePermissions(Guid treeId, Guid treeNodeId)
         {
             await _treeObjectManager.RepairTreeNodeEffectivePermissions(treeId, treeNodeId);
         }
 
         
-        public async Task SetTreeNodeAcl(Guid treeId, int treeNodeId, AclInfo acl)
+        public async Task SetTreeNodeAcl(Guid treeId, Guid treeNodeId, AclInfo acl)
         {
             await _treeObjectManager.SetTreeNodeAcl(treeId, treeNodeId, acl);
         }
 
-        public async Task< AclInfo> GetTreeNodeAcl(Guid treeId, int treeNodeId)
+        public async Task< AclInfo> GetTreeNodeAcl(Guid treeId, Guid treeNodeId)
         {
             return await _treeObjectManager.GetTreeNodeAcl(treeId, treeNodeId);
         }
