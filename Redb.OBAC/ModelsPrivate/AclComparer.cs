@@ -95,7 +95,8 @@ namespace Redb.OBAC.ModelsPrivate
                     PermissionId = p.PermissionId,
                     UserId = p.UserId.Value, 
                     ObjectId = p.NodeId,
-                    ObjectTypeId = treeId
+                    ObjectTypeId = treeId,
+                    ExternalIdString = p.ExternalStringId
                 }));
             
             actions.AddRange(toRemove
@@ -107,7 +108,8 @@ namespace Redb.OBAC.ModelsPrivate
                     PermissionId = p.PermissionId,
                     UserId = p.UserId.Value, 
                     ObjectId = p.NodeId,
-                    ObjectTypeId = treeId
+                    ObjectTypeId = treeId,
+                    ExternalIdString = p.ExternalStringId
                 }));
             
             return actions;

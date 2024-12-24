@@ -8,7 +8,7 @@ namespace Redb.OBAC.Core.Models
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return NodeId == other.NodeId && UserId == other.UserId && UserGroupId == other.UserGroupId && PermissionId.Equals(other.PermissionId) && DenyPermission == other.DenyPermission;
+            return NodeId == other.NodeId && UserId == other.UserId && UserGroupId == other.UserGroupId && PermissionId.Equals(other.PermissionId) && DenyPermission == other.DenyPermission && ExternalStringId == other.ExternalStringId;
         }
 
         public override bool Equals(object obj)
@@ -24,28 +24,30 @@ namespace Redb.OBAC.Core.Models
         public int? UserGroupId;
         public Guid PermissionId;
         public bool DenyPermission;
+        public string ExternalStringId;
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(NodeId, UserId, UserGroupId, PermissionId, DenyPermission);
+            return HashCode.Combine(NodeId, UserId, UserGroupId, PermissionId, DenyPermission, ExternalStringId);
         }
 
         public override string ToString()
         {
-            return $"{NodeId}:{UserId}:{UserGroupId}:{PermissionId}:{DenyPermission}";
+            return $"{NodeId}:{UserId}:{UserGroupId}:{PermissionId}:{DenyPermission}:{ExternalStringId}";
         }
 
         public static TreeNodePermissionInfo Parse(string permInfo)
         {
             var parts = permInfo.Split(":");
-            if (parts.Length != 5) throw new ArgumentException("wrong permInfo format");
+            if (parts.Length != 6) throw new ArgumentException("wrong permInfo format");
             return new TreeNodePermissionInfo
             {
                 NodeId = int.Parse(parts[0]),
                 UserId = int.TryParse(parts[1], out var f) ? (int?)f : null, 
                 UserGroupId = int.TryParse(parts[2], out var f2) ? (int?)f2 : null, 
                 PermissionId = Guid.Parse(parts[3]),
-                DenyPermission = bool.Parse(parts[4])
+                DenyPermission = bool.Parse(parts[4]),
+                ExternalStringId = parts[5] == string.Empty ? null : parts[5]
             };
         }
     }

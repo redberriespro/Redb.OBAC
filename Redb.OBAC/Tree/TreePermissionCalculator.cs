@@ -91,7 +91,7 @@ namespace Redb.OBAC.Tree
 
                     var ngp = await UnwindGroupBasedPermissions(ctx, nodePermissions);
                     path.CurrentEffectivePermissions = _effectivePermissionCalculator
-                        .CalculateEffectivePermissions(path.Node.NodeId, path.Node.InheritParentPermissions,
+                        .CalculateEffectivePermissions(path.Node.NodeId, path.Node.ExternalStrId, path.Node.InheritParentPermissions,
                             nodePermissions,
                             ngp,
                             parentEffectivePermissions);
@@ -102,7 +102,8 @@ namespace Redb.OBAC.Tree
                         {
                             Action = PermissionActionEnum.RemoveAllObjectsDirectPermission,
                             ObjectId = path.Node.NodeId,
-                            ObjectTypeId = ctx.TreeId
+                            ObjectTypeId = ctx.TreeId,
+                            ExternalIdString = path.Node.ExternalStrId
                         }
                     });
                     
@@ -115,7 +116,8 @@ namespace Redb.OBAC.Tree
                             ObjectId = path.Node.NodeId,
                             ObjectTypeId = ctx.TreeId,
                             PermissionId = ep.PermissionId,
-                            UserId = ep.UserId.Value
+                            UserId = ep.UserId.Value,
+                            ExternalIdString = ep.ExternalStringId
                         }));
 
                     return SimpleTreeVisitor.WhatToDoNext.Continue;
@@ -155,7 +157,8 @@ namespace Redb.OBAC.Tree
                     {
                         Action = PermissionActionEnum.RemoveAllObjectsDirectPermission,
                         ObjectId = path.Node.NodeId,
-                        ObjectTypeId = ctx.TreeId
+                        ObjectTypeId = ctx.TreeId,
+                        ExternalIdString = path.Node.ExternalStrId
                     }});
                     return SimpleTreeVisitor.WhatToDoNext.Continue;
                 });
@@ -215,7 +218,7 @@ namespace Redb.OBAC.Tree
                     
                     // calculate current effective permissions based on current' everything (and a parents' E.P.) 
                     var currentEffectivePermissions = _effectivePermissionCalculator
-                        .CalculateEffectivePermissions(path.Node.NodeId, path.Node.InheritParentPermissions,
+                        .CalculateEffectivePermissions(path.Node.NodeId, path.Node.ExternalStrId, path.Node.InheritParentPermissions,
                             currentNodePermissions.ToArray(),
                             currentNodeGroupPermissions,
                             currentParentEffectivePermissions);
@@ -245,7 +248,7 @@ namespace Redb.OBAC.Tree
                     // for nodeId and deeper nodes, effective permission list will be calculated, 
                     // while it is loaded from db for nodeId's parent's node
                     path.UpdatedEffectivePermissions = _effectivePermissionCalculator
-                        .CalculateEffectivePermissions(path.Node.NodeId, updatedInheritanceFlag,
+                        .CalculateEffectivePermissions(path.Node.NodeId, path.Node.ExternalStrId, updatedInheritanceFlag,
                             updatedNodePermissions,
                             updatedNodeGroupPermissions,
                             updatedParentEffectivePermissions);

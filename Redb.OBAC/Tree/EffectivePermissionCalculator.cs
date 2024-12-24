@@ -10,6 +10,7 @@ namespace Redb.OBAC.Tree
     {
         public TreeNodePermissionInfo[] CalculateEffectivePermissions(
             int nodeId,
+            string externalStrId,
             bool inheritParentPermissions,
             TreeNodePermissionInfo[] nodeDirectPermissionsRaw,
             TreeNodePermissionInfo[] nodeGroupPermissionsRaw,
@@ -33,13 +34,14 @@ namespace Redb.OBAC.Tree
 
             
             var l2p = inheritParentPermissions
-                ? FoldPair(nodeId,nodeGroupPermissions, parentEffectivePermissions)
+                ? FoldPair(nodeId, externalStrId, nodeGroupPermissions, parentEffectivePermissions)
                 : nodeGroupPermissions;
-            return FoldPair(nodeId,nodeDirectPermissions, l2p);
+            return FoldPair(nodeId, externalStrId, nodeDirectPermissions, l2p);
         }
 
         private TreeNodePermissionInfo[] FoldPair(
             int nodeId,
+            string externalStrId,
             TreeNodePermissionInfo[] higher, TreeNodePermissionInfo[] lower)
         {
             var res = new HashSet<(Guid, int)>(); // permid + userid
@@ -65,7 +67,8 @@ namespace Redb.OBAC.Tree
                 NodeId = nodeId,
                 DenyPermission = false, 
                 PermissionId = r.Item1,
-                UserId = r.Item2
+                UserId = r.Item2,
+                ExternalStringId = externalStrId
             }).ToArray();
 
         }

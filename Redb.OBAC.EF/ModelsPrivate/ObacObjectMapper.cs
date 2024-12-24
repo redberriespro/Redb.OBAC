@@ -12,7 +12,8 @@ namespace Redb.OBAC.EF.ModelsPrivate
                 DenyPermission = false,
                 PermissionId = epe.PermissionId,
                 UserId = epe.UserId,
-                UserGroupId = null
+                UserGroupId = null,
+                ExternalStringId = epe.ExternalStringId
             };
     }
 }

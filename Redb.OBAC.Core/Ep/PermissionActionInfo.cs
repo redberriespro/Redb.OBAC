@@ -15,5 +15,6 @@ namespace Redb.OBAC.Core.Ep
         public int ObjectId { get; set; }
         public Guid ObjectTypeId { get; set; }
         public Guid PermissionId { get; set; }
+        public string ExternalIdString { get; set; }
     }
 }

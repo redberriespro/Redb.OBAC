@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Google.Protobuf.WellKnownTypes;
 using NUnit.Framework;
 using Redb.OBAC.Core.Models;
 using Redb.OBAC.Models;
@@ -21,7 +22,7 @@ namespace Redb.OBAC.Tests.ThreeTests
         {
             var c = new EffectivePermissionCalculator();
             
-            var res = c.CalculateEffectivePermissions(88,true, new [] {
+            var res = c.CalculateEffectivePermissions(88, null, true, new [] {
                 new TreeNodePermissionInfo { PermissionId = Perm_Read, UserId = 1},
                 new TreeNodePermissionInfo { PermissionId = Perm_Read, UserId = 1}
                 }, new [] {
@@ -38,7 +39,7 @@ namespace Redb.OBAC.Tests.ThreeTests
                 new TreeNodePermissionInfo { PermissionId = Perm_Read, UserId = 1}
             });
             
-            res = c.CalculateEffectivePermissions(88,true, new [] {
+            res = c.CalculateEffectivePermissions(88, null, true, new [] {
                     new TreeNodePermissionInfo { PermissionId = Perm_Read, UserId = 1}
                 }, new [] {
                     new TreeNodePermissionInfo { PermissionId = Perm_Change, UserId = 1}
@@ -53,7 +54,7 @@ namespace Redb.OBAC.Tests.ThreeTests
             });
             
             
-            res = c.CalculateEffectivePermissions(88,false, new [] {
+            res = c.CalculateEffectivePermissions(88, null, false, new [] {
                 new TreeNodePermissionInfo { PermissionId = Perm_Read, UserId = 1}
             }, new [] {
                 new TreeNodePermissionInfo { PermissionId = Perm_Change, UserId = 1}
@@ -66,7 +67,7 @@ namespace Redb.OBAC.Tests.ThreeTests
                 new TreeNodePermissionInfo { PermissionId = Perm_Change, UserId = 1},
             });
             
-            res = c.CalculateEffectivePermissions(88,true, new [] {
+            res = c.CalculateEffectivePermissions(88, null, true, new [] {
                 new TreeNodePermissionInfo { PermissionId = Perm_Read, UserId = 1}
             }, new [] {
                 new TreeNodePermissionInfo { PermissionId = Perm_Change, UserId = 1},
@@ -81,7 +82,7 @@ namespace Redb.OBAC.Tests.ThreeTests
                 new TreeNodePermissionInfo { PermissionId = Perm_Change, UserId = 1}
             });
             
-            res = c.CalculateEffectivePermissions(88,true, new [] {
+            res = c.CalculateEffectivePermissions(88, null, true, new [] {
                 new TreeNodePermissionInfo { PermissionId = Perm_Read, UserId = 1},
                 new TreeNodePermissionInfo { PermissionId = Perm_Read, UserId = 1, DenyPermission = true},
                 new TreeNodePermissionInfo { PermissionId = Perm_Change, UserId = 1, DenyPermission = true}
@@ -97,7 +98,7 @@ namespace Redb.OBAC.Tests.ThreeTests
                 new TreeNodePermissionInfo { PermissionId = Perm_Read, UserId = 1}
             });
 
-            res = c.CalculateEffectivePermissions(88, true,
+            res = c.CalculateEffectivePermissions(88, null, true,
                 null,
                 null,
                 new TreeNodePermissionInfo[0]);

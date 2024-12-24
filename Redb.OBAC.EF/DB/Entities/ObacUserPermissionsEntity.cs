@@ -24,5 +24,8 @@ namespace Redb.OBAC.EF.DB.Entities
         
         [Column("objid")]
         public int? ObjectId { get; set; }
+
+        [Column("external_string_id")]
+        public string ExternalStringId { get; set; }
     }
 }

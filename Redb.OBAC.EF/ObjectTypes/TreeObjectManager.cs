@@ -219,9 +219,9 @@ namespace Redb.OBAC.EF.ObjectTypes
             {
                 EnsureAclValid(acl);
 
-                var oldAcl = await GetTreeNodeAcl(treeId, treeNodeId);
+                var oldTreeNode = await GetTreeNode(treeId, treeNodeId);
 
-                var oldAclExploded = await ExplodeAcl(oldAcl);
+                var oldAclExploded = await ExplodeAcl(oldTreeNode.Acl);
                 var newAclExploded = await ExplodeAcl(acl);
                 
                 var diff = AclComparer.CompareAcls(oldAclExploded, newAclExploded);
@@ -235,9 +235,9 @@ namespace Redb.OBAC.EF.ObjectTypes
                 var tc = new TreePermissionCalculator();
                 var tr = MakeTreeActionContext(treeId);
 
-                var ptoadd = diff.AclItemsToBeAdded.Select(a => TreeObjectMapper.AclToPermissionInfo(treeNodeId, a))
+                var ptoadd = diff.AclItemsToBeAdded.Select(a => TreeObjectMapper.AclToPermissionInfo(treeNodeId, oldTreeNode.ExternalStringId, a))
                     .ToArray();
-                var ptodel = diff.AclItemsToBeRemoved.Select(a => TreeObjectMapper.AclToPermissionInfo(treeNodeId, a))
+                var ptodel = diff.AclItemsToBeRemoved.Select(a => TreeObjectMapper.AclToPermissionInfo(treeNodeId, oldTreeNode.ExternalStringId, a))
                     .ToArray();
 
                 await tc.ChangePermissions(

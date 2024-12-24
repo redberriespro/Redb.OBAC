@@ -20,5 +20,8 @@ namespace Redb.OBAC.MongoDriver.DB.Entities
         
         [BsonElement("objid")]
         public int? ObjectId { get; set; }
+
+        [BsonElement("external_string_id")]
+        public string ExternalStringId { get; set; }
     }
 }

@@ -30,5 +30,8 @@ namespace Redb.OBAC.MongoDriver.DB.Entities
 
         [BsonElement("is_deny")]
         public bool Deny { get; set; }
+
+        [BsonElement("external_string_id")]
+        public string ExternalStringId { get; set; }
     }
 }

@@ -24,15 +24,17 @@ namespace Redb.OBAC.MongoDriver.ModelsPrivate
                 DenyPermission = npe.Deny,
                 PermissionId = npe.PermissionId,
                 UserId = npe.UserId,
-                UserGroupId = npe.UserGroupId
+                UserGroupId = npe.UserGroupId,
+                ExternalStringId = npe.ExternalStringId
             };
 
-        public static TreeNodePermissionInfo AclToPermissionInfo(int nodeId, AclItemInfo aclItem)
+        public static TreeNodePermissionInfo AclToPermissionInfo(int nodeId, string externalStringId, AclItemInfo aclItem)
             => new TreeNodePermissionInfo
             {
                 NodeId = nodeId, PermissionId = aclItem.PermissionId, UserId = aclItem.UserId,
                 UserGroupId = aclItem.UserGroupId,
-                DenyPermission = aclItem.Kind == PermissionKindEnum.Deny
+                DenyPermission = aclItem.Kind == PermissionKindEnum.Deny,
+                ExternalStringId = externalStringId
             };
     }
 }

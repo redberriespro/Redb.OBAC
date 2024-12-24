@@ -57,7 +57,8 @@ namespace Redb.OBAC.Client.EffectivePermissionsReceiver
                             PermissionId = a.PermissionId,
                             ObjectTypeId = a.ObjectTypeId,
                             ObjectId = a.ObjectId,
-                            UserId = a.UserId
+                            UserId = a.UserId,
+                            ExternalIdString = a.ExternalIdString,
                         });
                     }
                         break;

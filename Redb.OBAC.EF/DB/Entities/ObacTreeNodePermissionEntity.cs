@@ -31,5 +31,8 @@ namespace Redb.OBAC.EF.DB.Entities
 
         [Column("is_deny")]
         public bool Deny { get; set; }
+
+        [Column("external_string_id")]
+        public string ExternalStringId { get; set; }
     }
 }

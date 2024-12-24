@@ -505,7 +505,7 @@ namespace Redb.OBAC.MongoDriver.BL
             return obj?.Id;
         }
 
-        public async Task AddUserEffectivePermission(int subjectId, Guid[] permissionIds, Guid objectTypeId, int? objectId, bool deleteExisting)
+        public async Task AddUserEffectivePermission(int subjectId, Guid[] permissionIds, Guid objectTypeId, int? objectId, bool deleteExisting, string externalStrId)
         {
             await using var ctx = _storageProvider.CreateObacContext();
 
@@ -524,7 +524,8 @@ namespace Redb.OBAC.MongoDriver.BL
                     UserId = subjectId,
                     PermissionId = permissionId,
                     ObjectTypeId = objectTypeId,
-                    ObjectId = objectId
+                    ObjectId = objectId,
+                    ExternalStringId = externalStrId
                 });
             }
         }
@@ -558,7 +559,8 @@ namespace Redb.OBAC.MongoDriver.BL
                     DenyPermission = false,
                     PermissionId = x.PermissionId,
                     UserId = x.UserId,
-                    UserGroupId = null
+                    UserGroupId = null,
+                    ExternalStringId = x.ExternalStringId
                 }).ToList();
         }
 
@@ -842,7 +844,8 @@ namespace Redb.OBAC.MongoDriver.BL
                     PermissionId = addItem.PermissionId,
                     UserId = addItem.UserId,
                     UserGroupId = addItem.UserGroupId,
-                    Deny = addItem.DenyPermission
+                    Deny = addItem.DenyPermission,
+                    ExternalStringId = addItem.ExternalStringId
                 });
             }
 
@@ -971,7 +974,8 @@ namespace Redb.OBAC.MongoDriver.BL
                                 PermissionId = a.PermissionId,
                                 ObjectTypeId = a.ObjectTypeId,
                                 ObjectId = a.ObjectId,
-                                UserId = a.UserId
+                                UserId = a.UserId,
+                                ExternalStringId = a.ExternalIdString
                             });
                         }
                         break;

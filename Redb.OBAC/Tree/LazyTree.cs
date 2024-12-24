@@ -14,6 +14,7 @@ namespace Redb.OBAC.Tree
         public int? ParentNodeId;
         public bool InheritParentPermissions;
         public int OwnerUserid { get; set; }
+        public string ExternalStrId;
 
 
         public HashSet<TreeNodeItem> Subnodes = new HashSet<TreeNodeItem>();
@@ -158,7 +159,7 @@ namespace Redb.OBAC.Tree
                     NodeId = n.NodeId,
                     ParentNodeId = n.ParentNodeId,
                     InheritParentPermissions = n.InheritParentPermissions,
-                    
+                    ExternalStrId = n.ExternalStringId,
                     OwnerUserid = n.OwnerUserid
                 };
                 nodesToAdd[n.NodeId] = ni;
