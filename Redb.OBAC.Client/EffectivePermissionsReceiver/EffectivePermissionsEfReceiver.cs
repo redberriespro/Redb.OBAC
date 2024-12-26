@@ -4,17 +4,22 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Redb.OBAC.Core;
 using Redb.OBAC.Core.Ep;
+using Redb.OBAC.Core.Models;
 
 namespace Redb.OBAC.Client.EffectivePermissionsReceiver
 {
-    public class EffectivePermissionsEfReceiver : IEffectivePermissionFeed
+    public class EffectivePermissionsEfReceiver : IEffectivePermissionFeed, IObjectManagerRequired
     {
         private readonly Func<IObacEpContext> _obacEpContext;
+        private readonly EffectivePermissionsConfig _config;
+        private IObacObjectManager _objectManager;
+
         private const int EP_BATCH_SZ = 100;
 
-        public EffectivePermissionsEfReceiver(Func<IObacEpContext> obacEpContext)
+        public EffectivePermissionsEfReceiver(Func<IObacEpContext> obacEpContext, EffectivePermissionsConfig config = null)
         {
             _obacEpContext = obacEpContext;
+            _config = config ?? new EffectivePermissionsConfig();
         }
 
         public async Task FeedWithActionList(IEnumerable<PermissionActionInfo> actions)
@@ -51,13 +56,20 @@ namespace Redb.OBAC.Client.EffectivePermissionsReceiver
                         break;
                     case PermissionActionEnum.AddDirectPermission:
                     {
+                        TreeNodeInfo treeNode = null;
+                        if (_config.EnableObjectExternalStringId)
+                        {
+                            treeNode = await _objectManager.GetTreeNode(a.ObjectTypeId, a.ObjectId).ConfigureAwait(false);
+                        }
+                        
                         await cxt.EffectivePermissions.AddAsync(new ObacEffectivePermissionsEntity()
                         {
                             Id = new Guid(),
                             PermissionId = a.PermissionId,
                             ObjectTypeId = a.ObjectTypeId,
                             ObjectId = a.ObjectId,
-                            UserId = a.UserId
+                            UserId = a.UserId,
+                            ObjExternalIdStr = _config.EnableObjectExternalStringId ? treeNode?.ExternalStringId : null
                         });
                     }
                         break;
@@ -74,6 +86,11 @@ namespace Redb.OBAC.Client.EffectivePermissionsReceiver
 
             if (n != EP_BATCH_SZ)
                 await cxt.SaveChangesAsync();
+        }
+
+        public void Initialize(IObacObjectManager objectManager)
+        {
+            _objectManager = objectManager;
         }
     }
 }
