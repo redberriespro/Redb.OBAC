@@ -1,5 +1,5 @@
 using System;
-using System.Threading.Tasks;
+using System.Linq;
 using Redb.OBAC.Backends.InMemory;
 using Redb.OBAC.Core;
 using Redb.OBAC.EF.DB;
@@ -9,7 +9,6 @@ namespace Redb.OBAC.EF.BL
 {
     public class ObacConfiguration: IObacConfiguration
     {
-        private IObacStorageProvider _storageProvider;
         private ObjectManager _objectManager;
         private InMemoryObacCacheBackend _cacheBackend;
         private ObjectStorage _objectStorage;
@@ -35,8 +34,13 @@ namespace Redb.OBAC.EF.BL
             _objectStorage = new ObjectStorage(storageProvider);
 
             var exFeeds = extraFeeds ?? Array.Empty<IEffectivePermissionFeed>();
-            
+           
             _objectManager = new ObjectManager(_objectStorage, _cacheBackend, exFeeds);
+
+            foreach (var effectivePermissionFeed in exFeeds.OfType<IObjectManagerRequired>())
+            {
+                effectivePermissionFeed.Initialize(_objectManager);
+            }
         }
     }
 }

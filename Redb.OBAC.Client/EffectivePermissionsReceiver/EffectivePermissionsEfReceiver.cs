@@ -7,9 +7,11 @@ using Redb.OBAC.Core.Ep;
 
 namespace Redb.OBAC.Client.EffectivePermissionsReceiver
 {
-    public class EffectivePermissionsEfReceiver : IEffectivePermissionFeed
+    public class EffectivePermissionsEfReceiver : IEffectivePermissionFeed, IObjectManagerRequired
     {
         private readonly Func<IObacEpContext> _obacEpContext;
+        private IObacObjectManager _objectManager;
+
         private const int EP_BATCH_SZ = 100;
 
         public EffectivePermissionsEfReceiver(Func<IObacEpContext> obacEpContext)
@@ -51,13 +53,15 @@ namespace Redb.OBAC.Client.EffectivePermissionsReceiver
                         break;
                     case PermissionActionEnum.AddDirectPermission:
                     {
+                        var treeNode = await _objectManager.GetTreeNode(a.ObjectTypeId, a.ObjectId).ConfigureAwait(false);
                         await cxt.EffectivePermissions.AddAsync(new ObacEffectivePermissionsEntity()
                         {
                             Id = new Guid(),
                             PermissionId = a.PermissionId,
                             ObjectTypeId = a.ObjectTypeId,
                             ObjectId = a.ObjectId,
-                            UserId = a.UserId
+                            UserId = a.UserId,
+                            ObjExternalIdStr = treeNode.ExternalStringId
                         });
                     }
                         break;
@@ -74,6 +78,11 @@ namespace Redb.OBAC.Client.EffectivePermissionsReceiver
 
             if (n != EP_BATCH_SZ)
                 await cxt.SaveChangesAsync();
+        }
+
+        public void Initialize(IObacObjectManager objectManager)
+        {
+            _objectManager = objectManager;
         }
     }
 }

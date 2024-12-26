@@ -21,5 +21,8 @@ namespace Redb.OBAC.Client.EffectivePermissionsReceiver
         
         [Column("objid")]
         public int? ObjectId { get; set; }
+
+        [Column("obj_external_id_str")]
+        public string ObjExternalIdStr { get; set; }
     }
 }
