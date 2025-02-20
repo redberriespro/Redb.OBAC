@@ -104,12 +104,15 @@ For more details please discover code Examples (https://github.com/redberriespro
 - Simple app with effective permissions cache stored in local DB (C#, EF) - https://github.com/redberriespro/Redb.OBAC/blob/main/Examples/HelloObacEf/Program.cs
 
 ## Credits
-Initially Created by
+Initially created by:
 - Yury Skaletskiy (yury@redberries.pro)
 - Dmitry Koval (dkoval@redberries.pro)
 
-Great thanks to our dearest contributors, including
+Great thanks to our dearest contributors, including:
 - [PapaCarloSap](https://github.com/PapaCarloSap) (MySql backend)
 - [kaiser113-ru](https://github.com/kaiser113-ru) (MongoDB and MSSQL backends)
+
+Special thanks also to:
+- [Araxis](http://araxis.com/), for helping improve OS software with their great products.
 
 (c) 2021-... Redberries.pro
